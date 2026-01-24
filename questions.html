@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MentorLoop EDU | Student Questions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentorLoop EDU | Student Doubt Solving & Peer Learning Platform</title>
+
+<meta name="description" content="MentorLoop EDU is a safe, school-approved platform where students ask doubts, help peers, earn points, and learn together through community discussion.">
+
+<meta name="keywords" content="MentorLoop EDU, student doubt solving, peer learning, school edtech platform, ask doubts online, student mentoring">
+
+<meta name="author" content="MentorLoop EDU">
+
+<meta name="robots" content="index, follow">
+
+<link rel="canonical" href="https://YOUR-GITHUB-PAGES-URL/index.html">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+    }
+
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .actions {
+      background: #eef2ff;
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #c7d2fe;
+    }
+
+    .actions button {
+      padding: 12px 18px;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>MentorLoop EDU — Student Questions</header>
+
+<!-- ACTION BAR -->
+<div class="actions">
+  <button onclick="answerQuestion()">
+    ✍️ Answer a Question (+10 points)
+  </button>
+</div>
+
+<!-- QUESTIONS LIST (GOOGLE SHEET) -->
+<iframe
+  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRdGg7Zke2ABcZvIq6RBsu4EovWdxFKiZaH5Hr34hJ4Al-1IJpOTouQ5O9aepxfLvwjfjTdFOtlOUT8/pubhtml?widget=true&amp;headers=false">
+</iframe>
+
+<script>
+function answerQuestion() {
+  // Award points for helping
+  let points = localStorage.getItem("ml_points")
+    ? parseInt(localStorage.getItem("ml_points"))
+    : 0;
+
+  points += 10;
+  localStorage.setItem("ml_points", points);
+
+  alert("Thanks for helping! 🎉 +10 points added.");
+
+  // Open Answer Google Form
+  window.open(
+    "https://docs.google.com/forms/d/e/1FAIpQLSfbgwBIa-DYrdoIpd-c8S8-u2tG8PHGspxutDkg17sYXam1vQ/viewform?usp=header",
+    "_blank"
+  );
+}
+</script>
+
+</body>
+</html>
+
