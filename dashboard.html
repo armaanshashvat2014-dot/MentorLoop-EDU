@@ -1,51 +1,84 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>MentorLoop EDU | Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MentorLoop EDU | Student Doubt Solving & Peer Learning Platform</title>
-
-<meta name="description" content="MentorLoop EDU is a safe, school-approved platform where students ask doubts, help peers, earn points, and learn together through community discussion.">
-
-<meta name="keywords" content="MentorLoop EDU, student doubt solving, peer learning, school edtech platform, ask doubts online, student mentoring">
-
-<meta name="author" content="MentorLoop EDU">
-
-<meta name="robots" content="index, follow">
-
-<link rel="canonical" href="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/ask-doubt.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       background: #f3f4f6;
-      padding: 20px;
+      color: #1f2937;
     }
 
-    h1 {
-      color: #1e40af;
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
     }
 
     .card {
       background: white;
-      padding: 18px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #1e40af;
+    }
+
+    .small {
+      font-size: 0.85rem;
+      color: #6b7280;
     }
 
     .btn {
-      display: inline-block;
-      padding: 12px 18px;
+      display: block;
+      margin-top: 12px;
+      padding: 12px;
+      width: 100%;
       background: #2563eb;
       color: white;
-      font-weight: bold;
+      border: none;
       border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: center;
       text-decoration: none;
-      margin-right: 10px;
+    }
+
+    .btn.red {
+      background: #dc2626;
     }
 
     iframe {
@@ -54,32 +87,67 @@
       border: none;
       margin-top: 10px;
     }
-
-    .note {
-      font-size: 0.85rem;
-      color: #6b7280;
-      margin-top: 8px;
-    }
   </style>
 </head>
 
 <body>
 
-<h1>MentorLoop EDU Dashboard</h1>
+<header>
+  <h1>MentorLoop EDU Dashboard</h1>
+  <a href="index.html">Logout</a>
+</header>
 
-<!-- ACTIONS -->
-<div class="card">
-  <a class="btn" href="ask-doubt.html">Ask a Doubt</a>
-  <a class="btn" href="questions.html">View Questions</a>
+<div class="container">
+  <div class="grid">
+
+    <!-- PROFILE -->
+    <div class="card">
+      <h2>Your Profile</h2>
+      <p><strong>Role:</strong> Student</p>
+      <p><strong>Points:</strong> <span id="points">0</span></p>
+      <p class="small">
+        Earn points by asking doubts and helping other students.
+      </p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="card">
+      <h2>Actions</h2>
+
+      <a href="ask-doubt.html" class="btn">
+        Ask a Doubt
+      </a>
+
+      <a href="questions.html" class="btn">
+        Help Another Student
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ANSWERS SECTION -->
+  <div class="card" style="margin-top:20px;">
+    <h2>✅ Answers from the Community</h2>
+    <p class="small">
+      If someone has answered your question, it will appear below.
+      Look for the same question text you submitted.
+    </p>
+
+    <iframe
+      src="https://docs.google.com/spreadsheets/d/15IriKRl4PTUTwST2kbVNQcMwWR33kptPXHnAs1BhOXc/edit?resourcekey=&gid=216140037#gid=216140037">
+    </iframe>
+  </div>
+
 </div>
 
-<!-- ANSWERS SECTION -->
+<script>
+  // Load points from localStorage
+  let points = localStorage.getItem("ml_points")
+    ? parseInt(localStorage.getItem("ml_points"))
+    : 0;
 
-
-<!-- LOGOUT -->
-<div class="card">
-  <a class="btn" href="index.html" style="background:#dc2626;">Logout</a>
-</div>
+  document.getElementById("points").textContent = points;
+</script>
 
 </body>
 </html>
