@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MentorLoop EDU | Fair Play Reports</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+      padding: 30px;
+      color: #1f2937;
+    }
+
+    h1 {
+      color: #dc2626;
+    }
+
+    .note {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .report {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+    .reason {
+      font-weight: bold;
+      color: #b91c1c;
+    }
+
+    .time {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .details {
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    .empty {
+      background: #ecfeff;
+      padding: 16px;
+      border-radius: 10px;
+      color: #0369a1;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🛡️ Fair Play Reports</h1>
+
+<p class="note">
+  These reports were submitted by students to help keep MentorLoop EDU safe.
+</p>
+
+<div id="reports"></div>
+
+<a href="dashboard.html">← Back to Dashboard</a>
+
+<script>
+  const reportsContainer = document.getElementById("reports");
+  const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
+
+  if (reports.length === 0) {
+    reportsContainer.innerHTML = `
+      <div class="empty">
+        No reports have been submitted yet.
+      </div>
+    `;
+  } else {
+    reports.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "report";
+
+      div.innerHTML = `
+        <div class="reason">🚩 Reason: ${r.reason}</div>
+        ${r.details ? `<div class="details">"${r.details}"</div>` : ""}
+        <div class="time">
+          Submitted on ${new Date(r.time).toLocaleString()}
+        </div>
+      `;
+
+      reportsContainer.appendChild(div);
+    });
+  }
+</script>
+
+</body>
+</html>
