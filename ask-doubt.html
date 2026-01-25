@@ -1,53 +1,48 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>MentorLoop EDU | Ask a Doubt</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MentorLoop EDU | Student Doubt Solving & Peer Learning Platform</title>
-
-<meta name="description" content="MentorLoop EDU is a safe, school-approved platform where students ask doubts, help peers, earn points, and learn together through community discussion.">
-
-<meta name="keywords" content="MentorLoop EDU, student doubt solving, peer learning, school edtech platform, ask doubts online, student mentoring">
-
-<meta name="author" content="MentorLoop EDU">
-
-<meta name="robots" content="index, follow">
-
-<link rel="canonical" href="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/ask-doubt.html">
-
+  <title>Ask a Doubt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f3f4f6;
+    body { font-family: Arial; background:#f3f4f6; padding:40px; }
+    form {
+      background:white; padding:20px; border-radius:10px;
+      max-width:400px; margin:auto;
     }
-    header {
-      background: #1e40af;
-      color: white;
-      padding: 16px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 1.2rem;
+    input, textarea {
+      width:100%; padding:10px; margin:10px 0;
     }
-    iframe {
-      width: 100%;
-      height: 90vh;
-      border: none;
+    button {
+      width:100%; padding:12px;
+      background:#2563eb; color:white;
+      border:none; border-radius:8px;
+      font-weight:bold;
     }
   </style>
 </head>
 <body>
 
-<header>MentorLoop EDU — Ask a Doubt</header>
+<form onsubmit="saveDoubt(event)">
+  <h2>Ask a Doubt</h2>
+  <input required placeholder="Your name" id="name">
+  <input required placeholder="Subject" id="subject">
+  <textarea required placeholder="Your doubt" id="doubt"></textarea>
+  <button type="submit">Submit</button>
+</form>
 
-<iframe 
-  src="https://docs.google.com/forms/d/e/1FAIpQLSfVr6j3RJoURigCLHi3zhpt0kLVCSTpoVIaHRZ1nvg72NAJKA/viewform?usp=publish-editor">
-</iframe>
+<script>
+function saveDoubt(e) {
+  e.preventDefault();
+  const doubts = JSON.parse(localStorage.getItem("doubts") || "[]");
+  doubts.push({
+    name: name.value,
+    subject: subject.value,
+    text: doubt.value
+  });
+  localStorage.setItem("doubts", JSON.stringify(doubts));
+  window.location.href = "dashboard.html";
+}
+</script>
 
 </body>
 </html>
-
-
-
