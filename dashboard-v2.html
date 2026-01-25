@@ -1,117 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>MentorLoop EDU | Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
+      margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       background: #f3f4f6;
-      padding: 30px;
+      color: #1f2937;
     }
 
-    h1 {
-      color: #1e40af;
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
     }
 
     .card {
       background: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin: 15px 0;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     }
 
-    .subject {
-      font-weight: bold;
+    h2 {
+      margin-top: 0;
       color: #1e40af;
     }
 
-    .report-btn {
-      margin-top: 10px;
-      background: #dc2626;
+    .btn {
+      display: block;
+      margin-top: 12px;
+      padding: 12px;
+      width: 100%;
+      background: #2563eb;
       color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-
-    .reported {
-      opacity: 0.5;
-      font-style: italic;
-    }
-
-    a {
-      display: inline-block;
-      margin-top: 20px;
+      border-radius: 8px;
+      text-align: center;
       text-decoration: none;
-      color: #2563eb;
       font-weight: bold;
+    }
+
+    .btn.report {
+      background: #dc2626;
     }
   </style>
 </head>
+
 <body>
 
-<h1>Community Doubts</h1>
+<header>
+  <h1>MentorLoop EDU Dashboard</h1>
+  <a href="index.html">Logout</a>
+</header>
 
-<div id="list"></div>
+<div class="container">
+  <div class="grid">
 
-<a href="index.html">← Back Home</a>
+    <!-- PROFILE -->
+    <div class="card">
+      <h2>Your Profile</h2>
+      <p><strong>Role:</strong> Student</p>
+      <p><strong>Points:</strong> <span id="points">0</span></p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="card">
+      <h2>Actions</h2>
+
+      <a href="ask-doubt.html" class="btn">
+        Ask a Doubt
+      </a>
+
+      <a href="questions.html" class="btn">
+        Help Another Student
+      </a>
+
+      <!-- REPORT BUTTON -->
+      <a href="fair-play.html" class="btn report">
+        🚩 Report Inappropriate Content
+      </a>
+    </div>
+
+  </div>
+</div>
 
 <script>
-const doubts = JSON.parse(localStorage.getItem("doubts") || "[]");
-const reports = JSON.parse(localStorage.getItem("reports") || "[]");
+  let points = localStorage.getItem("ml_points")
+    ? parseInt(localStorage.getItem("ml_points"))
+    : 0;
 
-const list = document.getElementById("list");
-
-if (doubts.length === 0) {
-  list.innerHTML = "<p>No doubts yet.</p>";
-}
-
-doubts.forEach((d, index) => {
-  const isReported = reports.find(r => r.index === index);
-
-  const div = document.createElement("div");
-  div.className = "card" + (isReported ? " reported" : "");
-
-  div.innerHTML = `
-    <div class="subject">${d.subject}</div>
-    <p>${d.text}</p>
-    <small>— ${d.name}</small><br>
-    ${isReported ? 
-      "<p>🚩 This question has been reported.</p>" :
-      `<button class="report-btn" onclick="reportDoubt(${index})">
-        🚩 Report this question
-      </button>`
-    }
-  `;
-
-  list.appendChild(div);
-});
-
-function reportDoubt(index) {
-  const reason = prompt(
-    "Why are you reporting this?\n\n" +
-    "1. Inappropriate language\n" +
-    "2. Spam\n" +
-    "3. Harassment\n" +
-    "4. Other"
-  );
-
-  if (!reason) return;
-
-  reports.push({
-    index,
-    reason,
-    time: new Date().toISOString()
-  });
-
-  localStorage.setItem("reports", JSON.stringify(reports));
-  alert("Thanks. This question has been flagged for review.");
-  location.reload();
-}
+  document.getElementById("points").textContent = points;
 </script>
 
 </body>
