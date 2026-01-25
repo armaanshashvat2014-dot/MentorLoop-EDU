@@ -1,143 +1,142 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MentorLoop | Fair Play & Safety</title>
-  <title>MentorLoop EDU | Student Doubt Solving & Peer Learning Platform</title>
-
-<meta name="description" content="MentorLoop EDU is a safe, school-approved platform where students ask doubts, help peers, earn points, and learn together through community discussion.">
-
-<meta name="keywords" content="MentorLoop EDU, student doubt solving, peer learning, school edtech platform, ask doubts online, student mentoring">
-
-<meta name="author" content="MentorLoop EDU">
-
-<meta name="robots" content="index, follow">
-
-<link rel="canonical" href="https://YOUR-GITHUB-PAGES-URL/index.html">
+  <meta charset="UTF-8">
+  <title>MentorLoop EDU | Fair Play Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f8fafc;
-      color: #1f2937;
-      line-height: 1.6;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    header {
-      background: #1e3a8a;
-      color: white;
-      padding: 50px 20px;
-      text-align: center;
-    }
-    header h1 {
-      margin-bottom: 10px;
-      font-size: 2.2rem;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 40px 20px;
-    }
-    h2 {
-      color: #1e40af;
-      margin-top: 40px;
-    }
+
     .card {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      padding: 28px;
+      border-radius: 14px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #dc2626;
+      margin-top: 0;
+    }
+
+    p {
+      color: #374151;
+      font-size: 0.95rem;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 14px;
+      display: block;
+    }
+
+    select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-family: inherit;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    button {
       margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
     }
-    ul {
-      padding-left: 20px;
-    }
-    footer {
-      background: #111827;
-      color: #d1d5db;
+
+    .back {
+      display: block;
+      margin-top: 14px;
       text-align: center;
-      padding: 25px 15px;
-      margin-top: 60px;
-      font-size: 0.9rem;
-    }
-    a {
-      color: #2563eb;
       text-decoration: none;
+      color: #2563eb;
       font-weight: bold;
     }
   </style>
 </head>
+
 <body>
 
-<header>
-  <h1>Fair Play & Safety Policy</h1>
-  <p>Building a respectful, school-approved learning environment</p>
-</header>
+<div class="card">
+  <h1>🚩 Fair Play Report</h1>
 
-<div class="container">
+  <p>
+    MentorLoop EDU is a safe, respectful learning space.  
+    If you see inappropriate content, report it here.  
+    Our moderators will review it.
+  </p>
 
-  <div class="card">
-    <p>MentorLoop is committed to providing a <strong>safe, respectful, and educational environment</strong> for all students, teachers, and mentors. These Fair Play rules ensure that learning remains positive and inclusive.</p>
-  </div>
+  <form onsubmit="submitReport(event)">
+    
+    <label for="reason">Reason for report</label>
+    <select id="reason" required>
+      <option value="">-- Select a reason --</option>
+      <option>Inappropriate language</option>
+      <option>Spam / irrelevant content</option>
+      <option>Harassment or bullying</option>
+      <option>Wrong or misleading information</option>
+      <option>Other</option>
+    </select>
 
-  <h2>1. Respectful Communication</h2>
-  <div class="card">
-    <ul>
-      <li>Use polite and appropriate language at all times.</li>
-      <li>No bullying, harassment, hate speech, or personal attacks.</li>
-      <li>Disagreements must be academic and respectful.</li>
-    </ul>
-  </div>
+    <label for="details">Additional details (optional)</label>
+    <textarea id="details" placeholder="Explain briefly (optional)"></textarea>
 
-  <h2>2. Academic Integrity</h2>
-  <div class="card">
-    <ul>
-      <li>Questions must be related to learning and academics.</li>
-      <li>No cheating, plagiarism, or sharing of exam answers.</li>
-      <li>Mentors should guide, not simply give answers.</li>
-    </ul>
-  </div>
+    <button type="submit">Submit Report</button>
+  </form>
 
-  <h2>3. Responsible Participation</h2>
-  <div class="card">
-    <ul>
-      <li>Stay on-topic and avoid spam or irrelevant content.</li>
-      <li>Do not misuse the platform for promotion or messaging.</li>
-      <li>Encourage others and support a growth mindset.</li>
-    </ul>
-  </div>
-
-  <h2>4. Moderation & Consequences</h2>
-  <div class="card">
-    <ul>
-      <li>Content may be reviewed by teachers or moderators.</li>
-      <li>Warnings may be issued for rule violations.</li>
-      <li>Repeated or serious violations can lead to suspension.</li>
-    </ul>
-  </div>
-
-  <h2>5. Student Safety</h2>
-  <div class="card">
-    <ul>
-      <li>No sharing of personal contact information.</li>
-      <li>All interactions must remain within the platform.</li>
-      <li>Any safety concerns should be reported immediately.</li>
-    </ul>
-  </div>
-
-  <div class="card" style="margin-top:40px; text-align:center;">
-    <p>By using MentorLoop, all users agree to follow these Fair Play rules and help maintain a positive learning community.</p>
-    <p><a href="index.html">← Back to MentorLoop Home</a></p>
-  </div>
-
+  <a href="dashboard.html" class="back">← Back to Dashboard</a>
 </div>
 
-<footer>
-  © 2026 MentorLoop • Safe Learning • Fair Play • Shared Growth
-</footer>
+<script>
+  function submitReport(e) {
+    e.preventDefault();
+
+    const reason = document.getElementById("reason").value;
+    const details = document.getElementById("details").value;
+
+    if (!reason) {
+      alert("Please select a reason for reporting.");
+      return;
+    }
+
+    const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
+
+    reports.push({
+      reason: reason,
+      details: details,
+      time: new Date().toISOString()
+    });
+
+    localStorage.setItem("ml_reports", JSON.stringify(reports));
+
+    alert("Thank you. Your report has been submitted for review.");
+
+    window.location.href = "dashboard.html";
+  }
+</script>
 
 </body>
 </html>
-
