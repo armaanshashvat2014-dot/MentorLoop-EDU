@@ -1,48 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Ask a Doubt</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <title>MentorLoop EDU | Ask a Doubt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
-    body { font-family: Arial; background:#f3f4f6; padding:40px; }
-    form {
-      background:white; padding:20px; border-radius:10px;
-      max-width:400px; margin:auto;
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
+
+    .card {
+      background: white;
+      padding: 28px;
+      border-radius: 14px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #1e40af;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 14px;
+      display: block;
+    }
+
     input, textarea {
-      width:100%; padding:10px; margin:10px 0;
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-family: inherit;
     }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
     button {
-      width:100%; padding:12px;
-      background:#2563eb; color:white;
-      border:none; border-radius:8px;
-      font-weight:bold;
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .back {
+      display: block;
+      margin-top: 14px;
+      text-align: center;
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
     }
   </style>
 </head>
+
 <body>
 
-<form onsubmit="saveDoubt(event)">
-  <h2>Ask a Doubt</h2>
-  <input required placeholder="Your name" id="name">
-  <input required placeholder="Subject" id="subject">
-  <textarea required placeholder="Your doubt" id="doubt"></textarea>
-  <button type="submit">Submit</button>
-</form>
+<div class="card">
+  <h1>Ask a Doubt</h1>
 
-<script>
-function saveDoubt(e) {
-  e.preventDefault();
-  const doubts = JSON.parse(localStorage.getItem("doubts") || "[]");
-  doubts.push({
-    name: name.value,
-    subject: subject.value,
-    text: doubt.value
-  });
-  localStorage.setItem("doubts", JSON.stringify(doubts));
-  window.location.href = "dashboard-v2.html";
-}
-</script>
+  <form
+    action="https://docs.google.com/forms/d/e/1FAIpQLSfVr6j3RJoURigCLHi3zhpt0kLVCSTpoVIaHRZ1nvg72NAJKA/formResponse"
+    method="POST"
+  >
+
+    <label>Your Name</label>
+    <input type="text" name="entry.2076629337" required>
+
+    <label>Your Question</label>
+    <textarea name="entry.1963235764" required></textarea>
+
+    <label>Extra Field</label>
+    <input type="text" name="entry.727582675">
+
+    <label>Board</label>
+    <input type="text" name="entry.1157368420" required>
+
+    <button type="submit">Submit Doubt</button>
+  </form>
+
+  <a href="dashboard.html" class="back">← Back to Dashboard</a>
+</div>
 
 </body>
 </html>
