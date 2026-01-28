@@ -93,6 +93,8 @@
     
     <label for="reason">Reason for report</label>
     <select id="reason" required>
+      <label>Reported Student Name</label>
+<input type="text" id="reportedUser" required placeholder="Enter name exactly">
       <option value="">-- Select a reason --</option>
       <option>Inappropriate language</option>
       <option>Spam / irrelevant content</option>
@@ -136,6 +138,33 @@
 
     window.location.href = "dashboard-v2.html";
   }
+function submitReport(e) {
+  e.preventDefault();
+
+  const reportedUser = document.getElementById("reportedUser").value.trim();
+  const reason = document.getElementById("reason").value;
+  const details = document.getElementById("details").value;
+
+  if (!reportedUser || !reason) {
+    alert("Please fill all required fields.");
+    return;
+  }
+
+  const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
+
+  reports.push({
+    reportedUser: reportedUser,
+    reason: reason,
+    details: details,
+    time: new Date().toISOString()
+  });
+
+  localStorage.setItem("ml_reports", JSON.stringify(reports));
+
+  alert("Report submitted. Thank you for helping keep MentorLoop EDU safe.");
+
+  window.location.href = "dashboard.html";
+}
 </script>
 
 </body>
