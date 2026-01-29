@@ -79,9 +79,9 @@
   <h1>Ask a Doubt</h1>
 
   <form
-    action="https://docs.google.com/forms/d/e/1FAIpQLSfVr6j3RJoURigCLHi3zhpt0kLVCSTpoVIaHRZ1nvg72NAJKA/formResponse"
-    method="POST"
-  >
+  action="https://docs.google.com/forms/d/e/1FAIpQLSfVr6j3RJoURigCLHi3zhpt0kLVCSTpoVIaHRZ1nvg72NAJKA/formResponse"
+  method="POST"
+  onsubmit="return checkBanBeforeSubmit(event)">
 
     <label>Your Name</label>
     <input type="text" name="entry.2076629337" required>
@@ -90,7 +90,7 @@
     <textarea name="entry.1963235764" required></textarea>
 
     <label>Extra Field</label>
-    <input type="text" name="entry.727582675">
+    <input type="text" name="entry.727582675" required>
 
     <label>Board</label>
     <input type="text" name="entry.1157368420" required>
@@ -100,6 +100,22 @@
 
   <a href="dashboard.html" class="back">← Back to Dashboard</a>
 </div>
+<script>
+function checkBanBeforeSubmit(e) {
+  const username = document.getElementById("studentName").value.trim();
+
+  if (isUserBanned(username)) {
+    e.preventDefault();
+    alert(
+      "🚫 You have been temporarily restricted from posting.\n\n" +
+      "Reason: Multiple Fair Play violations.\n" +
+      "Please contact a teacher or moderator."
+    );
+    return false;
+  }
+  return true;
+}
+</script>
 
 </body>
 </html>
