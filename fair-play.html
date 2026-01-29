@@ -112,7 +112,6 @@
   <a href="dashboard-v2.html" class="back">← Back to Dashboard</a>
 </div>
 
-<script>
   function submitReport(e) {
     e.preventDefault();
 
@@ -164,6 +163,12 @@ function submitReport(e) {
   alert("Report submitted. Thank you for helping keep MentorLoop EDU safe.");
 
   window.location.href = "dashboard.html";
+}
+  <script>
+function isUserBanned(username) {
+  const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
+  const count = reports.filter(r => r.reportedUser === username).length;
+  return count >= 3;
 }
 </script>
 
