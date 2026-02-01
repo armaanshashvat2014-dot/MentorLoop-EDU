@@ -112,58 +112,6 @@
   <a href="dashboard-v2.html" class="back">← Back to Dashboard</a>
 </div>
 
-  function submitReport(e) {
-    e.preventDefault();
-
-    const reason = document.getElementById("reason").value;
-    const details = document.getElementById("details").value;
-
-    if (!reason) {
-      alert("Please select a reason for reporting.");
-      return;
-    }
-
-    const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
-
-    reports.push({
-      reason: reason,
-      details: details,
-      time: new Date().toISOString()
-    });
-
-    localStorage.setItem("ml_reports", JSON.stringify(reports));
-
-    alert("Thank you. Your report has been submitted for review.");
-
-    window.location.href = "dashboard-v2.html";
-  }
-function submitReport(e) {
-  e.preventDefault();
-
-  const reportedUser = document.getElementById("reportedUser").value.trim();
-  const reason = document.getElementById("reason").value;
-  const details = document.getElementById("details").value;
-
-  if (!reportedUser || !reason) {
-    alert("Please fill all required fields.");
-    return;
-  }
-
-  const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
-
-  reports.push({
-    reportedUser: reportedUser,
-    reason: reason,
-    details: details,
-    time: new Date().toISOString()
-  });
-
-  localStorage.setItem("ml_reports", JSON.stringify(reports));
-
-  alert("Report submitted. Thank you for helping keep MentorLoop EDU safe.");
-
-  window.location.href = "dashboard.html";
-}
   <script>
 function isUserBanned(username) {
   const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
