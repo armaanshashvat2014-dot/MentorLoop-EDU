@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Sprint</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background:#f3f4f6;
+      padding:30px;
+    }
+    .card {
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      max-width:500px;
+      margin:auto;
+      box-shadow:0 6px 15px rgba(0,0,0,0.1);
+    }
+    h1 { color:#1e40af; }
+    button {
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      background:#2563eb;
+      color:white;
+      border:none;
+      border-radius:8px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🧠 Quiz Sprint</h1>
+  <p id="question"></p>
+
+  <div id="options"></div>
+
+  <p><strong>Score:</strong> <span id="score">0</span></p>
+
+  <button onclick="nextQuestion()">Next</button>
+</div>
+
+<script>
+const questions = [
+  { q: "5 + 7 = ?", a: ["10","12","14"], c: 1 },
+  { q: "Capital of India?", a: ["Mumbai","Delhi","Chennai"], c: 1 },
+  { q: "3 × 6 = ?", a: ["18","12","9"], c: 0 },
+  { q: "Water freezes at ___ °C", a: ["0","10","100"], c: 0 },
+  { q: "Square root of 49?", a: ["6","7","8"], c: 1 }
+];
+
+let index = 0;
+let score = 0;
+
+function loadQuestion() {
+  if (index >= questions.length) {
+    document.querySelector(".card").innerHTML =
+      `<h1>🎉 Finished!</h1>
+       <p>Your score: ${score}/5</p>
+       <a href="games.html">Back to Games</a>`;
+    return;
+  }
+
+  const q = questions[index];
+  document.getElementById("question").textContent = q.q;
+
+  const options = document.getElementById("options");
+  options.innerHTML = "";
+
+  q.a.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.onclick = () => {
+      if (i === q.c) score++;
+      document.getElementById("score").textContent = score;
+    };
+    options.appendChild(btn);
+  });
+}
+
+function nextQuestion() {
+  index++;
+  loadQuestion();
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
