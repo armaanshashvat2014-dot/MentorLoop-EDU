@@ -105,12 +105,33 @@
 
   <a href="dashboard-v2.html" class="back">← Back to Dashboard</a>
 </div>
-
   <script>
-function isUserBanned(username) {
+function submitReport(e) {
+  e.preventDefault();
+
+  const questionId = document.getElementById("questionId").value.trim();
+  const reason = document.getElementById("reason").value;
+  const details = document.getElementById("details").value;
+
+  if (!questionId || !reason) {
+    alert("Please fill all required fields.");
+    return;
+  }
+
   const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
-  const count = reports.filter(r => r.reportedUser === username).length;
-  return count >= 3;
+
+  reports.push({
+    questionId: questionId,
+    reason: reason,
+    details: details,
+    time: new Date().toISOString()
+  });
+
+  localStorage.setItem("ml_reports", JSON.stringify(reports));
+
+  alert("Report submitted. The system will auto-review this content.");
+
+  window.location.href = "dashboard-v2.html";
 }
 </script>
 
