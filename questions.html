@@ -76,6 +76,28 @@
 </iframe>
 
 <script>
+function isQuestionHidden(questionId) {
+  const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
+  const count = reports.filter(r => r.questionId === questionId).length;
+  return count >= 3;
+}
+  questions.forEach(q => {
+
+  // 🚫 AUTO-HIDE AFTER 3 REPORTS
+  if (isQuestionHidden(q.id)) {
+    return; // skip rendering completely
+  }
+
+  const div = document.createElement("div");
+  div.className = "card";
+  div.innerHTML = `
+    <strong>${q.subject}</strong>
+    <p>${q.text}</p>
+    <small>ID: ${q.id}</small>
+  `;
+  container.appendChild(div);
+});
+
 function answerQuestion() {
   // Award points for helping
   let points = localStorage.getItem("ml_points")
