@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Quiz Sprint</title>
+  <title>Quiz Sprint | MentorLoop EDU</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -13,7 +13,7 @@
       background:white;
       padding:20px;
       border-radius:12px;
-      max-width:500px;
+      max-width:520px;
       margin:auto;
       box-shadow:0 6px 15px rgba(0,0,0,0.1);
     }
@@ -29,6 +29,9 @@
       font-weight:bold;
       cursor:pointer;
     }
+    button:hover {
+      background:#1d4ed8;
+    }
   </style>
 </head>
 <body>
@@ -40,18 +43,68 @@
   <div id="options"></div>
 
   <p><strong>Score:</strong> <span id="score">0</span></p>
-
-  <button onclick="nextQuestion()">Next</button>
 </div>
 
 <script>
-const questions = [
-  { q: "5 + 7 = ?", a: ["10","12","14"], c: 1 },
-  { q: "Capital of India?", a: ["Mumbai","Delhi","Chennai"], c: 1 },
-  { q: "3 × 6 = ?", a: ["18","12","9"], c: 0 },
-  { q: "Water freezes at ___ °C", a: ["0","10","100"], c: 0 },
-  { q: "Square root of 49?", a: ["6","7","8"], c: 1 }
+/* BIG QUESTION BANK (COMPLETELY NEW) */
+const questionBank = [
+  { q:"If ALL bloops are razzies and ALL razzies are lazzies, are all bloops lazzies?",
+    a:["Yes","No","Cannot be determined"], c:0 },
+
+  { q:"Which number comes next: 2, 6, 12, 20, ?",
+    a:["28","30","32"], c:0 },
+
+  { q:"Which planet has the shortest year?",
+    a:["Mercury","Mars","Venus"], c:0 },
+
+  { q:"A triangle has angles 30° and 60°. The third angle is?",
+    a:["90°","60°","30°"], c:0 },
+
+  { q:"What will always increase but never decrease?",
+    a:["Age","Speed","Energy"], c:0 },
+
+  { q:"If today is Monday, what day will it be after 10 days?",
+    a:["Thursday","Friday","Saturday"], c:1 },
+
+  { q:"Which of these is NOT a prime number?",
+    a:["17","19","21"], c:2 },
+
+  { q:"Which gas is most abundant in Earth’s atmosphere?",
+    a:["Oxygen","Nitrogen","Carbon dioxide"], c:1 },
+
+  { q:"A cube has how many edges?",
+    a:["12","8","6"], c:0 },
+
+  { q:"Which is heavier?",
+    a:["1 kg of iron","1 kg of cotton","Both are same"], c:2 },
+
+  { q:"Which number is missing: 1, 4, 9, 16, ?",
+    a:["20","25","36"], c:1 },
+
+  { q:"What does a thermometer measure?",
+    a:["Heat","Temperature","Energy"], c:1 },
+
+  { q:"If 3x = 15, what is x?",
+    a:["3","5","15"], c:1 },
+
+  { q:"Which shape has all sides equal?",
+    a:["Rectangle","Square","Trapezium"], c:1 },
+
+  { q:"Which one is a renewable resource?",
+    a:["Coal","Solar energy","Petroleum"], c:1 }
 ];
+
+/* SHUFFLE FUNCTION */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/* SELECT 5 RANDOM QUESTIONS */
+let questions = shuffle([...questionBank]).slice(0, 5);
 
 let index = 0;
 let score = 0;
@@ -59,9 +112,11 @@ let score = 0;
 function loadQuestion() {
   if (index >= questions.length) {
     document.querySelector(".card").innerHTML =
-      `<h1>🎉 Finished!</h1>
-       <p>Your score: ${score}/5</p>
-       <a href="games.html">Back to Games</a>`;
+      `<h1>🎉 Quiz Complete!</h1>
+       <p>Your score: <strong>${score} / 5</strong></p>
+       <a href="games.html">Play Again</a>
+       <br><br>
+       <a href="dashboard.html">Back to Dashboard</a>`;
     return;
   }
 
@@ -76,15 +131,13 @@ function loadQuestion() {
     btn.textContent = opt;
     btn.onclick = () => {
       if (i === q.c) score++;
-      document.getElementById("score").textContent = score;
+      index++;
+      loadQuestion();
     };
     options.appendChild(btn);
   });
-}
 
-function nextQuestion() {
-  index++;
-  loadQuestion();
+  document.getElementById("score").textContent = score;
 }
 
 loadQuestion();
