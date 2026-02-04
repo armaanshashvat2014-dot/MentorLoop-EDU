@@ -123,6 +123,18 @@ const supabase = supabase.createClient(
   "usgsmkpqxdgvtepmnugh"
 );
 </script>
+<script>
+async function submitDoubt(e){
+  e.preventDefault();
+  const { error } = await supabase.from("questions").insert([{
+    student_name: name.value,
+    subject: subject.value,
+    question: question.value
+  }]);
 
+  if (error) alert("Error");
+  else location.href = "dashboard.html";
+}
+</script>
 </body>
 </html>
