@@ -117,7 +117,7 @@
   <p class="small">
     Browse answers submitted by mentors and students.
   </p>
-
+<div id="questions"></div>
   <iframe
     src="https://docs.google.com/spreadsheets/d/e/2PACX-1vReE-w_AKX-s_OaY5T66qHHjuijW7f9SXqF-Pa6f_4xsuV0Q0atyQCwTqRx2vvhfUwF8ZRBfL9yUeX_/pubhtml"
     width="100%"
@@ -145,9 +145,23 @@ const supabase = supabase.createClient(
 );
 
 </script>
+<script>
+async function loadQuestions(){
+  const { data } = await supabase
+    .from("questions")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  questions.innerHTML = data
+    .map(q => `<p><b>${q.subject}</b>: ${q.question}</p>`)
+    .join("");
+}
+loadQuestions();
+</script>
 
 </body>
 </html>
+
 
 
 
