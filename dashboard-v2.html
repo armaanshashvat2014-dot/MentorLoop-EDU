@@ -146,23 +146,54 @@ const supabase =window.supabase.createClient(
 
 </script>
 <script>
-async function loadQuestions(){
-  const { data } = await supabase
-    .from("questions")
-    .select("*")
-    .order("created_at", { ascending:false });
+document.addEventListener("DOMContentLoaded", async () => {
 
-  questions.innerHTML = data
-    .map(q => `<p><b>${q.subject}</b>: ${q.question}</p>`)
-    .join("");
-}
-loadQuestions();
+  const { data, error } = await supabase
+    .from("questions")
+    .select("*");
+
+  if (error) {
+    alert("Error loading questions: " + error.message);
+    return;
+  }
+
+  const box = document.getElementById("questions");
+
+  if (!box) {
+    alert("DIV with id='questions' not found");
+    return;
+  }
+
+  if (data.length === 0) {
+    box.innerHTML = "<p>No questions yet.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  data.forEach(q => {
+    const div = document.createElement("div");
+    div.style.padding = "10px";
+    div.style.borderBottom = "1px solid #ddd";
+
+    div.innerHTML = `
+      <b>${q.subject}</b><br>
+      ${q.question}<br>
+      <small>Asked by: ${q.student_name}</small>
+    `;
+
+    box.appendChild(div);
+  });
+
+});
 </script>
+
 <script>
 console.log("Supabase client:", supabase);
 </script>
 </body>
 </html>
+
 
 
 
