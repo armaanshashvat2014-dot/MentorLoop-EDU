@@ -51,6 +51,20 @@
       border-radius: 14px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     }
+.badge {
+  display: inline-block;
+  padding: 8px 14px;
+  margin: 6px;
+  border-radius: 999px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  background: #e5e7eb;
+  color: #374151;
+}
+.badge.unlocked {
+  background: #dbeafe;
+  color: #1e40af;
+}
 
     h2 {
       margin-top: 0;
@@ -91,7 +105,10 @@
       <h2>Your Profile</h2>
       <p><strong>Role:</strong> Student</p>
       <p><strong>Points:</strong> <span id="points">0</span></p>
-    </div>
+      <div class="card">
+  <h2>🏅 Your Badges</h2>
+  <div id="badges"></div>
+</div>
 
     <!-- ACTIONS -->
     <div class="card">
@@ -204,8 +221,40 @@ function addPoints(value) {
 <script>
 console.log("Supabase client:", supabase);
 </script>
+  <script>
+function renderBadges() {
+  const points = parseInt(localStorage.getItem("ml_points") || "0");
+
+  const badgeList = [
+    { name: "🟢 Curious Starter", min: 90 },
+    { name: "🔵 Active Learner", min: 100 },
+    { name: "🟣 Knowledge Helper", min: 150 },
+    { name: "🟡 Mentor Champ", min: 200 }
+  ];
+
+  const box = document.getElementById("badges");
+  box.innerHTML = "";
+
+  badgeList.forEach(badge => {
+    const span = document.createElement("span");
+    span.className = "badge";
+
+    if (points >= badge.min) {
+      span.classList.add("unlocked");
+    }
+
+    span.textContent = badge.name;
+    box.appendChild(span);
+  });
+}
+
+// Call it once when dashboard loads
+renderBadges();
+</script>
+
 </body>
 </html>
+
 
 
 
