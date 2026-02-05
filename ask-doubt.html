@@ -136,5 +136,13 @@ async function submitDoubt(e){
   else location.href = "dashboard.html";
 }
 </script>
+  <script>
+function awardAskPoints() {
+  let pts = parseInt(localStorage.getItem("ml_points") || "0");
+  pts += 10;
+  localStorage.setItem("ml_points", pts);
+}
+</script>
+
 </body>
 </html>
