@@ -131,11 +131,6 @@
   </div>
 </div>
 
-<script>
-let points = parseInt(localStorage.getItem("points") || "0");
-document.getElementById("points").innerText = points;
-</script>
-
   document.getElementById("points").textContent = points;
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -187,12 +182,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 });
 </script>
+<script>
+// Load points
+let points = localStorage.getItem("ml_points");
+if (!points) {
+  points = 0;
+  localStorage.setItem("ml_points", points);
+}
+
+document.getElementById("points").innerText = points;
+
+// Function to add points
+function addPoints(value) {
+  let current = parseInt(localStorage.getItem("ml_points"));
+  current += value;
+  localStorage.setItem("ml_points", current);
+  document.getElementById("points").innerText = current;
+}
+</script>
 
 <script>
 console.log("Supabase client:", supabase);
 </script>
 </body>
 </html>
+
 
 
 
