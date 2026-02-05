@@ -33,11 +33,18 @@ document.getElementById("q").textContent = doubts[index].question;
 
 function submitAnswer() {
   let points = parseInt(localStorage.getItem("ml_points") || "0");
-  points += 10;
+  points += 15;
   localStorage.setItem("ml_points", points);
 
-  alert("Answer submitted! +10 points");
+  alert("Answer submitted! +15 points");
   window.location.href = "dashboard-v2.html";
+}
+</script>
+<script>
+function awardAnswerPoints() {
+  let pts = parseInt(localStorage.getItem("ml_points") || "0");
+  pts += 15;
+  localStorage.setItem("ml_points", pts);
 }
 </script>
 
