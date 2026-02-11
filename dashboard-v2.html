@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (data.length === 0) {
-    box.innerHTML = "<p>No questions yet.</p>";
+    box.innerHTML = "<p>No questions yet by you.</p>";
     return;
   }
 
@@ -257,7 +257,7 @@ function loadQuestions() {
   const box = document.getElementById("questions");
 
   if (questions.length === 0) {
-    box.innerHTML = "<p>No questions yet.</p>";
+    box.innerHTML = "<p>No questions yet by you.</p>";
     return;
   }
 
@@ -283,6 +283,7 @@ loadQuestions();
 
 </body>
 </html>
+
 
 
 
