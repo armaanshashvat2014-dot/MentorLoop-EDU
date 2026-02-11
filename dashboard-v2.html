@@ -133,6 +133,10 @@
   <h2>📘 Community Answers</h2>
   <p class="small">
     Browse answers submitted by mentors and students.
+    <div class="card">
+  <h2>📚 Community Questions</h2>
+  <div id="questions"></div>
+</div>
   </p>
 <div id="questions"></div>
   <iframe
@@ -249,9 +253,40 @@ function renderBadges() {
 // Call it once when dashboard loads
 renderBadges();
 </script>
+<script>
+function loadQuestions() {
+  const questions = JSON.parse(localStorage.getItem("ml_questions") || "[]");
+
+  const box = document.getElementById("questions");
+
+  if (questions.length === 0) {
+    box.innerHTML = "<p>No questions yet.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  questions.reverse().forEach(q => {
+    const div = document.createElement("div");
+    div.style.padding = "10px";
+    div.style.borderBottom = "1px solid #eee";
+
+    div.innerHTML = `
+      <strong>${q.subject}</strong><br>
+      ${q.question}<br>
+      <small>Asked by: ${q.name}</small>
+    `;
+
+    box.appendChild(div);
+  });
+}
+
+loadQuestions();
+</script>
 
 </body>
 </html>
+
 
 
 
