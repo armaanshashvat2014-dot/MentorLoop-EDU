@@ -100,8 +100,9 @@
 
   <a href="dashboard-v2.html" class="back">← Back to Dashboard</a>
 </div>
-<script>
-function checkBanBeforeSubmit(e) {
+</script>
+  <script>
+    function checkBanBeforeSubmit(e) {
   const username = document.getElementById("studentName").value.trim();
 
   if (isUserBanned(username)) {
@@ -115,32 +116,33 @@ function checkBanBeforeSubmit(e) {
   }
   return true;
 }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const supabase = supabase.createClient(
-  "https://usgsmkpqxdgvtepmnugh.supabase.co",
-  "usgsmkpqxdgvtepmnugh"
-);
-</script>
-<script>
-async function submitDoubt(e){
-  e.preventDefault();
-  const { error } = await supabase.from("questions").insert([{
-    student_name: name.value,
-    subject: subject.value,
-    question: question.value
-  }]);
-
-  if (error) alert("Error");
-  else location.href = "dashboard.html";
-}
-</script>
-  <script>
 function awardAskPoints() {
   let pts = parseInt(localStorage.getItem("ml_points") || "0");
   pts += 10;
   localStorage.setItem("ml_points", pts);
+}
+</script>
+<script>
+function submitDoubt(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const subject = document.getElementById("subject").value;
+  const question = document.getElementById("question").value;
+
+  const existing = JSON.parse(localStorage.getItem("ml_questions") || "[]");
+
+  existing.push({
+    name,
+    subject,
+    question,
+    time: new Date().toISOString()
+  });
+
+  localStorage.setItem("ml_questions", JSON.stringify(existing));
+
+  alert("Doubt submitted!");
+  window.location.href = "dashboard.html";
 }
 </script>
 
