@@ -295,7 +295,7 @@ loadQuestions();
 <script>
 function loadAcademicStats() {
 
-  const doubts = JSON.parse(localStorage.getItem("ml_questions") || "[]");
+  const doubts = JSON.parse(localStorage.getItem("ml_questions",value) || "[]");
   const answers = JSON.parse(localStorage.getItem("ml_answers") || "[]");
   const points = parseInt(localStorage.getItem("ml_points") || "0");
 
@@ -314,6 +314,7 @@ loadAcademicStats();
 
 </body>
 </html>
+
 
 
 
