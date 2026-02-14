@@ -109,6 +109,12 @@
   <h2>🏅 Your Badges</h2>
   <div id="badges"></div>
 </div>
+      <!-----subjects----->
+      <div class="card">
+  <h2>📘 Subjects Engaged</h2>
+  <div id="subjectsList"></div>
+</div>
+
       <!---summary---->
 <div class="card">
   <h2>📊 Academic Summary</h2>
@@ -286,9 +292,29 @@ function loadQuestions() {
 
 loadQuestions();
 </script>
+<script>
+function loadAcademicStats() {
+
+  const doubts = JSON.parse(localStorage.getItem("ml_questions") || "[]");
+  const answers = JSON.parse(localStorage.getItem("ml_answers") || "[]");
+  const points = parseInt(localStorage.getItem("ml_points") || "0");
+
+  document.getElementById("totalDoubts").innerText = doubts.length;
+  document.getElementById("totalAnswers").innerText = answers.length;
+  document.getElementById("points").innerText = points;
+
+  // Unique subjects
+  const subjects = [...new Set(doubts.map(q => q.subject))];
+  document.getElementById("subjectsList").innerText =
+    subjects.length ? subjects.join(", ") : "No subjects yet";
+}
+
+loadAcademicStats();
+</script>
 
 </body>
 </html>
+
 
 
 
