@@ -17,33 +17,51 @@
 <meta name="robots" content="index, follow">
 
 <link rel="canonical" href="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/">
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       margin: 0;
       height: 100vh;
       font-family: Arial, sans-serif;
-      background: linear-gradient(-45deg, #1e3a8a, #2563eb, #0ea5e9, #1e40af);
-      background-size: 400% 400%;
-      animation: gradientMove 10s ease infinite;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .center-box {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
       text-align: center;
     }
 
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .portal-box {
+      background: rgba(255,255,255,0.08);
+      padding: 50px;
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 0 40px rgba(0,0,0,0.3);
+      animation: floatBox 4s ease-in-out infinite;
     }
 
-    .portal-box {
-      background: rgba(255,255,255,0.1);
-      padding: 40px;
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 0 40px rgba(0,0,0,0.2);
+    @keyframes floatBox {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
     }
 
     h1 {
@@ -54,8 +72,8 @@
     .portal {
       display: block;
       margin: 15px 0;
-      padding: 15px 20px;
-      background: rgba(255,255,255,0.2);
+      padding: 15px 25px;
+      background: rgba(255,255,255,0.15);
       border-radius: 12px;
       text-decoration: none;
       color: white;
@@ -64,7 +82,7 @@
     }
 
     .portal:hover {
-      transform: scale(1.05);
+      transform: scale(1.08);
       background: rgba(255,255,255,0.35);
     }
   </style>
@@ -72,14 +90,65 @@
 
 <body>
 
+<canvas id="bg"></canvas>
+
+<div class="center-box">
   <div class="portal-box">
     <h1>🎓 Welcome to MentorLoop EDU</h1>
 
     <a href="dashboard-v2.html" class="portal">📚 Enter Dashboard</a>
     <a href="ask-doubt.html" class="portal">❓ Ask a Doubt</a>
-    <a href="games.html" class="portal">🧠 Challenge Arena</a>
+    <a href="questions.html" class="portal">🧠 Explore Questions</a>
     <a href="fair-play.html" class="portal">🛡 Fair Play Zone</a>
+    <a href="games.html" class="portal">🎲Fun quizzes</a>
   </div>
+</div>
+
+<script>
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    radius: Math.random() * 3 + 1,
+    dx: (Math.random() - 0.5) * 0.5,
+    dy: (Math.random() - 0.5) * 0.5
+  });
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    p.x += p.dx;
+    p.y += p.dy;
+
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
 
 </body>
 </html>
