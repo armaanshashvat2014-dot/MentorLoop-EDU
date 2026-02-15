@@ -143,7 +143,21 @@ function submitDoubt(e) {
 
   alert("Doubt submitted!");
   window.location.href = "dashboard.html";
-}
+}let questions = JSON.parse(localStorage.getItem("ml_questions") || "[]");
+
+questions.push({
+  name: name.value,
+  subject: subject.value,
+  question: question.value
+});
+
+localStorage.setItem("ml_questions", JSON.stringify(questions));
+
+// Add points
+let pts = parseInt(localStorage.getItem("ml_points") || "0");
+pts += 10;
+localStorage.setItem("ml_points", pts);
+
 </script>
 
 </body>
