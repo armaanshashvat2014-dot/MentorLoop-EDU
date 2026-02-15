@@ -17,71 +17,69 @@
 <meta name="robots" content="index, follow">
 
 <link rel="canonical" href="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/">
-
   <style>
     body {
       margin: 0;
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(135deg, #2563eb, #1e40af);
-      color: white;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(-45deg, #1e3a8a, #2563eb, #0ea5e9, #1e40af);
+      background-size: 400% 400%;
+      animation: gradientMove 10s ease infinite;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
     }
 
-    .container {
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(10px);
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .portal-box {
+      background: rgba(255,255,255,0.1);
       padding: 40px;
-      border-radius: 16px;
-      text-align: center;
-      max-width: 420px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(0,0,0,0.2);
     }
 
     h1 {
-      margin-bottom: 10px;
+      margin-bottom: 30px;
       font-size: 2rem;
     }
 
-    p {
-      font-size: 1rem;
-      opacity: 0.95;
-    }
-
-    button {
-      margin-top: 25px;
-      padding: 14px 24px;
-      font-size: 1rem;
-      background: white;
-      color: #1e40af;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+    .portal {
+      display: block;
+      margin: 15px 0;
+      padding: 15px 20px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      text-decoration: none;
+      color: white;
       font-weight: bold;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: 0.3s;
     }
 
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    .portal:hover {
+      transform: scale(1.05);
+      background: rgba(255,255,255,0.35);
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
-    <h1>MentorLoop EDU</h1>
-    <p>A safe, student-powered community for asking doubts,<br>helping peers, and learning together. Your learning companion, upgraded</p>
+  <div class="portal-box">
+    <h1>🎓 Welcome to MentorLoop EDU</h1>
 
-    <a href="ask-doubt.html">
-      <button>Enter MentorLoop EDU</button>
-    </a>
+    <a href="dashboard.html" class="portal">📚 Enter Study Hub</a>
+    <a href="ask-doubt.html" class="portal">❓ Ask a Doubt</a>
+    <a href="games.html" class="portal">🧠 Challenge Arena</a>
+    <a href="fair-play.html" class="portal">🛡 Fair Play Zone</a>
   </div>
 
 </body>
 </html>
-
- 
