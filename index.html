@@ -95,7 +95,7 @@
 <div class="center-box">
   <div class="portal-box">
     <h1>🎓 Welcome to MentorLoop EDU</h1>
-
+     <h2 id="welcomeText"></h2>
     <a href="dashboard-v2.html" class="portal">📚 Enter Dashboard</a>
     <a href="ask-doubt.html" class="portal">❓ Ask a Doubt</a>
     <a href="questions.html" class="portal">🧠 Explore Questions</a>
@@ -148,6 +148,28 @@ window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+</script>
+<script>
+function setupUser() {
+  let name = localStorage.getItem("ml_user_name");
+  let role = localStorage.getItem("ml_user_role");
+
+  if (!name || !role) {
+    name = prompt("Enter your name:");
+    role = prompt("Enter your role (Student/Mentor):");
+
+    if (!name) name = "Learner";
+    if (!role) role = "Student";
+
+    localStorage.setItem("ml_user_name", name);
+    localStorage.setItem("ml_user_role", role);
+  }
+
+  document.getElementById("welcomeText").innerText =
+    "Welcome back, " + name + " (" + role + ")";
+}
+
+setupUser();
 </script>
 
 </body>
