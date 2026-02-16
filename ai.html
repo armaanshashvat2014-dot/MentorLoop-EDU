@@ -1,24 +1,105 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <title>MentorLoop AI Teacher</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      width: 95%;
+      max-width: 600px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      margin-bottom: 15px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102,126,234,0.5);
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #5a67d8;
+    }
+
+    #answer {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f4f6ff;
+      border-radius: 12px;
+      text-align: left;
+      min-height: 50px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #333;
+    }
+
+    .loading {
+      opacity: 0.6;
+      font-style: italic;
+    }
+
+  </style>
 </head>
 <body>
 
-  <h2>MentorLoop AI Teacher</h2>
+  <div class="container">
+    <h2>📚 MentorLoop AI Teacher</h2>
 
-  <input id="question" placeholder="Ask any academic question..." />
-  <button onclick="askAI()">Ask</button>
+    <input id="question" placeholder="Ask any academic question..." />
+    <button onclick="askAI()">Ask AI</button>
 
-  <p><strong>Answer:</strong></p>
-  <div id="answer"></div>
+    <div id="answer"></div>
+  </div>
 
   <script>
     async function askAI() {
       const question = document.getElementById("question").value;
       const answerBox = document.getElementById("answer");
-      answerBox.innerText = "Thinking...";
+
+      if (!question) return;
+
+      answerBox.innerHTML = "<span class='loading'>Thinking...</span>";
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -29,7 +110,7 @@
         body: JSON.stringify({
           model: "openai/gpt-3.5-turbo",
           messages: [
-            { role: "system", content: "You are a helpful AI teacher that explains concepts clearly to students." },
+            { role: "system", content: "You are MentorLoop EDU AI. Explain answers step-by-step in a simple way suitable for school students." },
             { role: "user", content: question }
           ]
         })
@@ -42,3 +123,4 @@
 
 </body>
 </html>
+
