@@ -1,112 +1,44 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MentorLoop EDU | AI Tutor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      padding: 30px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
-
-    textarea {
-      width: 100%;
-      height: 100px;
-      margin-top: 10px;
-      padding: 10px;
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .response {
-      margin-top: 20px;
-      padding: 15px;
-      background: #e0e7ff;
-      border-radius: 8px;
-    }
-  </style>
+  <title>MentorLoop AI Teacher</title>
 </head>
-
 <body>
 
-<div class="card">
-  <h2>🧠 MentorLoop EDU AI Tutor</h2>
+  <h2>MentorLoop AI Teacher</h2>
 
-  <textarea id="question" placeholder="Ask an academic question..."></textarea>
-  <button onclick="answerQuestion()">Ask AI</button>
+  <input id="question" placeholder="Ask any academic question..." />
+  <button onclick="askAI()">Ask</button>
 
-  <div id="response" class="response"></div>
-</div>
+  <p><strong>Answer:</strong></p>
+  <div id="answer"></div>
 
-<script>
-function answerQuestion() {
-  const q = document.getElementById("question").value.toLowerCase();
-  const responseBox = document.getElementById("response");
+  <script>
+    async function askAI() {
+      const question = document.getElementById("question").value;
+      const answerBox = document.getElementById("answer");
+      answerBox.innerText = "Thinking...";
 
-  if (!q) {
-    responseBox.innerText = "Please enter a question.";
-    return;
-  }
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer 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",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are a helpful AI teacher that explains concepts clearly to students." },
+            { role: "user", content: question }
+          ]
+        })
+      });
 
-  // Math
-  if (q.includes("solve") || q.includes("equation")) {
-    responseBox.innerText =
-      "To solve a basic linear equation, isolate the variable. Example:\n2x + 5 = 15\nSubtract 5 → 2x = 10\nDivide by 2 → x = 5";
-    return;
-  }
-
-  // Science
-  if (q.includes("photosynthesis")) {
-    responseBox.innerText =
-      "Photosynthesis is the process by which green plants use sunlight, carbon dioxide, and water to produce glucose and oxygen.";
-    return;
-  }
-
-  if (q.includes("gravity")) {
-    responseBox.innerText =
-      "Gravity is a force that attracts objects toward each other. On Earth, it pulls objects toward the center of the planet.";
-    return;
-  }
-
-  // English
-  if (q.includes("noun")) {
-    responseBox.innerText =
-      "A noun is a word that names a person, place, thing, or idea.";
-    return;
-  }
-
-  // History
-  if (q.includes("independence")) {
-    responseBox.innerText =
-      "Independence refers to freedom from control. For example, India gained independence in 1947.";
-    return;
-  }
-
-  // Non-academic
-  responseBox.innerText =
-    "MentorLoop EDU AI answers academic questions only. Please ask about Math, Science, English, or History.";
-}
-</script>
+      const data = await response.json();
+      answerBox.innerText = data.choices[0].message.content;
+    }
+  </script>
 
 </body>
 </html>
