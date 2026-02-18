@@ -1,18 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Mentorloop EDUBots</title>
+  <meta charset="UTF-8">
+  <title>MentorLoop EDUBots</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 900px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #10b981, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      opacity: 0.8;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .bots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 18px;
+      transition: 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
+
+    .card p {
+      font-size: 14px;
+      margin-bottom: 20px;
+      opacity: 0.7;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .perplexity {
+      background: #10b981;
+    }
+
+    .helix {
+      background: #6366f1;
+    }
+
+    .chatgpt {
+      background: #22c55e;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+      transform: scale(1.05);
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 13px;
+      opacity: 0.6;
+    }
+
+  </style>
 </head>
-  <body>
-   <p> These are the AI Mentorloop EDU employs.Note that we won't monitor you and you can use these at your own risks.</p>
-    <a href="https://www.perplexity.ai/" class="btn" style="background:#10b981;">
-   Meet Perplexity
-</a> 
-     <a href="https://helix-ai-v2.streamlit.app/" class="btn" style="background:#10b981;">
-   Meet Helix(more accurate, but only for 6th-8th graders)
-</a> 
-     <a href="https://chatgpt.com/?utm_source=google&utm_medium=paidsearch_brand&utm_campaign=GOOG_C_SEM_GBR_Core_CHT_BAU_ACQ_PER_MIX_ALL_APAC_IN_EN_032525&utm_term=chatgpt&utm_content=177344203135&utm_ad=741704613486&utm_match=e&gad_source=1&gad_campaignid=22370388714&gbraid=0AAAAA-IW-UUdnj9b0zHg76jFQdY9Uy9ue&gclid=Cj0KCQiAubrJBhCbARIsAHIdxD_0-lx7wTC-q7tCV3l47g-_OJscXTUVtlc3ytM0Y2kFj_bL8kGeCfIaAjOOEALw_wcB" class="btn" style="background:#10b981;">
-    Meet ChatGPT
-</a> 
-  </body>
+
+<body>
+
+  <div class="container">
+    <h1>MentorLoop EDUBots</h1>
+    <p>Explore powerful AI tools to enhance your learning. Use responsibly and think critically.</p>
+
+    <div class="bots">
+
+      <div class="card">
+        <h2>Perplexity AI</h2>
+        <p>Great for research and real-time web-based answers.</p>
+        <a href="https://www.perplexity.ai/" target="_blank" class="btn perplexity">
+          Meet Perplexity
+        </a>
+      </div>
+
+      <div class="card">
+        <h2>Helix AI</h2>
+        <p>Optimized for Grades 6–8. Simple explanations and structured answers.</p>
+        <a href="https://helix-ai-v2.streamlit.app/" target="_blank" class="btn helix">
+          Meet Helix
+        </a>
+      </div>
+
+      <div class="card">
+        <h2>ChatGPT</h2>
+        <p>Powerful conversational AI for deep explanations and learning support.</p>
+        <a href="https://chatgpt.com/" target="_blank" class="btn chatgpt">
+          Meet ChatGPT
+        </a>
+      </div>
+
+    </div>
+
+    <footer>
+      MentorLoop EDU © 2026 — Learn smart. Lead better.
+    </footer>
+
+  </div>
+
+</body>
 </html>
