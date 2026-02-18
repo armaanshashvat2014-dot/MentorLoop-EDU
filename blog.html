@@ -1,15 +1,127 @@
-<!DOCTYPE.html>
-<html>
-  <head>
-    <title> Creator of The app</title>
-  </head>
-  <body>
-    <h1> Who created this app?</h1>
-    <p>It was created by Armaan. One day, he was learning from AI.
-    But it gave him complex terms. So he set out on a mission to create an app.
-    Mentorloop EDU. And that- is how we started.</p>
-    <a href="dashboard-v2.html" class="btn" style="background:#22c55e;">
-  Back to dashboard
-</a>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Creator | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    .card {
+      background: #1e293b;
+      max-width: 800px;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #22d3ee, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      font-size: 17px;
+      line-height: 1.7;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+
+    .highlight {
+      color: #22d3ee;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #10b981, #22d3ee);
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>The Story Behind MentorLoop EDU</h1>
+
+    <p>
+      Every great platform begins with a simple frustration.
+    </p>
+
+    <p>
+      <span class="highlight">Armaan</span> was learning with AI one day. 
+      The answers were powerful… but filled with complex terms and confusing explanations.
+      Instead of giving up, he asked a bigger question:
+    </p>
+
+    <p>
+      <em>“Why can’t learning be smarter, simpler, and built for students like us?”</em>
+    </p>
+
+    <p>
+      That question sparked a mission.
+      A mission to build a safe, school-friendly platform where students could
+      ask doubts freely, help each other grow, and learn with clarity.
+    </p>
+
+    <p>
+      And that mission became <span class="highlight">MentorLoop EDU</span>.
+    </p>
+
+    <p>
+      Not just an app.  
+      A community.  
+      A learning movement.
+    </p>
+
+    <a href="dashboard-v2.html" class="btn">
+      ← Back to Dashboard
+    </a>
+  </div>
+
+</body>
 </html>
