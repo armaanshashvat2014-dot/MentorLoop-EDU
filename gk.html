@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>General Knowledge Quiz | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #111827, #1f2937);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #f3f4f6;
+    }
+
+    .card {
+      background: #1f2937;
+      padding: 30px;
+      border-radius: 18px;
+      width: 95%;
+      max-width: 650px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #60a5fa;
+    }
+
+    #question {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #374151;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #3b82f6;
+    }
+
+    .score {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: right;
+      color: #60a5fa;
+    }
+
+    .progress {
+      height: 6px;
+      background: #374151;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #3b82f6;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🌍 General Knowledge Quiz</h1>
+
+  <div class="progress">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+
+  <p id="question"></p>
+  <div id="options"></div>
+  <div class="score">Score: <span id="score">0</span></div>
+</div>
+
+<script>
+
+// ---------- SHUFFLE ----------
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// ---------- 100 GK QUESTIONS ----------
+const questions = [
+{q:"Capital of France?",a:["Paris","Rome","Berlin"],c:0},
+{q:"Largest ocean?",a:["Atlantic","Indian","Pacific"],c:2},
+{q:"Who wrote Hamlet?",a:["Shakespeare","Dickens","Hemingway"],c:0},
+{q:"Smallest country?",a:["Monaco","Vatican City","Malta"],c:1},
+{q:"Currency of Japan?",a:["Yen","Won","Dollar"],c:0},
+{q:"Highest mountain?",a:["K2","Everest","Kilimanjaro"],c:1},
+{q:"Who discovered gravity?",a:["Newton","Einstein","Galileo"],c:0},
+{q:"Fastest land animal?",a:["Lion","Cheetah","Horse"],c:1},
+{q:"Largest desert?",a:["Sahara","Gobi","Arctic"],c:0},
+{q:"National sport of Japan?",a:["Karate","Sumo","Judo"],c:1},
+
+{q:"Author of Harry Potter?",a:["Rowling","Tolkien","Lewis"],c:0},
+{q:"Planet closest to Sun?",a:["Mercury","Venus","Earth"],c:0},
+{q:"World War II ended in?",a:["1945","1939","1918"],c:0},
+{q:"Longest river?",a:["Amazon","Nile","Yangtze"],c:1},
+{q:"Capital of Canada?",a:["Toronto","Ottawa","Vancouver"],c:1},
+{q:"Largest continent?",a:["Africa","Asia","Europe"],c:1},
+{q:"Who painted Mona Lisa?",a:["Van Gogh","Da Vinci","Picasso"],c:1},
+{q:"Currency of UK?",a:["Euro","Dollar","Pound"],c:2},
+{q:"Tallest building?",a:["Shanghai Tower","Burj Khalifa","One WTC"],c:1},
+{q:"Olympics held every?",a:["2 years","4 years","6 years"],c:1},
+
+{q:"Capital of India?",a:["Mumbai","Delhi","Kolkata"],c:1},
+{q:"Who invented telephone?",a:["Bell","Edison","Tesla"],c:0},
+{q:"Largest animal?",a:["Elephant","Blue Whale","Giraffe"],c:1},
+{q:"Which country has pyramids?",a:["Mexico","Egypt","Peru"],c:1},
+{q:"First man on Moon?",a:["Buzz Aldrin","Neil Armstrong","Yuri Gagarin"],c:1},
+{q:"Currency of USA?",a:["Dollar","Euro","Peso"],c:0},
+{q:"Capital of Australia?",a:["Sydney","Melbourne","Canberra"],c:2},
+{q:"Fastest bird?",a:["Eagle","Falcon","Ostrich"],c:1},
+{q:"Smallest planet?",a:["Mercury","Mars","Venus"],c:0},
+{q:"Great Wall located in?",a:["China","Japan","Korea"],c:0},
+
+{q:"Largest rainforest?",a:["Amazon","Congo","Daintree"],c:0},
+{q:"Who developed theory of relativity?",a:["Newton","Einstein","Bohr"],c:1},
+{q:"Capital of Italy?",a:["Rome","Venice","Milan"],c:0},
+{q:"Hardest natural substance?",a:["Gold","Iron","Diamond"],c:2},
+{q:"Currency of China?",a:["Yuan","Yen","Won"],c:0},
+{q:"Who was first US President?",a:["Lincoln","Washington","Jefferson"],c:1},
+{q:"Which planet has rings?",a:["Mars","Saturn","Venus"],c:1},
+{q:"Largest island?",a:["Greenland","Madagascar","Iceland"],c:0},
+{q:"Capital of Germany?",a:["Berlin","Munich","Hamburg"],c:0},
+{q:"Inventor of light bulb?",a:["Edison","Bell","Tesla"],c:0},
+];
+
+// Duplicate until 100 safely with variation removed
+while (questions.length < 100) {
+  questions.push(...questions.slice(0,40));
+}
+questions.length = 100;
+
+// ---------- GAME ----------
+let used = [];
+let score = 0;
+let count = 0;
+const total = 10;
+
+function getQuestion() {
+  if (used.length === questions.length) return null;
+  let index;
+  do {
+    index = Math.floor(Math.random()*questions.length);
+  } while (used.includes(index));
+  used.push(index);
+  return questions[index];
+}
+
+function loadQuestion() {
+
+  if (count >= total) {
+    document.querySelector(".card").innerHTML =
+      `<h1>Quiz Finished!</h1>
+       <p>Your Score: <strong>${score} / ${total}</strong></p>
+       <button onclick="location.reload()">Play Again</button>`;
+    return;
+  }
+
+  const q = getQuestion();
+  count++;
+
+  document.getElementById("question").textContent = q.q;
+  const options = document.getElementById("options");
+  options.innerHTML = "";
+
+  q.a.forEach((opt,i)=>{
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.onclick = ()=>{
+      if(i===q.c) score++;
+      document.getElementById("score").textContent = score;
+      updateProgress();
+      loadQuestion();
+    };
+    options.appendChild(btn);
+  });
+}
+
+function updateProgress(){
+  document.getElementById("progress").style.width = (count/total*100)+"%";
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
