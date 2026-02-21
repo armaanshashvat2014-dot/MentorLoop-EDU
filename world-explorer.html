@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>World Explorer | Guess The Country</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: white;
+    }
+
+    .card {
+      background: #1e293b;
+      width: 95%;
+      max-width: 750px;
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+    }
+
+    img {
+      width: 100%;
+      border-radius: 12px;
+      margin: 15px 0;
+      max-height: 350px;
+      object-fit: cover;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #334155;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #38bdf8;
+      color: black;
+    }
+
+    .score {
+      text-align: right;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #38bdf8;
+    }
+
+    .progress {
+      height: 6px;
+      background: #334155;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #38bdf8;
+      transition: 0.3s;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🌍 World Explorer</h1>
+
+  <div class="progress">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+
+  <img id="locationImage" src="">
+  <div id="options"></div>
+
+  <div class="score">Score: <span id="score">0</span></div>
+</div>
+
+<script>
+
+// -------- SHUFFLE ----------
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// -------- 40 COUNTRIES ----------
+const locations = [
+{country:"France",img:"https://upload.wikimedia.org/wikipedia/commons/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg"},
+{country:"USA",img:"https://upload.wikimedia.org/wikipedia/commons/a/a1/Statue_of_Liberty_7.jpg"},
+{country:"India",img:"https://upload.wikimedia.org/wikipedia/commons/d/da/Taj-Mahal.jpg"},
+{country:"Brazil",img:"https://upload.wikimedia.org/wikipedia/commons/6/6f/Christ_the_Redeemer_-_Cristo_Redentor.jpg"},
+{country:"Egypt",img:"https://upload.wikimedia.org/wikipedia/commons/e/e3/Kheops-Pyramid.jpg"},
+{country:"Italy",img:"https://upload.wikimedia.org/wikipedia/commons/d/de/Colosseo_2020.jpg"},
+{country:"China",img:"https://upload.wikimedia.org/wikipedia/commons/6/6f/GreatWallBadaling.jpg"},
+{country:"Australia",img:"https://upload.wikimedia.org/wikipedia/commons/4/40/Sydney_Opera_House_Sails.jpg"},
+{country:"Japan",img:"https://upload.wikimedia.org/wikipedia/commons/1/12/Mount_Fuji_from_Hakone.jpg"},
+{country:"UK",img:"https://upload.wikimedia.org/wikipedia/commons/c/cd/Big_Ben_2012.jpg"},
+{country:"Russia",img:"https://upload.wikimedia.org/wikipedia/commons/4/4e/St_Basil%27s_Cathedral%2C_Moscow.jpg"},
+{country:"Canada",img:"https://upload.wikimedia.org/wikipedia/commons/c/cf/Niagara_Falls_2.jpg"},
+{country:"Germany",img:"https://upload.wikimedia.org/wikipedia/commons/8/8e/Brandenburg_Gate_Berlin.jpg"},
+{country:"Spain",img:"https://upload.wikimedia.org/wikipedia/commons/9/99/Sagrada_Familia_01.jpg"},
+{country:"Mexico",img:"https://upload.wikimedia.org/wikipedia/commons/5/5c/Chichen_Itza_3.jpg"},
+{country:"South Africa",img:"https://upload.wikimedia.org/wikipedia/commons/a/a6/Table_Mountain_from_Bloubergstrand.jpg"},
+{country:"Argentina",img:"https://upload.wikimedia.org/wikipedia/commons/1/16/Perito_Moreno_Glacier_Patagonia_Argentina_Luca_Galuzzi_2005.JPG"},
+{country:"Turkey",img:"https://upload.wikimedia.org/wikipedia/commons/9/9e/Hagia_Sophia_Mars_2013.jpg"},
+{country:"Thailand",img:"https://upload.wikimedia.org/wikipedia/commons/a/a1/Wat_Arun_Bangkok.jpg"},
+{country:"UAE",img:"https://upload.wikimedia.org/wikipedia/commons/9/93/Burj_Khalifa.jpg"},
+{country:"Switzerland",img:"https://upload.wikimedia.org/wikipedia/commons/5/5c/Matterhorn_from_Domhütte_-_2.jpg"},
+{country:"Greece",img:"https://upload.wikimedia.org/wikipedia/commons/d/da/Acropolis_2014.jpg"},
+{country:"Peru",img:"https://upload.wikimedia.org/wikipedia/commons/e/eb/Machu_Picchu%2C_Peru.jpg"},
+{country:"Netherlands",img:"https://upload.wikimedia.org/wikipedia/commons/5/50/KinderdijkWindmills.jpg"},
+{country:"Norway",img:"https://upload.wikimedia.org/wikipedia/commons/9/9e/Geirangerfjord.jpg"},
+{country:"Sweden",img:"https://upload.wikimedia.org/wikipedia/commons/4/45/Stockholm_City_Hall.jpg"},
+{country:"South Korea",img:"https://upload.wikimedia.org/wikipedia/commons/5/57/Seoul_skyline.jpg"},
+{country:"Singapore",img:"https://upload.wikimedia.org/wikipedia/commons/4/4d/Marina_Bay_Sands_in_the_evening.jpg"},
+{country:"Indonesia",img:"https://upload.wikimedia.org/wikipedia/commons/6/6e/Borobudur-Nothwest-view.jpg"},
+{country:"Vietnam",img:"https://upload.wikimedia.org/wikipedia/commons/9/9c/Ha_Long_Bay_in_Vietnam.jpg"},
+{country:"Kenya",img:"https://upload.wikimedia.org/wikipedia/commons/5/5f/Mount_Kenya.jpg"},
+{country:"Chile",img:"https://upload.wikimedia.org/wikipedia/commons/6/6c/Torres_del_Paine.jpg"},
+{country:"Iceland",img:"https://upload.wikimedia.org/wikipedia/commons/5/5e/Skogafoss.jpg"},
+{country:"Portugal",img:"https://upload.wikimedia.org/wikipedia/commons/c/c8/Belem_Tower_Lisbon.jpg"},
+{country:"Malaysia",img:"https://upload.wikimedia.org/wikipedia/commons/3/32/Petronas_Twin_Towers_at_night_%28edited%29.jpg"},
+{country:"Philippines",img:"https://upload.wikimedia.org/wikipedia/commons/7/76/Chocolate_Hills_Bohol.jpg"},
+{country:"Colombia",img:"https://upload.wikimedia.org/wikipedia/commons/6/65/Cartagena_Colombia.jpg"},
+{country:"Saudi Arabia",img:"https://upload.wikimedia.org/wikipedia/commons/6/6e/Al_Masjid_An_Nabawi.jpg"},
+{country:"New Zealand",img:"https://upload.wikimedia.org/wikipedia/commons/9/9e/Milford_Sound.jpg"}
+];
+
+// -------- GAME SETTINGS ----------
+let used = [];
+let score = 0;
+let round = 0;
+const totalRounds = 5;
+
+// -------- GAME FUNCTIONS ----------
+function getLocation() {
+  let index;
+  do {
+    index = Math.floor(Math.random() * locations.length);
+  } while (used.includes(index));
+  used.push(index);
+  return locations[index];
+}
+
+function loadRound() {
+
+  if (round >= totalRounds) {
+    document.querySelector(".card").innerHTML =
+      `<h1>Game Complete!</h1>
+       <p>Your Score: <strong>${score} / ${totalRounds}</strong></p>
+       <button onclick="location.reload()">Play Again</button>`;
+    return;
+  }
+
+  round++;
+  updateProgress();
+
+  const current = getLocation();
+  document.getElementById("locationImage").src = current.img;
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  let options = [current.country];
+
+  while (options.length < 4) {
+    let randomCountry = locations[Math.floor(Math.random()*locations.length)].country;
+    if (!options.includes(randomCountry)) {
+      options.push(randomCountry);
+    }
+  }
+
+  shuffle(options);
+
+  options.forEach(option=>{
+    const btn = document.createElement("button");
+    btn.textContent = option;
+    btn.onclick = ()=>{
+      if(option === current.country) score++;
+      document.getElementById("score").textContent = score;
+      loadRound();
+    };
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function updateProgress(){
+  document.getElementById("progress").style.width = (round/totalRounds*100)+"%";
+}
+
+loadRound();
+
+</script>
+
+</body>
+</html>
