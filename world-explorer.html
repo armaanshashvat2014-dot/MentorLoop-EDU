@@ -19,8 +19,8 @@
     .card {
       background: #1e293b;
       width: 95%;
-      max-width: 750px;
-      padding: 25px;
+      max-width: 700px;
+      padding: 30px;
       border-radius: 18px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
@@ -30,12 +30,13 @@
       color: #38bdf8;
     }
 
-    img {
-      width: 100%;
-      border-radius: 12px;
-      margin: 15px 0;
-      max-height: 350px;
-      object-fit: cover;
+    .clue {
+      font-size: 18px;
+      margin: 20px 0;
+      line-height: 1.6;
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 10px;
     }
 
     button {
@@ -48,7 +49,6 @@
       color: white;
       cursor: pointer;
       transition: 0.2s;
-      font-size: 15px;
     }
 
     button:hover {
@@ -58,7 +58,7 @@
 
     .score {
       text-align: right;
-      margin-top: 10px;
+      margin-top: 15px;
       font-weight: bold;
       color: #38bdf8;
     }
@@ -89,7 +89,7 @@
     <div class="progress-bar" id="progress"></div>
   </div>
 
-  <img id="locationImage" src="">
+  <div class="clue" id="clue"></div>
   <div id="options"></div>
 
   <div class="score">Score: <span id="score">0</span></div>
@@ -106,48 +106,48 @@ function shuffle(array) {
   return array;
 }
 
-// -------- 40 COUNTRIES (Using Unsplash Stable Images) ----------
+// -------- 40 COUNTRY CLUES ----------
 const locations = [
-{country:"France",img:"https://source.unsplash.com/800x500/?eiffel,tower"},
-{country:"USA",img:"https://source.unsplash.com/800x500/?statue,of,liberty"},
-{country:"India",img:"https://source.unsplash.com/800x500/?taj,mahal"},
-{country:"Brazil",img:"https://source.unsplash.com/800x500/?christ,the,redeemer"},
-{country:"Egypt",img:"https://source.unsplash.com/800x500/?pyramids,giza"},
-{country:"Italy",img:"https://source.unsplash.com/800x500/?colosseum,rome"},
-{country:"China",img:"https://source.unsplash.com/800x500/?great,wall,china"},
-{country:"Australia",img:"https://source.unsplash.com/800x500/?sydney,opera,house"},
-{country:"Japan",img:"https://source.unsplash.com/800x500/?mount,fuji"},
-{country:"UK",img:"https://source.unsplash.com/800x500/?big,ben,london"},
-{country:"Russia",img:"https://source.unsplash.com/800x500/?saint,basil,moscow"},
-{country:"Canada",img:"https://source.unsplash.com/800x500/?niagara,falls"},
-{country:"Germany",img:"https://source.unsplash.com/800x500/?brandenburg,gate"},
-{country:"Spain",img:"https://source.unsplash.com/800x500/?sagrada,familia"},
-{country:"Mexico",img:"https://source.unsplash.com/800x500/?chichen,itza"},
-{country:"South Africa",img:"https://source.unsplash.com/800x500/?table,mountain"},
-{country:"Argentina",img:"https://source.unsplash.com/800x500/?patagonia,mountains"},
-{country:"Turkey",img:"https://source.unsplash.com/800x500/?hagia,sophia"},
-{country:"Thailand",img:"https://source.unsplash.com/800x500/?wat,arun"},
-{country:"UAE",img:"https://source.unsplash.com/800x500/?burj,khalifa"},
-{country:"Switzerland",img:"https://source.unsplash.com/800x500/?matterhorn"},
-{country:"Greece",img:"https://source.unsplash.com/800x500/?acropolis,athens"},
-{country:"Peru",img:"https://source.unsplash.com/800x500/?machu,picchu"},
-{country:"Netherlands",img:"https://source.unsplash.com/800x500/?windmills,holland"},
-{country:"Norway",img:"https://source.unsplash.com/800x500/?fjord,norway"},
-{country:"Sweden",img:"https://source.unsplash.com/800x500/?stockholm,city"},
-{country:"South Korea",img:"https://source.unsplash.com/800x500/?seoul,skyline"},
-{country:"Singapore",img:"https://source.unsplash.com/800x500/?marina,bay,sands"},
-{country:"Indonesia",img:"https://source.unsplash.com/800x500/?borobudur"},
-{country:"Vietnam",img:"https://source.unsplash.com/800x500/?halong,bay"},
-{country:"Kenya",img:"https://source.unsplash.com/800x500/?mount,kenya"},
-{country:"Chile",img:"https://source.unsplash.com/800x500/?torres,del,paine"},
-{country:"Iceland",img:"https://source.unsplash.com/800x500/?waterfall,iceland"},
-{country:"Portugal",img:"https://source.unsplash.com/800x500/?belem,tower"},
-{country:"Malaysia",img:"https://source.unsplash.com/800x500/?petronas,towers"},
-{country:"Philippines",img:"https://source.unsplash.com/800x500/?chocolate,hills"},
-{country:"Colombia",img:"https://source.unsplash.com/800x500/?cartagena"},
-{country:"Saudi Arabia",img:"https://source.unsplash.com/800x500/?mecca,mosque"},
-{country:"New Zealand",img:"https://source.unsplash.com/800x500/?milford,sound"},
-{country:"Nepal",img:"https://source.unsplash.com/800x500/?mount,everest"}
+{country:"France",clue:"Home of the Eiffel Tower and famous for croissants."},
+{country:"Japan",clue:"Land of the rising sun and Mount Fuji."},
+{country:"Brazil",clue:"Christ the Redeemer overlooks Rio in this country."},
+{country:"Egypt",clue:"Ancient pyramids stand in its desert."},
+{country:"India",clue:"The Taj Mahal is located here."},
+{country:"Italy",clue:"The Colosseum is found in its capital."},
+{country:"China",clue:"The Great Wall stretches across this nation."},
+{country:"Australia",clue:"Sydney Opera House is here."},
+{country:"Canada",clue:"Niagara Falls borders this country and the USA."},
+{country:"Germany",clue:"Berlin is its capital."},
+{country:"Spain",clue:"Home of La Sagrada Familia in Barcelona."},
+{country:"Mexico",clue:"Chichen Itza is located here."},
+{country:"South Africa",clue:"Table Mountain overlooks Cape Town."},
+{country:"Argentina",clue:"Famous for Patagonia and tango."},
+{country:"Turkey",clue:"Hagia Sophia is in Istanbul."},
+{country:"Thailand",clue:"Bangkok is its capital city."},
+{country:"UAE",clue:"Burj Khalifa stands here."},
+{country:"Switzerland",clue:"Famous for the Matterhorn and chocolate."},
+{country:"Greece",clue:"The Acropolis is located here."},
+{country:"Peru",clue:"Machu Picchu is found here."},
+{country:"Netherlands",clue:"Known for windmills and tulips."},
+{country:"Norway",clue:"Famous for its fjords."},
+{country:"Sweden",clue:"Stockholm is its capital."},
+{country:"South Korea",clue:"Seoul is its capital."},
+{country:"Singapore",clue:"Marina Bay Sands is located here."},
+{country:"Indonesia",clue:"The island of Bali belongs to this country."},
+{country:"Vietnam",clue:"Ha Long Bay is here."},
+{country:"Kenya",clue:"Known for safaris and Mount Kenya."},
+{country:"Chile",clue:"Torres del Paine National Park is here."},
+{country:"Iceland",clue:"Famous for geysers and volcanoes."},
+{country:"Portugal",clue:"Lisbon is its capital."},
+{country:"Malaysia",clue:"Petronas Towers are here."},
+{country:"Philippines",clue:"An archipelago in Southeast Asia with Chocolate Hills."},
+{country:"Colombia",clue:"Cartagena is a historic city here."},
+{country:"Saudi Arabia",clue:"Mecca is located here."},
+{country:"New Zealand",clue:"Known for Milford Sound."},
+{country:"Russia",clue:"The Kremlin is in its capital."},
+{country:"UK",clue:"Big Ben is located in its capital."},
+{country:"USA",clue:"The Statue of Liberty stands here."},
+{country:"Nepal",clue:"Mount Everest lies within this country."}
 ];
 
 // -------- GAME SETTINGS ----------
@@ -156,7 +156,7 @@ let score = 0;
 let round = 0;
 const totalRounds = 5;
 
-// -------- GAME FUNCTIONS ----------
+// -------- GAME LOGIC ----------
 function getLocation() {
   let index;
   do {
@@ -180,7 +180,7 @@ function loadRound() {
   updateProgress();
 
   const current = getLocation();
-  document.getElementById("locationImage").src = current.img;
+  document.getElementById("clue").textContent = current.clue;
 
   const optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML = "";
