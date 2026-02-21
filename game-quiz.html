@@ -31,6 +31,7 @@
 
     #question {
       margin-bottom: 15px;
+      font-size: 18px;
     }
 
     button {
@@ -43,6 +44,7 @@
       border-radius: 8px;
       cursor: pointer;
       transition: 0.2s;
+      font-size: 15px;
     }
 
     button:hover {
@@ -62,7 +64,7 @@
 
 <script>
 
-// ---------- SAFE SHUFFLE ----------
+// ---------- SHUFFLE ----------
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -71,19 +73,60 @@ function shuffle(array) {
   return array;
 }
 
-// ---------- 100 QUESTIONS ----------
+// ---------- RANDOM INTEGER ----------
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// ---------- GENERATE 100 QUESTIONS ----------
 const questionBank = [];
 
-for (let i = 1; i <= 100; i++) {
+const operations = ["+", "-", "*", "/"];
+
+for (let i = 0; i < 100; i++) {
+
+  let a = randomInt(5, 50);
+  let b = randomInt(2, 20);
+
+  // Prevent same number
+  while (a === b) {
+    b = randomInt(2, 20);
+  }
+
+  let op = operations[randomInt(0, operations.length - 1)];
+  let correctAnswer;
+
+  if (op === "+") correctAnswer = a + b;
+  if (op === "-") correctAnswer = a - b;
+  if (op === "*") correctAnswer = a * b;
+  if (op === "/") {
+    // Force clean division
+    correctAnswer = randomInt(2, 20);
+    b = randomInt(2, 10);
+    a = correctAnswer * b;
+  }
+
+  let options = [correctAnswer];
+
+  // Generate wrong answers
+  while (options.length < 3) {
+    let wrong = correctAnswer + randomInt(-15, 15);
+    if (!options.includes(wrong) && wrong !== correctAnswer) {
+      options.push(wrong);
+    }
+  }
+
+  options = shuffle(options);
+
   questionBank.push({
-    q: `Sample Question ${i}: What is ${i} + ${i}?`,
-    a: [`${i}`, `${i*2}`, `${i*3}`],
-    c: 1
+    q: `What is ${a} ${op} ${b}?`,
+    a: options,
+    c: options.indexOf(correctAnswer)
   });
 }
 
 // ---------- GAME LOGIC ----------
-let questions = shuffle([...questionBank]).slice(0, 10); // 10 per round
+let questions = shuffle([...questionBank]).slice(0, 10);
 let index = 0;
 let score = 0;
 
@@ -98,6 +141,7 @@ function loadQuestion() {
   }
 
   const q = questions[index];
+
   document.getElementById("question").textContent = q.q;
 
   const options = document.getElementById("options");
