@@ -19,16 +19,13 @@
     .card {
       background: #1e293b;
       width: 95%;
-      max-width: 750px;
+      max-width: 800px;
       padding: 30px;
       border-radius: 18px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.7);
     }
 
-    h1 {
-      text-align: center;
-      color: #22d3ee;
-    }
+    h1 { text-align:center; color:#22d3ee; }
 
     .question {
       margin: 20px 0;
@@ -50,10 +47,7 @@
       transition: 0.2s;
     }
 
-    button:hover {
-      background: #22d3ee;
-      color: black;
-    }
+    button:hover { background:#22d3ee; color:black; }
 
     .progress {
       height: 6px;
@@ -75,7 +69,7 @@
 <body>
 
 <div class="card">
-  <h1>🧠 Overall Brain Performance Test</h1>
+  <h1>🧠 Overall Brain Assessment</h1>
 
   <div class="progress">
     <div class="progress-bar" id="progress"></div>
@@ -87,7 +81,7 @@
 
 <script>
 
-// Shuffle
+// ---------- SHUFFLE ----------
 function shuffle(array){
   for(let i=array.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -96,43 +90,139 @@ function shuffle(array){
   return array;
 }
 
-// Question Bank (5 per category)
-const questions = [
+// ---------- QUESTION BANK (100 TOTAL) ----------
 
-{cat:"Geography",q:"Capital of Japan?",a:["Tokyo","Osaka","Kyoto","Seoul"],c:0},
-{cat:"Geography",q:"Largest ocean?",a:["Atlantic","Pacific","Indian","Arctic"],c:1},
-{cat:"Geography",q:"Mount Everest is in?",a:["India","Nepal","China","Bhutan"],c:1},
-{cat:"Geography",q:"River Nile flows in?",a:["Asia","Africa","Europe","America"],c:1},
-{cat:"Geography",q:"Brazil is in which continent?",a:["Asia","Africa","Europe","South America"],c:3},
+const questionBank = [];
 
-{cat:"Science",q:"Chemical symbol of Gold?",a:["Au","Ag","Gd","Go"],c:0},
-{cat:"Science",q:"Gas humans breathe?",a:["CO2","Oxygen","Nitrogen","Helium"],c:1},
-{cat:"Science",q:"Center of atom?",a:["Electron","Nucleus","Proton","Shell"],c:1},
-{cat:"Science",q:"Speed of light approx?",a:["300,000 km/s","150,000","1,000","30,000"],c:0},
-{cat:"Science",q:"Planet known as Red Planet?",a:["Mars","Venus","Jupiter","Saturn"],c:0},
+// Helper to add
+function add(category, q, options, correct){
+  questionBank.push({
+    cat: category,
+    q: q,
+    a: options,
+    c: correct
+  });
+}
 
-{cat:"Logic",q:"What gets wetter the more it dries?",a:["Water","Towel","Rain","Soap"],c:1},
-{cat:"Logic",q:"What has keys but no locks?",a:["Map","Piano","Clock","Car"],c:1},
-{cat:"Logic",q:"What goes up but never down?",a:["Age","Smoke","Ball","Heat"],c:0},
-{cat:"Logic",q:"More you take, more you leave?",a:["Money","Footsteps","Time","Food"],c:1},
-{cat:"Logic",q:"What has an eye but can't see?",a:["Needle","Storm","Fish","Camera"],c:0},
+/* ===============================
+   ADD 20 QUESTIONS PER CATEGORY
+   (Geography, Science, Logic,
+    Detective, GK)
+   =============================== */
 
-{cat:"Detective",q:"Locked room, puddle water, no weapon. How?",a:["Ice melted","Poison","Shot","Trapdoor"],c:0},
-{cat:"Detective",q:"One footprint to body in snow?",a:["Walked alone","Dropped from above","Animal","Wind"],c:1},
-{cat:"Detective",q:"Tape says goodbye then gunshot. Why murder?",a:["Tape rewound","Gun fake","Voice mismatch","Wrong time"],c:0},
-{cat:"Detective",q:"Safe no forced entry?",a:["Stranger","Family member","Ghost","Hacker"],c:1},
-{cat:"Detective",q:"Clock staged after murder?",a:["Battery new","Wrong time","Broken glass","Dust"],c:0},
+// --- GEOGRAPHY (20)
+add("Geography","Capital of France?",["Paris","Rome","Berlin","Madrid"],0);
+add("Geography","Largest continent?",["Asia","Africa","Europe","America"],0);
+add("Geography","Mount Everest is in?",["India","Nepal","China","Bhutan"],1);
+add("Geography","Capital of Japan?",["Tokyo","Kyoto","Osaka","Seoul"],0);
+add("Geography","Largest ocean?",["Atlantic","Pacific","Indian","Arctic"],1);
+add("Geography","Sahara desert is in?",["Asia","Africa","Australia","America"],1);
+add("Geography","Capital of Canada?",["Toronto","Ottawa","Vancouver","Montreal"],1);
+add("Geography","Germany capital?",["Berlin","Munich","Frankfurt","Hamburg"],0);
+add("Geography","River Nile flows in?",["Africa","Europe","Asia","America"],0);
+add("Geography","Brazil continent?",["Asia","Africa","South America","Europe"],2);
+add("Geography","Capital of Italy?",["Rome","Milan","Venice","Naples"],0);
+add("Geography","UK capital?",["London","Manchester","Liverpool","Leeds"],0);
+add("Geography","USA capital?",["Washington DC","New York","LA","Chicago"],0);
+add("Geography","China located in?",["Asia","Europe","Africa","America"],0);
+add("Geography","Argentina continent?",["Asia","Africa","South America","Europe"],2);
+add("Geography","Great Barrier Reef?",["USA","Australia","Brazil","Japan"],1);
+add("Geography","Smallest country?",["Monaco","Vatican","Malta","Nepal"],1);
+add("Geography","Longest river?",["Nile","Amazon","Yangtze","Mississippi"],0);
+add("Geography","Capital of India?",["Delhi","Mumbai","Kolkata","Chennai"],0);
+add("Geography","Russia capital?",["Moscow","Kiev","Minsk","Warsaw"],0);
 
-{cat:"GK",q:"Who wrote Hamlet?",a:["Shakespeare","Dickens","Homer","Tolstoy"],c:0},
-{cat:"GK",q:"Smallest country?",a:["Monaco","Malta","Vatican","Bhutan"],c:2},
-{cat:"GK",q:"First man on moon?",a:["Armstrong","Aldrin","Gagarin","Collins"],c:0},
-{cat:"GK",q:"Currency of UK?",a:["Euro","Dollar","Pound","Franc"],c:2},
-{cat:"GK",q:"Tallest building?",a:["Shanghai Tower","Burj Khalifa","WTC","Petronas"],c:1},
+// --- SCIENCE (20)
+add("Science","Chemical symbol of Gold?",["Au","Ag","Gd","Go"],0);
+add("Science","Red Planet?",["Mars","Venus","Jupiter","Saturn"],0);
+add("Science","Gas humans breathe?",["Oxygen","Nitrogen","CO2","Helium"],0);
+add("Science","Center of atom?",["Nucleus","Electron","Proton","Shell"],0);
+add("Science","H2O is?",["Water","Salt","Hydrogen","Oxygen"],0);
+add("Science","Unit of force?",["Newton","Joule","Watt","Volt"],0);
+add("Science","Hardest natural substance?",["Diamond","Iron","Gold","Steel"],0);
+add("Science","Sun is a?",["Star","Planet","Comet","Asteroid"],0);
+add("Science","Boiling point of water?",["100°C","90°C","120°C","80°C"],0);
+add("Science","Unit of power?",["Watt","Volt","Joule","Ampere"],0);
+add("Science","Energy of motion?",["Kinetic","Potential","Thermal","Chemical"],0);
+add("Science","Symbol of Iron?",["Fe","Ir","Io","In"],0);
+add("Science","Gas plants absorb?",["CO2","Oxygen","Nitrogen","Helium"],0);
+add("Science","Human body temp?",["37°C","36°C","35°C","40°C"],0);
+add("Science","DNA full form?",["Deoxyribo Nucleic Acid","Dual Acid","Dynamic Acid","None"],0);
+add("Science","Largest organ?",["Skin","Heart","Brain","Liver"],0);
+add("Science","Speed of light approx?",["300,000 km/s","150,000","1,000","30,000"],0);
+add("Science","Unit of current?",["Ampere","Volt","Ohm","Watt"],0);
+add("Science","Blood carries?",["Oxygen","Water","Iron","Carbon"],0);
+add("Science","Photosynthesis occurs in?",["Leaves","Roots","Stem","Flower"],0);
 
-];
+// --- LOGIC (20)
+add("Logic","What gets wetter as it dries?",["Towel","Water","Rain","Soap"],0);
+add("Logic","What has keys but no locks?",["Piano","Map","Clock","Car"],0);
+add("Logic","What goes up but never down?",["Age","Smoke","Ball","Heat"],0);
+add("Logic","More you take more you leave?",["Footsteps","Money","Time","Food"],0);
+add("Logic","Eye but cannot see?",["Needle","Storm","Fish","Camera"],0);
+add("Logic","Full of holes holds water?",["Sponge","Net","Cup","Bottle"],0);
+add("Logic","Hands but cannot clap?",["Clock","Robot","Statue","Chair"],0);
+add("Logic","Neck but no head?",["Bottle","Tree","Road","Shirt"],0);
+add("Logic","Travel world stay corner?",["Stamp","Plane","Light","Sound"],0);
+add("Logic","Fragile if spoken?",["Silence","Glass","Ice","Paper"],0);
+add("Logic","Branches no fruit?",["Bank","Tree","River","Road"],0);
+add("Logic","Catch but not throw?",["Cold","Ball","Stone","Frisbee"],0);
+add("Logic","Cities no houses?",["Map","Ocean","Forest","Desert"],0);
+add("Logic","Ring no finger?",["Phone","Bell","Tree","Door"],0);
+add("Logic","Bigger when take away?",["Hole","Box","Mountain","Shadow"],0);
+add("Logic","Always coming never arrives?",["Tomorrow","Train","Rain","Wind"],0);
+add("Logic","One head one foot four legs?",["Bed","Dog","Chair","Horse"],0);
+add("Logic","Heart no beat?",["Artichoke","Stone","Clock","Car"],0);
+add("Logic","What runs but never walks?",["River","Dog","Wind","Car"],0);
+add("Logic","Taken before you get it?",["Photo","Step","Break","Breath"],0);
 
-// Shuffle questions
-let testQuestions = shuffle([...questions]);
+// --- DETECTIVE (20)
+add("Detective","Locked room puddle water?",["Ice melted","Poison","Shot","Trapdoor"],0);
+add("Detective","One footprint snow body?",["Dropped from above","Walked alone","Animal","Wind"],0);
+add("Detective","Tape goodbye gunshot?",["Tape rewound","Gun fake","Voice wrong","Time wrong"],0);
+add("Detective","Safe no forced entry?",["Family member","Stranger","Ghost","Hacker"],0);
+add("Detective","Clock staged murder?",["Battery new","Wrong time","Broken","Dust"],0);
+add("Detective","Keys dry drowning?",["Killed elsewhere","Waterproof","Lucky","Nothing"],0);
+add("Detective","Hot coffee guard asleep?",["Staged","Normal","Fake coffee","Innocent"],0);
+add("Detective","Only he drank water poison?",["Cup poisoned","Food","Air","Chair"],0);
+add("Detective","Body desert no footprints?",["Plane crash","Heat","Snake","Poison"],0);
+add("Detective","Dry hair during storm?",["He lied","Lucky","Stayed inside","Storm fake"],0);
+add("Detective","Milk allergy death?",["Allergy","Slip","Poison","Animal"],0);
+add("Detective","No alarm robbery?",["Inside job","Power cut","Lucky","Fault"],0);
+add("Detective","Reflection proves?",["She lied","Camera error","Angle","Fake"],0);
+add("Detective","Muddy boots thief?",["Gardener","Driver","Guest","Cleaner"],0);
+add("Detective","Sand in city shoes?",["Kidnapped","Beach","Construction","Desert"],0);
+add("Detective","No furniture hanging?",["Ice block","Trapdoor","Invisible chair","Magic"],0);
+add("Detective","Unopened newspaper death?",["Wife guilty","Paperboy","Neighbor","Unknown"],0);
+add("Detective","Keys not wet lake?",["Murder elsewhere","Waterproof","Shallow","Nothing"],0);
+add("Detective","Storm alibi clean clothes?",["Lied","Lucky","Inside","Storm fake"],0);
+add("Detective","Locked car inside keys?",["Suicide staged","Accident","Mistake","None"],0);
+
+// --- GK (20)
+add("GK","Who wrote Hamlet?",["Shakespeare","Dickens","Homer","Tolstoy"],0);
+add("GK","First man on moon?",["Armstrong","Aldrin","Gagarin","Collins"],0);
+add("GK","Currency UK?",["Pound","Euro","Dollar","Franc"],0);
+add("GK","Tallest building?",["Burj Khalifa","Shanghai Tower","WTC","Petronas"],0);
+add("GK","Olympics every?",["4 years","2 years","6 years","8 years"],0);
+add("GK","Fastest land animal?",["Cheetah","Lion","Horse","Tiger"],0);
+add("GK","Largest animal?",["Blue Whale","Elephant","Giraffe","Rhino"],0);
+add("GK","WW2 ended?",["1945","1939","1918","1950"],0);
+add("GK","Currency Japan?",["Yen","Won","Dollar","Peso"],0);
+add("GK","Great Wall in?",["China","Japan","Korea","Vietnam"],0);
+add("GK","Inventor telephone?",["Bell","Edison","Tesla","Newton"],0);
+add("GK","Mona Lisa painter?",["Da Vinci","Van Gogh","Picasso","Michelangelo"],0);
+add("GK","Largest desert?",["Sahara","Gobi","Arctic","Kalahari"],0);
+add("GK","UN headquarters?",["New York","London","Paris","Geneva"],0);
+add("GK","First US president?",["Washington","Lincoln","Jefferson","Adams"],0);
+add("GK","Currency USA?",["Dollar","Euro","Peso","Rupee"],0);
+add("GK","Capital Germany?",["Berlin","Munich","Frankfurt","Hamburg"],0);
+add("GK","Capital Italy?",["Rome","Venice","Milan","Naples"],0);
+add("GK","Smallest continent?",["Australia","Europe","Antarctica","Africa"],0);
+add("GK","Capital Spain?",["Madrid","Barcelona","Seville","Valencia"],0);
+
+// ---------- SELECT 25 RANDOM ----------
+let quizQuestions = shuffle([...questionBank]).slice(0,25);
+
 let index = 0;
 let score = 0;
 
@@ -146,14 +236,15 @@ let categoryScore = {
 
 function loadQuestion(){
 
-  if(index >= testQuestions.length){
+  if(index >= quizQuestions.length){
     showResults();
     return;
   }
 
   updateProgress();
 
-  const q = testQuestions[index];
+  const q = quizQuestions[index];
+
   document.getElementById("questionText").innerHTML =
     `<strong>Category:</strong> ${q.cat}<br><br>${q.q}`;
 
@@ -177,22 +268,22 @@ function loadQuestion(){
 
 function updateProgress(){
   document.getElementById("progress").style.width =
-    (index / testQuestions.length * 100) + "%";
+    (index / quizQuestions.length * 100) + "%";
 }
 
 function showResults(){
 
   let resultHTML = `
   <h1>📊 Performance Report</h1>
-  <p><strong>Total Score:</strong> ${score} / ${testQuestions.length}</p>
-  <p><strong>Percentage:</strong> ${(score/testQuestions.length*100).toFixed(1)}%</p>
+  <p><strong>Total Score:</strong> ${score} / 25</p>
+  <p><strong>Percentage:</strong> ${(score/25*100).toFixed(1)}%</p>
   <hr>
   <h3>Category Breakdown:</h3>
-  <p>🌍 Geography: ${categoryScore.Geography}/5</p>
-  <p>⚛️ Science: ${categoryScore.Science}/5</p>
-  <p>🧠 Logic: ${categoryScore.Logic}/5</p>
-  <p>🕵️ Detective: ${categoryScore.Detective}/5</p>
-  <p>📚 GK: ${categoryScore.GK}/5</p>
+  <p>🌍 Geography: ${categoryScore.Geography}</p>
+  <p>⚛️ Science: ${categoryScore.Science}</p>
+  <p>🧠 Logic: ${categoryScore.Logic}</p>
+  <p>🕵️ Detective: ${categoryScore.Detective}</p>
+  <p>📚 GK: ${categoryScore.GK}</p>
   <br>
   <button onclick="location.reload()">Retake Test</button>
   `;
