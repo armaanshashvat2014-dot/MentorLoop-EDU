@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Overall Performance Test | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg,#0f172a,#1e293b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: white;
+    }
+
+    .card {
+      background: #1e293b;
+      width: 95%;
+      max-width: 750px;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+    }
+
+    h1 {
+      text-align: center;
+      color: #22d3ee;
+    }
+
+    .question {
+      margin: 20px 0;
+      padding: 15px;
+      background: #0f172a;
+      border-radius: 10px;
+      font-size: 17px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #334155;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #22d3ee;
+      color: black;
+    }
+
+    .progress {
+      height: 6px;
+      background: #334155;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #22d3ee;
+      transition: 0.3s;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🧠 Overall Brain Performance Test</h1>
+
+  <div class="progress">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+
+  <div class="question" id="questionText"></div>
+  <div id="options"></div>
+</div>
+
+<script>
+
+// Shuffle
+function shuffle(array){
+  for(let i=array.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
+}
+
+// Question Bank (5 per category)
+const questions = [
+
+{cat:"Geography",q:"Capital of Japan?",a:["Tokyo","Osaka","Kyoto","Seoul"],c:0},
+{cat:"Geography",q:"Largest ocean?",a:["Atlantic","Pacific","Indian","Arctic"],c:1},
+{cat:"Geography",q:"Mount Everest is in?",a:["India","Nepal","China","Bhutan"],c:1},
+{cat:"Geography",q:"River Nile flows in?",a:["Asia","Africa","Europe","America"],c:1},
+{cat:"Geography",q:"Brazil is in which continent?",a:["Asia","Africa","Europe","South America"],c:3},
+
+{cat:"Science",q:"Chemical symbol of Gold?",a:["Au","Ag","Gd","Go"],c:0},
+{cat:"Science",q:"Gas humans breathe?",a:["CO2","Oxygen","Nitrogen","Helium"],c:1},
+{cat:"Science",q:"Center of atom?",a:["Electron","Nucleus","Proton","Shell"],c:1},
+{cat:"Science",q:"Speed of light approx?",a:["300,000 km/s","150,000","1,000","30,000"],c:0},
+{cat:"Science",q:"Planet known as Red Planet?",a:["Mars","Venus","Jupiter","Saturn"],c:0},
+
+{cat:"Logic",q:"What gets wetter the more it dries?",a:["Water","Towel","Rain","Soap"],c:1},
+{cat:"Logic",q:"What has keys but no locks?",a:["Map","Piano","Clock","Car"],c:1},
+{cat:"Logic",q:"What goes up but never down?",a:["Age","Smoke","Ball","Heat"],c:0},
+{cat:"Logic",q:"More you take, more you leave?",a:["Money","Footsteps","Time","Food"],c:1},
+{cat:"Logic",q:"What has an eye but can't see?",a:["Needle","Storm","Fish","Camera"],c:0},
+
+{cat:"Detective",q:"Locked room, puddle water, no weapon. How?",a:["Ice melted","Poison","Shot","Trapdoor"],c:0},
+{cat:"Detective",q:"One footprint to body in snow?",a:["Walked alone","Dropped from above","Animal","Wind"],c:1},
+{cat:"Detective",q:"Tape says goodbye then gunshot. Why murder?",a:["Tape rewound","Gun fake","Voice mismatch","Wrong time"],c:0},
+{cat:"Detective",q:"Safe no forced entry?",a:["Stranger","Family member","Ghost","Hacker"],c:1},
+{cat:"Detective",q:"Clock staged after murder?",a:["Battery new","Wrong time","Broken glass","Dust"],c:0},
+
+{cat:"GK",q:"Who wrote Hamlet?",a:["Shakespeare","Dickens","Homer","Tolstoy"],c:0},
+{cat:"GK",q:"Smallest country?",a:["Monaco","Malta","Vatican","Bhutan"],c:2},
+{cat:"GK",q:"First man on moon?",a:["Armstrong","Aldrin","Gagarin","Collins"],c:0},
+{cat:"GK",q:"Currency of UK?",a:["Euro","Dollar","Pound","Franc"],c:2},
+{cat:"GK",q:"Tallest building?",a:["Shanghai Tower","Burj Khalifa","WTC","Petronas"],c:1},
+
+];
+
+// Shuffle questions
+let testQuestions = shuffle([...questions]);
+let index = 0;
+let score = 0;
+
+let categoryScore = {
+  Geography:0,
+  Science:0,
+  Logic:0,
+  Detective:0,
+  GK:0
+};
+
+function loadQuestion(){
+
+  if(index >= testQuestions.length){
+    showResults();
+    return;
+  }
+
+  updateProgress();
+
+  const q = testQuestions[index];
+  document.getElementById("questionText").innerHTML =
+    `<strong>Category:</strong> ${q.cat}<br><br>${q.q}`;
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  q.a.forEach((option,i)=>{
+    const btn = document.createElement("button");
+    btn.textContent = option;
+    btn.onclick = ()=>{
+      if(i === q.c){
+        score++;
+        categoryScore[q.cat]++;
+      }
+      index++;
+      loadQuestion();
+    };
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function updateProgress(){
+  document.getElementById("progress").style.width =
+    (index / testQuestions.length * 100) + "%";
+}
+
+function showResults(){
+
+  let resultHTML = `
+  <h1>📊 Performance Report</h1>
+  <p><strong>Total Score:</strong> ${score} / ${testQuestions.length}</p>
+  <p><strong>Percentage:</strong> ${(score/testQuestions.length*100).toFixed(1)}%</p>
+  <hr>
+  <h3>Category Breakdown:</h3>
+  <p>🌍 Geography: ${categoryScore.Geography}/5</p>
+  <p>⚛️ Science: ${categoryScore.Science}/5</p>
+  <p>🧠 Logic: ${categoryScore.Logic}/5</p>
+  <p>🕵️ Detective: ${categoryScore.Detective}/5</p>
+  <p>📚 GK: ${categoryScore.GK}/5</p>
+  <br>
+  <button onclick="location.reload()">Retake Test</button>
+  `;
+
+  document.querySelector(".card").innerHTML = resultHTML;
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
