@@ -63,6 +63,11 @@
       background: #22d3ee;
       transition: 0.3s;
     }
+
+    hr {
+      border: 1px solid #334155;
+      margin: 15px 0;
+    }
   </style>
 </head>
 
@@ -81,7 +86,7 @@
 
 <script>
 
-// ---------- SHUFFLE ----------
+// ---------------- SHUFFLE ----------------
 function shuffle(array){
   for(let i=array.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -90,27 +95,15 @@ function shuffle(array){
   return array;
 }
 
-// ---------- QUESTION BANK (100 TOTAL) ----------
+// ---------------- QUESTION BANK (100 TOTAL) ----------------
 
 const questionBank = [];
 
-// Helper to add
 function add(category, q, options, correct){
-  questionBank.push({
-    cat: category,
-    q: q,
-    a: options,
-    c: correct
-  });
+  questionBank.push({ cat: category, q: q, a: options, c: correct });
 }
 
-/* ===============================
-   ADD 20 QUESTIONS PER CATEGORY
-   (Geography, Science, Logic,
-    Detective, GK)
-   =============================== */
-
-// --- GEOGRAPHY (20)
+// ========== GEOGRAPHY (20) ==========
 add("Geography","Capital of France?",["Paris","Rome","Berlin","Madrid"],0);
 add("Geography","Largest continent?",["Asia","Africa","Europe","America"],0);
 add("Geography","Mount Everest is in?",["India","Nepal","China","Bhutan"],1);
@@ -132,7 +125,7 @@ add("Geography","Longest river?",["Nile","Amazon","Yangtze","Mississippi"],0);
 add("Geography","Capital of India?",["Delhi","Mumbai","Kolkata","Chennai"],0);
 add("Geography","Russia capital?",["Moscow","Kiev","Minsk","Warsaw"],0);
 
-// --- SCIENCE (20)
+// ========== SCIENCE (20) ==========
 add("Science","Chemical symbol of Gold?",["Au","Ag","Gd","Go"],0);
 add("Science","Red Planet?",["Mars","Venus","Jupiter","Saturn"],0);
 add("Science","Gas humans breathe?",["Oxygen","Nitrogen","CO2","Helium"],0);
@@ -154,7 +147,7 @@ add("Science","Unit of current?",["Ampere","Volt","Ohm","Watt"],0);
 add("Science","Blood carries?",["Oxygen","Water","Iron","Carbon"],0);
 add("Science","Photosynthesis occurs in?",["Leaves","Roots","Stem","Flower"],0);
 
-// --- LOGIC (20)
+// ========== LOGIC (20) ==========
 add("Logic","What gets wetter as it dries?",["Towel","Water","Rain","Soap"],0);
 add("Logic","What has keys but no locks?",["Piano","Map","Clock","Car"],0);
 add("Logic","What goes up but never down?",["Age","Smoke","Ball","Heat"],0);
@@ -176,7 +169,7 @@ add("Logic","Heart no beat?",["Artichoke","Stone","Clock","Car"],0);
 add("Logic","What runs but never walks?",["River","Dog","Wind","Car"],0);
 add("Logic","Taken before you get it?",["Photo","Step","Break","Breath"],0);
 
-// --- DETECTIVE (20)
+// ========== DETECTIVE (20) ==========
 add("Detective","Locked room puddle water?",["Ice melted","Poison","Shot","Trapdoor"],0);
 add("Detective","One footprint snow body?",["Dropped from above","Walked alone","Animal","Wind"],0);
 add("Detective","Tape goodbye gunshot?",["Tape rewound","Gun fake","Voice wrong","Time wrong"],0);
@@ -194,11 +187,11 @@ add("Detective","Muddy boots thief?",["Gardener","Driver","Guest","Cleaner"],0);
 add("Detective","Sand in city shoes?",["Kidnapped","Beach","Construction","Desert"],0);
 add("Detective","No furniture hanging?",["Ice block","Trapdoor","Invisible chair","Magic"],0);
 add("Detective","Unopened newspaper death?",["Wife guilty","Paperboy","Neighbor","Unknown"],0);
-add("Detective","Keys not wet lake?",["Murder elsewhere","Waterproof","Shallow","Nothing"],0);
 add("Detective","Storm alibi clean clothes?",["Lied","Lucky","Inside","Storm fake"],0);
 add("Detective","Locked car inside keys?",["Suicide staged","Accident","Mistake","None"],0);
+add("Detective","Only one exit no noise?",["Inside killer","Accident","Ghost","Unknown"],0);
 
-// --- GK (20)
+// ========== GK (20) ==========
 add("GK","Who wrote Hamlet?",["Shakespeare","Dickens","Homer","Tolstoy"],0);
 add("GK","First man on moon?",["Armstrong","Aldrin","Gagarin","Collins"],0);
 add("GK","Currency UK?",["Pound","Euro","Dollar","Franc"],0);
@@ -273,10 +266,16 @@ function updateProgress(){
 
 function showResults(){
 
+  const maxMarks = quizQuestions.length;
+  const percentage = ((score / maxMarks) * 100).toFixed(1);
+
   let resultHTML = `
-  <h1>📊 Performance Report</h1>
-  <p><strong>Total Score:</strong> ${score} / 25</p>
-  <p><strong>Percentage:</strong> ${(score/25*100).toFixed(1)}%</p>
+  <h1>📊 Final Performance Report</h1>
+
+  <p><strong>Marks Obtained:</strong> ${score}</p>
+  <p><strong>Maximum Marks:</strong> ${maxMarks}</p>
+  <p><strong>Percentage:</strong> ${percentage}%</p>
+
   <hr>
   <h3>Category Breakdown:</h3>
   <p>🌍 Geography: ${categoryScore.Geography}</p>
@@ -284,6 +283,7 @@ function showResults(){
   <p>🧠 Logic: ${categoryScore.Logic}</p>
   <p>🕵️ Detective: ${categoryScore.Detective}</p>
   <p>📚 GK: ${categoryScore.GK}</p>
+
   <br>
   <button onclick="location.reload()">Retake Test</button>
   `;
