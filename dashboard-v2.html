@@ -178,7 +178,7 @@ iframe {
       <p><strong>Name:</strong> <span id="userName"></span></p>
       <p><strong>Role:</strong> Student</p>
       <p><strong>Points:</strong> <span id="points">0</span></p>
-
+<p><strong>🔥 Streak:</strong> <span id="streak">0</span> days</p>
       <h2 style="margin-top:20px;">🏅 Your Badges</h2>
       <div id="badges"></div>
     </div>
@@ -285,7 +285,43 @@ function renderBadges() {
 
 renderBadges();
 </script>
+<script>
+function updateStreak() {
 
+  const today = new Date().toDateString();
+  const lastVisit = localStorage.getItem("ml_last_visit");
+  let streak = parseInt(localStorage.getItem("ml_streak") || "0");
+
+  if (!lastVisit) {
+    // First time user
+    streak = 1;
+  } else {
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (lastVisit === today) {
+      // Same day → no change
+    }
+    else if (lastVisit === yesterday.toDateString()) {
+      // Came next day → increase streak
+      streak += 1;
+    }
+    else {
+      // Missed a day → reset streak
+      streak = 1;
+    }
+  }
+
+  localStorage.setItem("ml_streak", streak);
+  localStorage.setItem("ml_last_visit", today);
+
+  document.getElementById("streak").innerText = streak;
+}
+
+updateStreak();
+</script>
 </body>
 </html>
+
 
