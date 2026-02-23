@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Grade Test | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0f172a,#1e293b);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      color:white;
+    }
+
+    .card{
+      background:#1e293b;
+      padding:30px;
+      border-radius:20px;
+      width:95%;
+      max-width:750px;
+    }
+
+    h2{
+      text-align:center;
+      color:#22d3ee;
+    }
+
+    .question{
+      margin:20px 0;
+      padding:15px;
+      background:#0f172a;
+      border-radius:10px;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      background:#334155;
+      border:none;
+      border-radius:8px;
+      color:white;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#22d3ee;
+      color:black;
+    }
+
+    .progress{
+      height:6px;
+      background:#334155;
+      border-radius:4px;
+      overflow:hidden;
+      margin-bottom:15px;
+    }
+
+    .bar{
+      height:100%;
+      width:0%;
+      background:#22d3ee;
+      transition:0.3s;
+    }
+
+    hr{
+      border:1px solid #334155;
+      margin:15px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2 id="title"></h2>
+
+  <div class="progress">
+    <div class="bar" id="bar"></div>
+  </div>
+
+  <div class="question" id="questionText"></div>
+  <div id="options"></div>
+</div>
+
+<script>
+
+// ---------- Get Level ----------
+const params = new URLSearchParams(window.location.search);
+const level = params.get("level") || "overall";
+
+// ---------- Shuffle ----------
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// ---------- Question Banks (20 each = 100 total) ----------
+
+const banks = {
+
+primary: [
+  {q:"5 + 3 = ?",a:["8","7","6","9"],c:0},
+  {q:"Capital of India?",a:["Delhi","Goa","Mumbai","Chennai"],c:0},
+  {q:"Water freezes at?",a:["0°C","50°C","100°C","10°C"],c:0},
+  {q:"Sun rises in the?",a:["East","West","North","South"],c:0},
+  {q:"Largest animal?",a:["Blue Whale","Dog","Cat","Lion"],c:0},
+  {q:"2 x 4 = ?",a:["8","6","4","10"],c:0},
+  {q:"Opposite of hot?",a:["Cold","Warm","Fire","Heat"],c:0},
+  {q:"Color of sky?",a:["Blue","Green","Red","Black"],c:0},
+  {q:"10 - 4 = ?",a:["6","5","4","7"],c:0},
+  {q:"Which is fruit?",a:["Apple","Carrot","Potato","Onion"],c:0},
+  {q:"Earth is a?",a:["Planet","Star","Moon","Comet"],c:0},
+  {q:"How many days in week?",a:["7","5","6","8"],c:0},
+  {q:"1 dozen equals?",a:["12","10","6","8"],c:0},
+  {q:"Shape with 3 sides?",a:["Triangle","Square","Circle","Hexagon"],c:0},
+  {q:"Which animal barks?",a:["Dog","Cat","Cow","Lion"],c:0},
+  {q:"5 + 5 = ?",a:["10","9","8","11"],c:0},
+  {q:"Rainbow has how many colors?",a:["7","6","5","8"],c:0},
+  {q:"Which is vegetable?",a:["Carrot","Banana","Apple","Mango"],c:0},
+  {q:"Month after March?",a:["April","May","June","July"],c:0},
+  {q:"2 + 2 = ?",a:["4","3","5","6"],c:0}
+],
+
+lower: [
+  {q:"Solve 5x=25",a:["5","10","25","0"],c:0},
+  {q:"H2O is?",a:["Water","Salt","Iron","Air"],c:0},
+  {q:"Largest continent?",a:["Asia","Europe","Africa","Australia"],c:0},
+  {q:"Unit of force?",a:["Newton","Watt","Volt","Joule"],c:0},
+  {q:"Capital of France?",a:["Paris","Rome","Berlin","Madrid"],c:0},
+  {q:"6 x 7 = ?",a:["42","36","48","40"],c:0},
+  {q:"Gas humans breathe?",a:["Oxygen","CO2","Nitrogen","Helium"],c:0},
+  {q:"Square root of 81?",a:["9","8","7","6"],c:0},
+  {q:"Earth revolves around?",a:["Sun","Moon","Mars","Jupiter"],c:0},
+  {q:"Speed unit?",a:["m/s","kg","Watt","Volt"],c:0},
+  {q:"Capital of Japan?",a:["Tokyo","Seoul","Beijing","Bangkok"],c:0},
+  {q:"Photosynthesis occurs in?",a:["Leaves","Roots","Stem","Flower"],c:0},
+  {q:"12 / 3 = ?",a:["4","3","6","5"],c:0},
+  {q:"Which is prime?",a:["7","8","9","10"],c:0},
+  {q:"Ocean between US and Europe?",a:["Atlantic","Pacific","Indian","Arctic"],c:0},
+  {q:"Chemical symbol Iron?",a:["Fe","Ir","Io","In"],c:0},
+  {q:"Density formula?",a:["mass/volume","volume/mass","mass*volume","none"],c:0},
+  {q:"5² = ?",a:["25","10","20","15"],c:0},
+  {q:"Capital of Italy?",a:["Rome","Venice","Milan","Naples"],c:0},
+  {q:"Gas plants absorb?",a:["CO2","Oxygen","Nitrogen","Helium"],c:0}
+],
+
+upper: [
+  {q:"Derivative of x²?",a:["2x","x","x²","1"],c:0},
+  {q:"DNA full form?",a:["Deoxyribo Nucleic Acid","Dual Acid","Dynamic Acid","None"],c:0},
+  {q:"Speed of light?",a:["300,000 km/s","150,000","1,000","10,000"],c:0},
+  {q:"Solve 2x+4=10",a:["3","2","4","5"],c:0},
+  {q:"Chemical symbol Gold?",a:["Au","Ag","Gd","Go"],c:0},
+  {q:"Newton's 2nd law?",a:["F=ma","E=mc²","V=IR","P=IV"],c:0},
+  {q:"Capital Germany?",a:["Berlin","Munich","Frankfurt","Hamburg"],c:0},
+  {q:"Log10(100)?",a:["2","1","10","0"],c:0},
+  {q:"Boiling point water?",a:["100°C","90°C","80°C","110°C"],c:0},
+  {q:"Unit of current?",a:["Ampere","Volt","Watt","Ohm"],c:0},
+  {q:"Integration of 2x?",a:["x² + C","2x²","x + C","None"],c:0},
+  {q:"Largest organ?",a:["Skin","Heart","Brain","Liver"],c:0},
+  {q:"What is entropy?",a:["Disorder","Energy","Mass","Force"],c:0},
+  {q:"Acceleration formula?",a:["v/t","t/v","v*t","v+t"],c:0},
+  {q:"Solve 3²?",a:["9","6","3","12"],c:0},
+  {q:"Capital Russia?",a:["Moscow","Kiev","Minsk","Warsaw"],c:0},
+  {q:"Gas used in balloons?",a:["Helium","Oxygen","CO2","Hydrogen"],c:0},
+  {q:"Power formula?",a:["P=VI","F=ma","E=mc²","V=IR"],c:0},
+  {q:"Smallest unit of life?",a:["Cell","Atom","Molecule","Tissue"],c:0},
+  {q:"Capital UK?",a:["London","Manchester","Leeds","Liverpool"],c:0}
+],
+
+senior: [
+  {q:"Integration of x?",a:["x²/2 + C","x²","1","x"],c:0},
+  {q:"Schrodinger equation relates to?",a:["Quantum Mechanics","Relativity","Thermodynamics","Optics"],c:0},
+  {q:"Derivative of sinx?",a:["cosx","-cosx","sinx","-sinx"],c:0},
+  {q:"Planck constant symbol?",a:["h","c","G","R"],c:0},
+  {q:"Limit of sinx/x at 0?",a:["1","0","∞","-1"],c:0},
+  {q:"Avogadro number approx?",a:["6.02x10^23","3.14","9.8","1.6x10^-19"],c:0},
+  {q:"Log e base?",a:["Natural log","Common log","Binary","Decimal"],c:0},
+  {q:"Heisenberg principle?",a:["Uncertainty","Relativity","Entropy","Inertia"],c:0},
+  {q:"Derivative of e^x?",a:["e^x","xe^x","x","1"],c:0},
+  {q:"Rydberg constant relates to?",a:["Hydrogen spectrum","Gravity","Heat","Mass"],c:0},
+  {q:"Unit of resistance?",a:["Ohm","Volt","Watt","Ampere"],c:0},
+  {q:"Integration of 1/x?",a:["ln|x| + C","x","1","x²"],c:0},
+  {q:"Fleming's left hand rule?",a:["Motor rule","Generator rule","Lens rule","None"],c:0},
+  {q:"What is quark?",a:["Elementary particle","Atom","Cell","Wave"],c:0},
+  {q:"Second law thermo?",a:["Entropy increases","Energy lost","Mass lost","None"],c:0},
+  {q:"Gauss law relates to?",a:["Electric flux","Heat","Mass","Speed"],c:0},
+  {q:"Laplace transform used in?",a:["Differential equations","Geometry","Statistics","Biology"],c:0},
+  {q:"Unit of frequency?",a:["Hertz","Newton","Joule","Tesla"],c:0},
+  {q:"pH less than 7?",a:["Acidic","Basic","Neutral","Salt"],c:0},
+  {q:"Value of g approx?",a:["9.8","8","10","7"],c:0}
+],
+
+overall: [
+  {q:"Capital of Japan?",a:["Tokyo","Kyoto","Seoul","Beijing"],c:0},
+  {q:"Chemical symbol Iron?",a:["Fe","Ir","Io","In"],c:0},
+  {q:"Largest ocean?",a:["Pacific","Atlantic","Indian","Arctic"],c:0},
+  {q:"Who wrote Hamlet?",a:["Shakespeare","Dickens","Homer","Tolstoy"],c:0},
+  {q:"What gets wetter as it dries?",a:["Towel","Water","Rain","Soap"],c:0},
+  {q:"First man on moon?",a:["Armstrong","Aldrin","Gagarin","Collins"],c:0},
+  {q:"Capital France?",a:["Paris","Rome","Berlin","Madrid"],c:0},
+  {q:"Gas humans breathe?",a:["Oxygen","CO2","Nitrogen","Helium"],c:0},
+  {q:"Sun is a?",a:["Star","Planet","Comet","Asteroid"],c:0},
+  {q:"Largest animal?",a:["Blue Whale","Elephant","Dog","Lion"],c:0},
+  {q:"Capital Germany?",a:["Berlin","Munich","Frankfurt","Hamburg"],c:0},
+  {q:"2+2=?",a:["4","3","5","6"],c:0},
+  {q:"Unit of force?",a:["Newton","Watt","Volt","Joule"],c:0},
+  {q:"H2O is?",a:["Water","Salt","Iron","Air"],c:0},
+  {q:"Capital India?",a:["Delhi","Mumbai","Goa","Chennai"],c:0},
+  {q:"Largest continent?",a:["Asia","Europe","Africa","Australia"],c:0},
+  {q:"Boiling point water?",a:["100°C","90°C","80°C","110°C"],c:0},
+  {q:"Chemical symbol Gold?",a:["Au","Ag","Gd","Go"],c:0},
+  {q:"Earth revolves around?",a:["Sun","Moon","Mars","Jupiter"],c:0},
+  {q:"Capital UK?",a:["London","Manchester","Leeds","Liverpool"],c:0}
+]
+
+};
+
+// ---------- Select Bank ----------
+let selected = banks[level] || banks["overall"];
+let quiz = shuffle([...selected]).slice(0,25);
+
+document.getElementById("title").innerText =
+  level.charAt(0).toUpperCase() + level.slice(1) + " Level Test";
+
+let index=0;
+let score=0;
+
+function loadQuestion(){
+
+  if(index >= quiz.length){
+    const percentage=((score/quiz.length)*100).toFixed(1);
+    document.querySelector(".card").innerHTML=`
+      <h2>Test Complete</h2>
+      <p><strong>Marks Obtained:</strong> ${score}</p>
+      <p><strong>Maximum Marks:</strong> ${quiz.length}</p>
+      <p><strong>Percentage:</strong> ${percentage}%</p>
+      <hr>
+      <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+    `;
+    return;
+  }
+
+  updateProgress();
+
+  const q=quiz[index];
+  document.getElementById("questionText").innerHTML=q.q;
+
+  const optDiv=document.getElementById("options");
+  optDiv.innerHTML="";
+
+  q.a.forEach((opt,i)=>{
+    const btn=document.createElement("button");
+    btn.innerText=opt;
+    btn.onclick=()=>{
+      if(i===q.c) score++;
+      index++;
+      loadQuestion();
+    };
+    optDiv.appendChild(btn);
+  });
+}
+
+function updateProgress(){
+  document.getElementById("bar").style.width=
+    (index/quiz.length*100)+"%";
+}
+
+loadQuestion();
+
+</script>
+</body>
+</html>
