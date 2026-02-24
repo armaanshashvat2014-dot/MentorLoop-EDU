@@ -122,7 +122,7 @@ const optionsSet = [
   ["Sun","Moon","Mars","Jupiter"]
 ];
 
-// Generate 100 questions by repeating base set with variation
+// Generate 100 questions
 for(let i=0;i<100;i++){
   const baseIndex = i % sampleQuestions.length;
   questionBank.push({
@@ -209,10 +209,25 @@ function loadQuestion(){
 function showResults(){
 
   let winner = "";
+  let winningScore = Math.max(score1, score2);
+  const totalQuestions = selectedQuestions.length;
 
   if(score1 > score2) winner = `🏆 ${player1} Wins!`;
   else if(score2 > score1) winner = `🏆 ${player2} Wins!`;
   else winner = "🤝 It's a Draw!";
+
+  // 🔥 SAVE AS ONE COMPLETED TEST
+  let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
+  let totalScore = parseInt(localStorage.getItem("ml_total_score") || "0");
+  let totalQs = parseInt(localStorage.getItem("ml_total_questions") || "0");
+
+  testsTaken++;
+  totalScore += winningScore;
+  totalQs += totalQuestions;
+
+  localStorage.setItem("ml_tests_taken", testsTaken);
+  localStorage.setItem("ml_total_score", totalScore);
+  localStorage.setItem("ml_total_questions", totalQs);
 
   document.getElementById("game").innerHTML =
     `<h2>Battle Results</h2>
