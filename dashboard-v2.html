@@ -183,7 +183,21 @@ iframe {
       <h2 style="margin-top:20px;">🏅 Your Badges</h2>
       <div id="badges"></div>
     </div>
+<!-- ACADEMIC SUMMARY (NEW PROFESSIONAL CARD) -->
+<div class="card">
+<h2>📊 Academic Summary</h2>
 
+<p><strong>Total Tests Taken:</strong> <span id="testsTaken">0</span></p>
+<p><strong>Total Questions Solved:</strong> <span id="totalQuestions">0</span></p>
+<p><strong>Average Performance:</strong> <span id="averageScore">0</span>%</p>
+
+<p style="margin-top:15px;"><strong>Certificate Progress (100 Tests)</strong></p>
+<div class="progress-bar">
+  <div class="progress-fill" id="certProgress"></div>
+</div>
+<p class="small"><span id="certText"></span></p>
+
+</div>
     <!-- ACTIONS -->
     <div class="card">
       <h2>Actions</h2>
@@ -320,8 +334,29 @@ function updateStreak() {
 
 updateStreak();
 </script>
+  <script>
+// Academic Summary Logic
+let testsTaken=parseInt(localStorage.getItem("ml_tests_taken")||"0");
+let totalScore=parseInt(localStorage.getItem("ml_total_score")||"0");
+let totalQuestions=parseInt(localStorage.getItem("ml_total_questions")||"0");
+
+document.getElementById("testsTaken").innerText=testsTaken;
+document.getElementById("totalQuestions").innerText=totalQuestions;
+
+let average=0;
+if(totalQuestions>0){
+average=((totalScore/totalQuestions)*100).toFixed(1);
+}
+document.getElementById("averageScore").innerText=average;
+
+let progress=Math.min((testsTaken/100)*100,100);
+document.getElementById("certProgress").style.width=progress+"%";
+document.getElementById("certText").innerText=
+testsTaken+"/100 tests completed";
+</script>
 </body>
 </html>
+
 
 
 
