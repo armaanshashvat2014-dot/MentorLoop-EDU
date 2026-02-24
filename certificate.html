@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Achievement Certificate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:#f3f4f6;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    .certificate{
+      width:900px;
+      background:white;
+      padding:60px;
+      border:10px solid #1e293b;
+      text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    h1{
+      font-size:42px;
+      margin-bottom:10px;
+      color:#1e293b;
+    }
+
+    h2{
+      color:#10b981;
+      margin:20px 0;
+    }
+
+    .name{
+      font-size:30px;
+      margin:20px 0;
+      font-weight:bold;
+    }
+
+    .details{
+      margin-top:20px;
+      font-size:18px;
+    }
+
+    .footer{
+      margin-top:50px;
+      font-size:14px;
+      color:#555;
+    }
+
+    button{
+      margin-top:30px;
+      padding:12px 20px;
+      border:none;
+      background:#1e293b;
+      color:white;
+      cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="certificate">
+  <h1>Certificate of Academic Excellence</h1>
+
+  <p>This certifies that</p>
+
+  <div class="name" id="studentName"></div>
+
+  <p>has successfully completed 100 assessments with outstanding performance.</p>
+
+  <h2>Average Score: <span id="average"></span>%</h2>
+
+  <div class="details">
+    Issued by MentorLoop EDU<br>
+    Date: <span id="date"></span>
+  </div>
+
+  <div class="footer">
+    Excellence through consistency and dedication.
+  </div>
+
+  <button onclick="window.print()">Download / Print</button>
+</div>
+
+<script>
+
+const name = localStorage.getItem("ml_user_name") || "Learner";
+const testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
+const totalScore = parseInt(localStorage.getItem("ml_total_score") || "0");
+const totalQuestions = parseInt(localStorage.getItem("ml_total_questions") || "0");
+
+const average = ((totalScore / totalQuestions) * 100).toFixed(1);
+
+if(testsTaken >= 100 && average >= 80){
+  document.getElementById("studentName").innerText = name;
+  document.getElementById("average").innerText = average;
+  document.getElementById("date").innerText = new Date().toDateString();
+}else{
+  document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>Certificate not yet unlocked.</h2>";
+}
+
+</script>
+
+</body>
+</html>
