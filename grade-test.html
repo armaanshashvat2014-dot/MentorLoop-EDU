@@ -129,7 +129,7 @@ primary: [
   {q:"2 + 2 = ?",a:["4","3","5","6"],c:0}
 ],
 
-lower: [
+lowersecondary: [
   {q:"Solve 5x=25",a:["5","10","25","0"],c:0},
   {q:"H2O is?",a:["Water","Salt","Iron","Air"],c:0},
   {q:"Largest continent?",a:["Asia","Europe","Africa","Australia"],c:0},
@@ -152,7 +152,7 @@ lower: [
   {q:"Gas plants absorb?",a:["CO2","Oxygen","Nitrogen","Helium"],c:0}
 ],
 
-upper: [
+uppersecondary: [
   {q:"Derivative of x²?",a:["2x","x","x²","1"],c:0},
   {q:"DNA full form?",a:["Deoxyribo Nucleic Acid","Dual Acid","Dynamic Acid","None"],c:0},
   {q:"Speed of light?",a:["300,000 km/s","150,000","1,000","10,000"],c:0},
@@ -175,7 +175,7 @@ upper: [
   {q:"Capital UK?",a:["London","Manchester","Leeds","Liverpool"],c:0}
 ],
 
-senior: [
+seniorsecondary: [
   {q:"Integration of x?",a:["x²/2 + C","x²","1","x"],c:0},
   {q:"Schrodinger equation relates to?",a:["Quantum Mechanics","Relativity","Thermodynamics","Optics"],c:0},
   {q:"Derivative of sinx?",a:["cosx","-cosx","sinx","-sinx"],c:0},
@@ -243,7 +243,7 @@ function loadQuestion(){
       <p><strong>Maximum Marks:</strong> ${quiz.length}</p>
       <p><strong>Percentage:</strong> ${percentage}%</p>
       <hr>
-      <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+      <button onclick="window.location.href='dashboard-v2.html'">Back to Dashboard</button>
     `;
     return;
   }
