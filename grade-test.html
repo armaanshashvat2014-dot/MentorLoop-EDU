@@ -89,6 +89,97 @@
 
 <script>
 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Grade Test | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0f172a,#1e293b);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      color:white;
+    }
+
+    .card{
+      background:#1e293b;
+      padding:30px;
+      border-radius:20px;
+      width:95%;
+      max-width:750px;
+    }
+
+    h2{
+      text-align:center;
+      color:#22d3ee;
+    }
+
+    .question{
+      margin:20px 0;
+      padding:15px;
+      background:#0f172a;
+      border-radius:10px;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      background:#334155;
+      border:none;
+      border-radius:8px;
+      color:white;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#22d3ee;
+      color:black;
+    }
+
+    .progress{
+      height:6px;
+      background:#334155;
+      border-radius:4px;
+      overflow:hidden;
+      margin-bottom:15px;
+    }
+
+    .bar{
+      height:100%;
+      width:0%;
+      background:#22d3ee;
+      transition:0.3s;
+    }
+
+    hr{
+      border:1px solid #334155;
+      margin:15px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2 id="title"></h2>
+
+  <div class="progress">
+    <div class="bar" id="bar"></div>
+  </div>
+
+  <div class="question" id="questionText"></div>
+  <div id="options"></div>
+</div>
+
+<script>
+
 // ---------- Get Level ----------
 const params = new URLSearchParams(window.location.search);
 const level = params.get("level") || "overall";
@@ -221,9 +312,7 @@ overall: [
   {q:"Capital UK?",a:["London","Manchester","Leeds","Liverpool"],c:0}
 ]
 
-};
-
-// ---------- Select Bank ----------
+};// ---------- Select Bank ----------
 let selected = banks[level] || banks["overall"];
 let quiz = shuffle([...selected]).slice(0,25);
 
@@ -236,14 +325,31 @@ let score=0;
 function loadQuestion(){
 
   if(index >= quiz.length){
+
     const percentage=((score/quiz.length)*100).toFixed(1);
+
+    // 🔥 SAVE TEST DATA PROPERLY
+    let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
+    let totalScore = parseInt(localStorage.getItem("ml_total_score") || "0");
+    let totalQuestions = parseInt(localStorage.getItem("ml_total_questions") || "0");
+
+    testsTaken++;
+    totalScore += score;
+    totalQuestions += quiz.length;
+
+    localStorage.setItem("ml_tests_taken", testsTaken);
+    localStorage.setItem("ml_total_score", totalScore);
+    localStorage.setItem("ml_total_questions", totalQuestions);
+
     document.querySelector(".card").innerHTML=`
       <h2>Test Complete</h2>
       <p><strong>Marks Obtained:</strong> ${score}</p>
       <p><strong>Maximum Marks:</strong> ${quiz.length}</p>
       <p><strong>Percentage:</strong> ${percentage}%</p>
       <hr>
-      <button onclick="window.location.href='dashboard-v2.html'">Back to Dashboard</button>
+      <button onclick="window.location.href='dashboard-v2.html'">
+        Back to Dashboard
+      </button>
     `;
     return;
   }
@@ -276,5 +382,4 @@ function updateProgress(){
 loadQuestion();
 
 </script>
-</body>
-</html>
+
