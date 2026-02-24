@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Battle | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0f172a,#1e293b);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      color:white;
+    }
+
+    .card{
+      background:#1e293b;
+      padding:30px;
+      border-radius:20px;
+      width:95%;
+      max-width:700px;
+      text-align:center;
+      box-shadow:0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    h2{ color:#22d3ee; }
+
+    input{
+      width:100%;
+      padding:10px;
+      margin:10px 0;
+      border-radius:8px;
+      border:none;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      background:#334155;
+      border:none;
+      border-radius:8px;
+      color:white;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#22d3ee;
+      color:black;
+    }
+
+    .question{
+      margin:20px 0;
+      padding:15px;
+      background:#0f172a;
+      border-radius:10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="game">
+  <h2>🔥 Quiz Battle Mode</h2>
+
+  <input id="p1" placeholder="Player 1 Name">
+  <input id="p2" placeholder="Player 2 Name">
+  <button onclick="startBattle()">Start Battle</button>
+</div>
+
+<script>
+
+// 🔥 100 QUESTION BANK
+const questionBank = [];
+
+const sampleQuestions = [
+  "Capital of France?",
+  "Largest ocean?",
+  "2 + 2 = ?",
+  "Chemical symbol Gold?",
+  "Sun is a?",
+  "Largest animal?",
+  "H2O is?",
+  "5 x 6 = ?",
+  "Capital of Japan?",
+  "First man on moon?",
+  "Square root of 81?",
+  "Speed of light unit?",
+  "Largest continent?",
+  "Gas humans breathe?",
+  "Capital of Germany?",
+  "Boiling point of water?",
+  "Derivative of x²?",
+  "Prime number?",
+  "Unit of force?",
+  "Earth revolves around?"
+];
+
+const optionsSet = [
+  ["Paris","Rome","Berlin","Madrid"],
+  ["Pacific","Atlantic","Indian","Arctic"],
+  ["4","3","5","6"],
+  ["Au","Ag","Gd","Go"],
+  ["Star","Planet","Comet","Asteroid"],
+  ["Blue Whale","Elephant","Dog","Lion"],
+  ["Water","Salt","Iron","Air"],
+  ["30","25","35","20"],
+  ["Tokyo","Seoul","Beijing","Bangkok"],
+  ["Armstrong","Aldrin","Gagarin","Collins"],
+  ["9","8","7","6"],
+  ["m/s","kg","Watt","Volt"],
+  ["Asia","Europe","Africa","Australia"],
+  ["Oxygen","CO2","Nitrogen","Helium"],
+  ["Berlin","Munich","Frankfurt","Hamburg"],
+  ["100°C","90°C","80°C","110°C"],
+  ["2x","x","x²","1"],
+  ["7","8","9","10"],
+  ["Newton","Watt","Volt","Joule"],
+  ["Sun","Moon","Mars","Jupiter"]
+];
+
+// Generate 100 questions by repeating base set with variation
+for(let i=0;i<100;i++){
+  const baseIndex = i % sampleQuestions.length;
+  questionBank.push({
+    q: sampleQuestions[baseIndex],
+    a: optionsSet[baseIndex],
+    c: 0
+  });
+}
+
+// Shuffle function
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+let selectedQuestions = [];
+let player1 = "";
+let player2 = "";
+let currentPlayer = 1;
+let index = 0;
+let score1 = 0;
+let score2 = 0;
+
+function startBattle(){
+
+  player1 = document.getElementById("p1").value || "Player 1";
+  player2 = document.getElementById("p2").value || "Player 2";
+
+  selectedQuestions = shuffle([...questionBank]).slice(0,5);
+
+  document.getElementById("game").innerHTML =
+    `<h2>${player1}'s Turn</h2>
+     <div class="question" id="question"></div>
+     <div id="options"></div>`;
+
+  loadQuestion();
+}
+
+function loadQuestion(){
+
+  if(index >= selectedQuestions.length){
+
+    if(currentPlayer === 1){
+      currentPlayer = 2;
+      index = 0;
+
+      document.getElementById("game").innerHTML =
+        `<h2>${player2}'s Turn</h2>
+         <div class="question" id="question"></div>
+         <div id="options"></div>`;
+
+      loadQuestion();
+      return;
+    }
+
+    showResults();
+    return;
+  }
+
+  const q = selectedQuestions[index];
+  document.getElementById("question").innerText = q.q;
+
+  const optDiv = document.getElementById("options");
+  optDiv.innerHTML = "";
+
+  q.a.forEach((opt,i)=>{
+    const btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = ()=>{
+      if(i === q.c){
+        if(currentPlayer === 1) score1++;
+        else score2++;
+      }
+      index++;
+      loadQuestion();
+    };
+    optDiv.appendChild(btn);
+  });
+}
+
+function showResults(){
+
+  let winner = "";
+
+  if(score1 > score2) winner = `🏆 ${player1} Wins!`;
+  else if(score2 > score1) winner = `🏆 ${player2} Wins!`;
+  else winner = "🤝 It's a Draw!";
+
+  document.getElementById("game").innerHTML =
+    `<h2>Battle Results</h2>
+     <p>${player1}: ${score1}/5</p>
+     <p>${player2}: ${score2}/5</p>
+     <h2>${winner}</h2>
+     <button onclick="location.reload()">Play Again</button>`;
+}
+
+</script>
+
+</body>
+</html>
