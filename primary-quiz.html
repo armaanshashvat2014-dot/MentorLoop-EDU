@@ -1,171 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Primary Quiz | MentorLoop EDU</title>
+<title>Primary Quiz</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body{
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  color:white;
-}
-.card{
-  background:#1e293b;
-  padding:30px;
-  border-radius:20px;
-  width:95%;
-  max-width:700px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.5);
-}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;justify-content:center;align-items:center;min-height:100vh;color:white;}
+.card{background:#1e293b;padding:30px;border-radius:20px;width:95%;max-width:700px;}
 h2{text-align:center;color:#22d3ee;}
-.question{
-  margin:20px 0;
-  padding:15px;
-  background:#0f172a;
-  border-radius:10px;
-}
-button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:#334155;
-  border:none;
-  border-radius:8px;
-  color:white;
-  cursor:pointer;
-}
-button:hover{
-  background:#22d3ee;
-  color:black;
-}
-.progress{
-  height:8px;
-  background:#334155;
-  border-radius:6px;
-  overflow:hidden;
-  margin-bottom:15px;
-}
-.bar{
-  height:100%;
-  width:0%;
-  background:#22d3ee;
-  transition:0.3s;
-}
-.small{
-  font-size:13px;
-  color:#94a3b8;
-  margin-top:10px;
-}
+.question{margin:20px 0;padding:15px;background:#0f172a;border-radius:10px;}
+button{width:100%;padding:12px;margin-top:10px;background:#334155;border:none;border-radius:8px;color:white;cursor:pointer;}
+button:hover{background:#22d3ee;color:black;}
+.progress{height:8px;background:#334155;border-radius:6px;overflow:hidden;margin-bottom:15px;}
+.bar{height:100%;width:0%;background:#22d3ee;transition:0.3s;}
 </style>
 </head>
 <body>
 
 <div class="card">
 <h2>Primary Grade Quiz</h2>
-
-<div class="progress">
-<div class="bar" id="bar"></div>
-</div>
-
+<div class="progress"><div class="bar" id="bar"></div></div>
 <div class="question" id="questionText"></div>
 <div id="options"></div>
-
-<p class="small">
-Total Tests Completed: <span id="tests">0</span>
-</p>
 </div>
 
 <script>
 
-// 10 Primary Questions
-const quizData = [
-{q:"5 + 3 = ?",a:["8","7","6","9"],c:0},
-{q:"2 x 4 = ?",a:["8","6","4","10"],c:0},
-{q:"Color of sky?",a:["Blue","Green","Red","Black"],c:0},
-{q:"10 - 4 = ?",a:["6","5","4","7"],c:0},
+const quizData=[
+{q:"5+3=?",a:["8","7","6","9"],c:0},
+{q:"2x4=?",a:["8","6","4","10"],c:0},
+{q:"10-4=?",a:["6","5","4","7"],c:0},
+{q:"1 dozen=?",a:["12","10","8","6"],c:0},
+{q:"Sky color?",a:["Blue","Green","Red","Black"],c:0},
 {q:"Which is fruit?",a:["Apple","Carrot","Potato","Onion"],c:0},
-{q:"How many days in a week?",a:["7","6","5","8"],c:0},
-{q:"Which animal barks?",a:["Dog","Cat","Cow","Lion"],c:0},
-{q:"1 dozen equals?",a:["12","10","8","6"],c:0},
-{q:"Rainbow has how many colors?",a:["7","6","5","8"],c:0},
-{q:"Sun rises in the?",a:["East","West","North","South"],c:0}
+{q:"Days in week?",a:["7","6","5","8"],c:0},
+{q:"Dog says?",a:["Bark","Meow","Moo","Roar"],c:0},
+{q:"Rainbow colors?",a:["7","6","5","8"],c:0},
+{q:"Sun rises in?",a:["East","West","North","South"],c:0}
 ];
 
-let index = 0;
-let score = 0;
+runQuiz();
 
-let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
-document.getElementById("tests").innerText = testsTaken;
+function runQuiz(){
+let index=0,score=0;
 
-function loadQuestion(){
+function load(){
+if(index>=quizData.length){
+let percent=((score/10)*100).toFixed(1);
 
-if(index >= quizData.length){
+let tests=parseInt(localStorage.getItem("ml_tests_taken")||"0");
+let totalScore=parseInt(localStorage.getItem("ml_total_score")||"0");
+let totalQ=parseInt(localStorage.getItem("ml_total_questions")||"0");
 
-const percentage = ((score/quizData.length)*100).toFixed(1);
+let msg="";
 
-// 🔥 UPDATE MAIN STORAGE SYSTEM
-let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
-let totalScore = parseInt(localStorage.getItem("ml_total_score") || "0");
-let totalQuestions = parseInt(localStorage.getItem("ml_total_questions") || "0");
+if(percent>=80){
+tests++; totalScore+=score; totalQ+=10;
+localStorage.setItem("ml_tests_taken",tests);
+localStorage.setItem("ml_total_score",totalScore);
+localStorage.setItem("ml_total_questions",totalQ);
+msg="<p style='color:#10b981'>✔ Counted toward certificate</p>";
+}else{
+msg="<p style='color:#ef4444'>❌ Minimum 80% required</p>";
+}
 
-testsTaken++;
-totalScore += score;
-totalQuestions += quizData.length;
-
-localStorage.setItem("ml_tests_taken", testsTaken);
-localStorage.setItem("ml_total_score", totalScore);
-localStorage.setItem("ml_total_questions", totalQuestions);
-
-document.querySelector(".card").innerHTML = `
+document.querySelector(".card").innerHTML=`
 <h2>Quiz Complete</h2>
-<p><strong>Score:</strong> ${score}/10</p>
-<p><strong>Percentage:</strong> ${percentage}%</p>
-<p>Total Tests Completed: ${testsTaken}</p>
-
-<button onclick="window.location.href='certificate.html'">
-Check Certificate
-</button>
-
+<p>Score: ${score}/10</p>
+<p>Percentage: ${percent}%</p>
+${msg}
 <button onclick="location.reload()">Play Again</button>
+<button onclick="window.location.href='certificate.html'">Check Certificate</button>
 `;
-
 return;
 }
 
-updateProgress();
+document.getElementById("bar").style.width=(index/10*100)+"%";
+document.getElementById("questionText").innerText=quizData[index].q;
 
-const q = quizData[index];
-document.getElementById("questionText").innerText = q.q;
-
-const optDiv = document.getElementById("options");
-optDiv.innerHTML = "";
-
-q.a.forEach((opt,i)=>{
-const btn = document.createElement("button");
-btn.innerText = opt;
-btn.onclick = ()=>{
-if(i === q.c) score++;
-index++;
-loadQuestion();
-};
-optDiv.appendChild(btn);
+let optDiv=document.getElementById("options");
+optDiv.innerHTML="";
+quizData[index].a.forEach((opt,i)=>{
+let b=document.createElement("button");
+b.innerText=opt;
+b.onclick=()=>{if(i===quizData[index].c)score++;index++;load();};
+optDiv.appendChild(b);
 });
 }
 
-function updateProgress(){
-document.getElementById("bar").style.width =
-(index/quizData.length*100)+"%";
+load();
 }
 
-loadQuestion();
-
 </script>
-
 </body>
 </html>
