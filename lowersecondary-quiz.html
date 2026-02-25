@@ -38,7 +38,63 @@ const quizData=[
 {q:"12/3=?",a:["4","3","6","5"],c:0}
 ];
 
-runQuiz();
+let index=0;
+let score=0;
+
+function loadQuestion(){
+
+if(index>=quizData.length){
+
+let percent=((score/10)*100).toFixed(1);
+
+let tests=parseInt(localStorage.getItem("ml_tests_taken")||"0");
+let totalScore=parseInt(localStorage.getItem("ml_total_score")||"0");
+let totalQ=parseInt(localStorage.getItem("ml_total_questions")||"0");
+
+let msg="";
+
+if(percent>=80){
+tests++; totalScore+=score; totalQ+=10;
+localStorage.setItem("ml_tests_taken",tests);
+localStorage.setItem("ml_total_score",totalScore);
+localStorage.setItem("ml_total_questions",totalQ);
+msg="<p style='color:#10b981'>✔ Counted toward certificate</p>";
+}else{
+msg="<p style='color:#ef4444'>❌ Minimum 80% required</p>";
+}
+
+document.querySelector(".card").innerHTML=`
+<h2>Quiz Complete</h2>
+<p>Score: ${score}/10</p>
+<p>Percentage: ${percent}%</p>
+${msg}
+<button onclick="location.reload()">Play Again</button>
+<button onclick="window.location.href='certificate.html'">Check Certificate</button>
+`;
+
+return;
+}
+
+document.getElementById("bar").style.width=(index/10*100)+"%";
+document.getElementById("questionText").innerText=quizData[index].q;
+
+let optDiv=document.getElementById("options");
+optDiv.innerHTML="";
+
+quizData[index].a.forEach((opt,i)=>{
+let btn=document.createElement("button");
+btn.innerText=opt;
+btn.onclick=()=>{
+if(i===quizData[index].c) score++;
+index++;
+loadQuestion();
+};
+optDiv.appendChild(btn);
+});
+}
+
+loadQuestion();
+
 </script>
 </body>
 </html>
