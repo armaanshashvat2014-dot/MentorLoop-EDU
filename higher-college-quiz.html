@@ -1,159 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Higher Secondary & College Quiz | MentorLoop EDU</title>
+<title>Higher & College Quiz</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body{
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  color:white;
-}
-.card{
-  background:#1e293b;
-  padding:30px;
-  border-radius:20px;
-  width:95%;
-  max-width:700px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.5);
-}
-h2{
-  text-align:center;
-  color:#22d3ee;
-}
-.question{
-  margin:20px 0;
-  padding:15px;
-  background:#0f172a;
-  border-radius:10px;
-}
-button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:#334155;
-  border:none;
-  border-radius:8px;
-  color:white;
-  cursor:pointer;
-}
-button:hover{
-  background:#22d3ee;
-  color:black;
-}
-.progress{
-  height:8px;
-  background:#334155;
-  border-radius:6px;
-  overflow:hidden;
-  margin-bottom:15px;
-}
-.bar{
-  height:100%;
-  width:0%;
-  background:#22d3ee;
-  transition:0.3s;
-}
-.small{
-  font-size:13px;
-  color:#94a3b8;
-  margin-top:10px;
-}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;justify-content:center;align-items:center;min-height:100vh;color:white;}
+.card{background:#1e293b;padding:30px;border-radius:20px;width:95%;max-width:700px;}
+h2{text-align:center;color:#22d3ee;}
+.question{margin:20px 0;padding:15px;background:#0f172a;border-radius:10px;}
+button{width:100%;padding:12px;margin-top:10px;background:#334155;border:none;border-radius:8px;color:white;cursor:pointer;}
+button:hover{background:#22d3ee;color:black;}
+.progress{height:8px;background:#334155;border-radius:6px;overflow:hidden;margin-bottom:15px;}
+.bar{height:100%;width:0%;background:#22d3ee;transition:0.3s;}
 </style>
 </head>
 <body>
 
 <div class="card">
 <h2>Higher Secondary & College Quiz</h2>
-
-<div class="progress">
-<div class="bar" id="bar"></div>
-</div>
-
+<div class="progress"><div class="bar" id="bar"></div></div>
 <div class="question" id="questionText"></div>
 <div id="options"></div>
-
-<p class="small">
-Total Tests Completed: <span id="tests">0</span>
-</p>
 </div>
 
 <script>
 
-// 10 Higher/College Level Questions
-const quizData = [
+const quizData=[
 {q:"Derivative of x³?",a:["3x²","x²","x³","3x"],c:0},
 {q:"Integration of 2x?",a:["x² + C","2x²","x + C","None"],c:0},
 {q:"Newton's Second Law?",a:["F=ma","E=mc²","V=IR","P=IV"],c:0},
-{q:"Einstein's mass-energy equivalence?",a:["F=ma","E=mc²","V=IR","P=IV"],c:1},
-{q:"Ohm's Law?",a:["a²+b²=c²","V=IR","F=ma","PV=nRT"],c:1},
+{q:"Einstein's equation?",a:["F=ma","E=mc²","V=IR","P=IV"],c:1},
+{q:"Ohm's Law?",a:["V=IR","F=ma","PV=nRT","E=hf"],c:0},
 {q:"Ideal Gas Law?",a:["PV=nRT","F=ma","E=hf","W=Fd"],c:0},
 {q:"Derivative of sinx?",a:["cosx","-cosx","sinx","-sinx"],c:0},
-{q:"Limit of sinx/x as x→0?",a:["1","0","∞","-1"],c:0},
-{q:"Value of gravitational constant g approx?",a:["9.8","8","10","7"],c:0},
-{q:"Integration of 1/x?",a:["ln|x| + C","x","1","x²"],c:0}
+{q:"Limit of sinx/x?",a:["1","0","∞","-1"],c:0},
+{q:"Value of g?",a:["9.8","8","10","7"],c:0},
+{q:"Integration of 1/x?",a:["ln|x|+C","x","1","x²"],c:0}
 ];
 
-let index = 0;
-let score = 0;
-
-let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
-document.getElementById("tests").innerText = testsTaken;
+let index=0;
+let score=0;
 
 function loadQuestion(){
 
-if(index >= quizData.length){
+if(index>=quizData.length){
 
-const percentage = ((score/quizData.length)*100).toFixed(1);
+let percent=((score/10)*100).toFixed(1);
 
-// 🔥 UPDATE MAIN STORAGE SYSTEM
-let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
-let totalScore = parseInt(localStorage.getItem("ml_total_score") || "0");
-let totalQuestions = parseInt(localStorage.getItem("ml_total_questions") || "0");
+let tests=parseInt(localStorage.getItem("ml_tests_taken")||"0");
+let totalScore=parseInt(localStorage.getItem("ml_total_score")||"0");
+let totalQ=parseInt(localStorage.getItem("ml_total_questions")||"0");
 
-testsTaken++;
-totalScore += score;
-totalQuestions += quizData.length;
+let msg="";
 
-localStorage.setItem("ml_tests_taken", testsTaken);
-localStorage.setItem("ml_total_score", totalScore);
-localStorage.setItem("ml_total_questions", totalQuestions);
+if(percent>=80){
+tests++; totalScore+=score; totalQ+=10;
+localStorage.setItem("ml_tests_taken",tests);
+localStorage.setItem("ml_total_score",totalScore);
+localStorage.setItem("ml_total_questions",totalQ);
+msg="<p style='color:#10b981'>✔ Counted toward certificate</p>";
+}else{
+msg="<p style='color:#ef4444'>❌ Minimum 80% required</p>";
+}
 
-document.querySelector(".card").innerHTML = `
+document.querySelector(".card").innerHTML=`
 <h2>Quiz Complete</h2>
-<p><strong>Score:</strong> ${score}/10</p>
-<p><strong>Percentage:</strong> ${percentage}%</p>
-<p>Total Tests Completed: ${testsTaken}</p>
-
-<button onclick="window.location.href='certificate.html'">
-Check Certificate
-</button>
-
+<p>Score: ${score}/10</p>
+<p>Percentage: ${percent}%</p>
+${msg}
 <button onclick="location.reload()">Play Again</button>
+<button onclick="window.location.href='certificate.html'">Check Certificate</button>
 `;
 
 return;
 }
 
-updateProgress();
+document.getElementById("bar").style.width=(index/10*100)+"%";
+document.getElementById("questionText").innerText=quizData[index].q;
 
-const q = quizData[index];
-document.getElementById("questionText").innerText = q.q;
+let optDiv=document.getElementById("options");
+optDiv.innerHTML="";
 
-const optDiv = document.getElementById("options");
-optDiv.innerHTML = "";
-
-q.a.forEach((opt,i)=>{
-const btn = document.createElement("button");
-btn.innerText = opt;
-btn.onclick = ()=>{
-if(i === q.c) score++;
+quizData[index].a.forEach((opt,i)=>{
+let btn=document.createElement("button");
+btn.innerText=opt;
+btn.onclick=()=>{
+if(i===quizData[index].c) score++;
 index++;
 loadQuestion();
 };
@@ -161,14 +93,8 @@ optDiv.appendChild(btn);
 });
 }
 
-function updateProgress(){
-document.getElementById("bar").style.width =
-(index/quizData.length*100)+"%";
-}
-
 loadQuestion();
 
 </script>
-
 </body>
 </html>
