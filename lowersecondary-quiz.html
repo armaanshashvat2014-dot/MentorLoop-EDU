@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Lower Secondary Quiz | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  color:white;
+}
+.card{
+  background:#1e293b;
+  padding:30px;
+  border-radius:20px;
+  width:95%;
+  max-width:700px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+h2{text-align:center;color:#22d3ee;}
+.question{
+  margin:20px 0;
+  padding:15px;
+  background:#0f172a;
+  border-radius:10px;
+}
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#334155;
+  border:none;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
+button:hover{
+  background:#22d3ee;
+  color:black;
+}
+.progress{
+  height:8px;
+  background:#334155;
+  border-radius:6px;
+  overflow:hidden;
+  margin-bottom:15px;
+}
+.bar{
+  height:100%;
+  width:0%;
+  background:#22d3ee;
+  transition:0.3s;
+}
+.small{
+  font-size:13px;
+  color:#94a3b8;
+  margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>Lower Secondary Quiz</h2>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
+<div class="question" id="questionText"></div>
+<div id="options"></div>
+
+<p class="small">
+Total Tests Completed: <span id="tests">0</span>
+</p>
+</div>
+
+<script>
+
+// 10 Lower Secondary Questions
+const quizData = [
+{q:"Solve 5x = 25",a:["5","10","25","0"],c:0},
+{q:"H2O is?",a:["Water","Salt","Iron","Air"],c:0},
+{q:"6 x 7 = ?",a:["42","36","48","40"],c:0},
+{q:"Square root of 81?",a:["9","8","7","6"],c:0},
+{q:"Density formula?",a:["mass/volume","volume/mass","mass*volume","none"],c:0},
+{q:"Speed formula?",a:["distance/time","time/distance","distance*time","none"],c:0},
+{q:"Force formula?",a:["mass/acceleration","mass*acceleration","acceleration/mass","none"],c:1},
+{q:"Pressure formula?",a:["force/area","area/force","force*area","none"],c:0},
+{q:"Gas humans breathe?",a:["Oxygen","CO2","Nitrogen","Helium"],c:0},
+{q:"Largest continent?",a:["Asia","Europe","Africa","Australia"],c:0}
+];
+
+let index = 0;
+let score = 0;
+
+let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
+document.getElementById("tests").innerText = testsTaken;
+
+function loadQuestion(){
+
+if(index >= quizData.length){
+
+const percentage = ((score/quizData.length)*100).toFixed(1);
+
+// 🔥 UPDATE MAIN STORAGE SYSTEM
+let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
+let totalScore = parseInt(localStorage.getItem("ml_total_score") || "0");
+let totalQuestions = parseInt(localStorage.getItem("ml_total_questions") || "0");
+
+testsTaken++;
+totalScore += score;
+totalQuestions += quizData.length;
+
+localStorage.setItem("ml_tests_taken", testsTaken);
+localStorage.setItem("ml_total_score", totalScore);
+localStorage.setItem("ml_total_questions", totalQuestions);
+
+document.querySelector(".card").innerHTML = `
+<h2>Quiz Complete</h2>
+<p><strong>Score:</strong> ${score}/10</p>
+<p><strong>Percentage:</strong> ${percentage}%</p>
+<p>Total Tests Completed: ${testsTaken}</p>
+
+<button onclick="window.location.href='certificate.html'">
+Check Certificate
+</button>
+
+<button onclick="location.reload()">Play Again</button>
+`;
+
+return;
+}
+
+updateProgress();
+
+const q = quizData[index];
+document.getElementById("questionText").innerText = q.q;
+
+const optDiv = document.getElementById("options");
+optDiv.innerHTML = "";
+
+q.a.forEach((opt,i)=>{
+const btn = document.createElement("button");
+btn.innerText = opt;
+btn.onclick = ()=>{
+if(i === q.c) score++;
+index++;
+loadQuestion();
+};
+optDiv.appendChild(btn);
+});
+}
+
+function updateProgress(){
+document.getElementById("bar").style.width =
+(index/quizData.length*100)+"%";
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
