@@ -380,6 +380,17 @@ function updateProgress(){
 }
 
 loadQuestion();
+// 🔥 SUBJECT PERFORMANCE TRACKING
 
+let subjectStats = JSON.parse(localStorage.getItem("ml_subject_stats") || "{}");
+
+if(!subjectStats[level]){
+  subjectStats[level] = { score: 0, total: 0 };
+}
+
+subjectStats[level].score += score;
+subjectStats[level].total += quiz.length;
+
+localStorage.setItem("ml_subject_stats", JSON.stringify(subjectStats));
 </script>
 
