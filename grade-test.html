@@ -94,7 +94,8 @@ primary: [
 {q:"2 x 4 = ?",a:["8","6","4","10"],c:0},
 {q:"Color of sky?",a:["Blue","Green","Red","Black"],c:0},
 {q:"10 - 4 = ?",a:["6","5","4","7"],c:0},
-{q:"Which is fruit?",a:["Apple","Carrot","Potato","Onion"],c:0}
+{q:"Which is fruit?",a:["Apple","Carrot","Potato","Onion"],c:0},
+{q:"Which starts with A?",a:["Apple","Carrot","Potato","Onion"],c:0}
 ],
 
 lowersecondary: [
@@ -102,7 +103,10 @@ lowersecondary: [
 {q:"H2O is?",a:["Water","Salt","Iron","Air"],c:0},
 {q:"6 x 7 = ?",a:["42","36","48","40"],c:0},
 {q:"Square root of 81?",a:["9","8","7","6"],c:0},
-{q:"Density formula?",a:["mass/volume","volume/mass","mass*volume","none"],c:0}
+{q:"Density formula?",a:["mass/volume","volume/mass","mass*volume","none"],c:0},
+{q: Speed formula?, a: [ distance/time, time/distance, distance*time, none ], c: 0},
+{q: Force formula?, a: [ mass/acceleration, mass*acceleration, acceleration/mass, none ], c: 1},
+  {q: Pressure formula?, a: [ force/area, area/force, force*area, none ], c: 0}
 ],
 
 uppersecondary: [
@@ -110,7 +114,11 @@ uppersecondary: [
 {q:"Newton's 2nd law?",a:["F=ma","E=mc²","V=IR","P=IV"],c:0},
 {q:"Log10(100)?",a:["2","1","10","0"],c:0},
 {q:"Integration of 2x?",a:["x² + C","2x²","x + C","None"],c:0},
-{q:"Smallest unit of life?",a:["Cell","Atom","Molecule","Tissue"],c:0}
+{q:"Smallest unit of life?",a:["Cell","Atom","Molecule","Tissue"],c:0},
+  {q: Einstein's mass-energy equivalence?, a: [ $F=ma$ , $E=mc^2$ , $V=IR$ , $P=IV$ ], c: 1},
+{q: Ohm's Law?, a: [ $a^2+b^2=c^2$ , $F=G\frac{m_1m_2}{r^2}$ , $V=IR$ , $\lambda=\frac{h}{p}$ ], c: 2},
+{q: Ideal Gas Law?, a: [ $PV=nRT$ , $F=ma$ , $E=hf$ , $W=Fd$ ], c: 0}
+
 ],
 
 seniorsecondary: [
@@ -118,7 +126,10 @@ seniorsecondary: [
 {q:"Derivative of sinx?",a:["cosx","-cosx","sinx","-sinx"],c:0},
 {q:"Limit of sinx/x at 0?",a:["1","0","∞","-1"],c:0},
 {q:"Unit of resistance?",a:["Ohm","Volt","Watt","Ampere"],c:0},
-{q:"Value of g approx?",a:["9.8","8","10","7"],c:0}
+{q:"Value of g approx?",a:["9.8","8","10","7"],c:0},
+  {q:"Derivative of cosx?",a:["-sinx","sinx","cosx","-cosx"],c:0},
+{q:"Derivative of tanx?",a:["sec²x","csc²x","-sec²x","tanx"],c:0},
+{q:"Derivative of eˣ?",a:["eˣ","xeˣ⁻¹","ln(x)","1/x"],c:0}
 ]
 
 };
