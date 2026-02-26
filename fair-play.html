@@ -1,138 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>MentorLoop EDU | Fair Play Report</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fair Play | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  color:white;
+}
 
-    .card {
-      background: white;
-      padding: 28px;
-      border-radius: 14px;
-      max-width: 520px;
-      width: 100%;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
+.container{
+  background:#111827;
+  width:95%;
+  max-width:600px;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 0 25px rgba(0,0,0,0.6);
+}
 
-    h1 {
-      color: #dc2626;
-      margin-top: 0;
-    }
+h1{
+  text-align:center;
+  margin-bottom:20px;
+}
 
-    p {
-      color: #374151;
-      font-size: 0.95rem;
-    }
+input, textarea{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+  font-family:'Segoe UI';
+}
 
-    label {
-      font-weight: bold;
-      margin-top: 14px;
-      display: block;
-    }
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
 
-    select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-      font-family: inherit;
-    }
+button:hover{
+  background:#1e40af;
+}
 
-    textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
+.status{
+  margin-top:15px;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
+}
 
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background: #dc2626;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.success{
+  background:#065f46;
+}
 
-    .back {
-      display: block;
-      margin-top: 14px;
-      text-align: center;
-      text-decoration: none;
-      color: #2563eb;
-      font-weight: bold;
-    }
-  </style>
+.error{
+  background:#7f1d1d;
+}
+
+.banned{
+  background:#991b1b;
+  font-weight:bold;
+}
+</style>
 </head>
 
 <body>
 
-<div class="card">
-  <h1>🚩 Fair Play Report</h1>
+<div class="container">
 
-  <p>
-    MentorLoop EDU is a safe, respectful learning space.  
-    If you see inappropriate content, report it here.  
-    Our moderators will review it.
-  </p>
+<h1>⚖️ Fair Play System</h1>
 
-  <form onsubmit="submitReport(event)">    
-   
-      <label>Reported Student Name</label>
-<input type="text" id="reportedUser" required placeholder="Enter name exactly">  
+<input type="text" id="reporter" placeholder="Your Username" required>
+<input type="text" id="reported" placeholder="Username to Report" required>
+<textarea id="reason" placeholder="Reason for report..." rows="3"></textarea>
 
-    <label for="details">Additional details(optional) and why</label>
-    <textarea id="details" placeholder="Explain briefly (optional)"></textarea>
+<button onclick="submitReport()">Submit Report</button>
 
-    <button type="submit">Submit Report</button>
-  </form>
-  
-  <label>Question ID (copy from question)</label>
-<input type="text" id="questionId" required placeholder="e.g. Q-102">
+<div id="message"></div>
 
-  <a href="dashboard-v2.html" class="back">← Back to Dashboard</a>
 </div>
-  <script>
-function submitReport(e) {
-  e.preventDefault();
 
-  const questionId = document.getElementById("questionId").value.trim();
-  const reason = document.getElementById("reason").value;
-  const details = document.getElementById("details").value;
+<script>
 
-  if (!questionId || !reason) {
-    alert("Please fill all required fields.");
+function submitReport(){
+
+  let reporter = document.getElementById("reporter").value.trim();
+  let reported = document.getElementById("reported").value.trim();
+
+  if(!reporter || !reported){
+    showMessage("Please fill all fields.","error");
     return;
   }
 
-  const reports = JSON.parse(localStorage.getItem("ml_reports") || "[]");
+  if(reporter === reported){
+    showMessage("You cannot report yourself.","error");
+    return;
+  }
 
-  reports.push({
-    questionId: questionId,
-    reason: reason,
-    details: details,
-    time: new Date().toISOString()
-  });
+  let reports = JSON.parse(localStorage.getItem("fairPlayReports")) || {};
+  let bannedUsers = JSON.parse(localStorage.getItem("bannedUsers")) || [];
 
-  localStorage.setItem("ml_reports", JSON.stringify(reports));
+  if(bannedUsers.includes(reported)){
+    showMessage("This user is already banned.","banned");
+    return;
+  }
 
-  alert("Report submitted. The system will auto-review this content.");
+  if(!reports[reported]){
+    reports[reported] = [];
+  }
 
-  window.location.href = "dashboard-v2.html";
+  if(reports[reported].includes(reporter)){
+    showMessage("You have already reported this user.","error");
+    return;
+  }
+
+  reports[reported].push(reporter);
+
+  if(reports[reported].length >= 3){
+    bannedUsers.push(reported);
+    localStorage.setItem("bannedUsers", JSON.stringify(bannedUsers));
+    showMessage("User has been automatically banned after 3 reports.","banned");
+  } else {
+    showMessage("Report submitted successfully.","success");
+  }
+
+  localStorage.setItem("fairPlayReports", JSON.stringify(reports));
 }
+
+function showMessage(text,type){
+  let msg = document.getElementById("message");
+  msg.className = "status " + type;
+  msg.innerText = text;
+}
+
 </script>
 
 </body>
