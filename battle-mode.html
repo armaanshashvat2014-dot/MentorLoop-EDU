@@ -1,254 +1,217 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Quiz Battle | MentorLoop EDU</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battle Mode | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body{
-      margin:0;
-      font-family:'Segoe UI',sans-serif;
-      background:linear-gradient(135deg,#0f172a,#1e293b);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:100vh;
-      color:white;
-    }
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
 
-    .card{
-      background:#1e293b;
-      padding:30px;
-      border-radius:20px;
-      width:95%;
-      max-width:700px;
-      text-align:center;
-      box-shadow:0 20px 40px rgba(0,0,0,0.6);
-    }
+.container{
+  background:#111827;
+  width:95%;
+  max-width:600px;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 0 20px rgba(0,0,0,0.6);
+}
 
-    h2{ color:#22d3ee; }
+h1{
+  text-align:center;
+  margin-bottom:15px;
+}
 
-    input{
-      width:100%;
-      padding:10px;
-      margin:10px 0;
-      border-radius:8px;
-      border:none;
-    }
+button{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#2563eb;
+  color:white;
+  font-weight:bold;
+}
 
-    button{
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      background:#334155;
-      border:none;
-      border-radius:8px;
-      color:white;
-      cursor:pointer;
-      transition:0.2s;
-    }
+button:hover{
+  background:#1e40af;
+}
 
-    button:hover{
-      background:#22d3ee;
-      color:black;
-    }
+.option{
+  display:block;
+  width:100%;
+  margin:8px 0;
+}
 
-    .question{
-      margin:20px 0;
-      padding:15px;
-      background:#0f172a;
-      border-radius:10px;
-    }
-  </style>
+.progress{
+  height:10px;
+  background:#374151;
+  border-radius:5px;
+  overflow:hidden;
+  margin-bottom:15px;
+}
+
+.progress-bar{
+  height:10px;
+  width:0%;
+  background:#22c55e;
+}
+
+.scoreboard{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.hidden{
+  display:none;
+}
+</style>
 </head>
+
 <body>
 
-<div class="card" id="game">
-  <h2>🔥 Quiz Battle Mode</h2>
+<div class="container">
 
-  <input id="p1" placeholder="Player 1 Name">
-  <input id="p2" placeholder="Player 2 Name">
-  <button onclick="startBattle()">Start Battle</button>
+<h1>⚔️ Battle Arena</h1>
+
+<div id="modeSelect">
+  <button onclick="startGame('ai')">Battle Slow AI</button>
+  <button onclick="startGame('pvp')">Battle Player (Same Device)</button>
+</div>
+
+<div id="gameArea" class="hidden">
+
+<div class="scoreboard">
+  <div>Player 1: <span id="score1">0</span></div>
+  <div id="score2Label">AI: <span id="score2">0</span></div>
+</div>
+
+<div class="progress">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<h3 id="question"></h3>
+
+<div id="options"></div>
+
+</div>
+
+<div id="result" class="hidden">
+  <h2 id="winnerText"></h2>
+  <button onclick="location.reload()">Play Again</button>
+</div>
+
 </div>
 
 <script>
 
-// 🔥 100 QUESTION BANK
-const questionBank = [];
-
-const sampleQuestions = [
-  "Capital of France?",
-  "Largest ocean?",
-  "2 + 2 = ?",
-  "Chemical symbol Gold?",
-  "Sun is a?",
-  "Largest animal?",
-  "H2O is?",
-  "5 x 6 = ?",
-  "Capital of Japan?",
-  "First man on moon?",
-  "Square root of 81?",
-  "Speed of light unit?",
-  "Largest continent?",
-  "Gas humans breathe?",
-  "Capital of Germany?",
-  "Boiling point of water?",
-  "Derivative of x²?",
-  "Prime number?",
-  "Unit of force?",
-  "Earth revolves around?"
+const questions = [
+  {q:"5 + 3 = ?", a:["6","7","8","9"], c:2},
+  {q:"Capital of India?", a:["Delhi","Mumbai","Chennai","Kolkata"], c:0},
+  {q:"12 ÷ 4 = ?", a:["2","3","4","6"], c:1},
+  {q:"Water formula?", a:["CO2","H2O","O2","NaCl"], c:1},
+  {q:"9 x 2 = ?", a:["18","16","20","14"], c:0}
 ];
 
-const optionsSet = [
-  ["Paris","Rome","Berlin","Madrid"],
-  ["Pacific","Atlantic","Indian","Arctic"],
-  ["4","3","5","6"],
-  ["Au","Ag","Gd","Go"],
-  ["Star","Planet","Comet","Asteroid"],
-  ["Blue Whale","Elephant","Dog","Lion"],
-  ["Water","Salt","Iron","Air"],
-  ["30","25","35","20"],
-  ["Tokyo","Seoul","Beijing","Bangkok"],
-  ["Armstrong","Aldrin","Gagarin","Collins"],
-  ["9","8","7","6"],
-  ["m/s","kg","Watt","Volt"],
-  ["Asia","Europe","Africa","Australia"],
-  ["Oxygen","CO2","Nitrogen","Helium"],
-  ["Berlin","Munich","Frankfurt","Hamburg"],
-  ["100°C","90°C","80°C","110°C"],
-  ["2x","x","x²","1"],
-  ["7","8","9","10"],
-  ["Newton","Watt","Volt","Joule"],
-  ["Sun","Moon","Mars","Jupiter"]
-];
+let current=0;
+let score1=0;
+let score2=0;
+let mode="ai";
+let turn=1;
 
-// Generate 100 questions
-for(let i=0;i<100;i++){
-  const baseIndex = i % sampleQuestions.length;
-  questionBank.push({
-    q: sampleQuestions[baseIndex],
-    a: optionsSet[baseIndex],
-    c: 0
-  });
-}
+function startGame(selectedMode){
+  mode=selectedMode;
+  document.getElementById("modeSelect").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
 
-// Shuffle function
-function shuffle(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
+  if(mode==="pvp"){
+    document.getElementById("score2Label").innerHTML="Player 2: <span id='score2'>0</span>";
   }
-  return arr;
-}
-
-let selectedQuestions = [];
-let player1 = "";
-let player2 = "";
-let currentPlayer = 1;
-let index = 0;
-let score1 = 0;
-let score2 = 0;
-
-function startBattle(){
-
-  player1 = document.getElementById("p1").value || "Player 1";
-  player2 = document.getElementById("p2").value || "Player 2";
-
-  selectedQuestions = shuffle([...questionBank]).slice(0,5);
-
-  document.getElementById("game").innerHTML =
-    `<h2>${player1}'s Turn</h2>
-     <div class="question" id="question"></div>
-     <div id="options"></div>`;
 
   loadQuestion();
 }
 
 function loadQuestion(){
-
-  if(index >= selectedQuestions.length){
-
-    if(currentPlayer === 1){
-      currentPlayer = 2;
-      index = 0;
-
-      document.getElementById("game").innerHTML =
-        `<h2>${player2}'s Turn</h2>
-         <div class="question" id="question"></div>
-         <div id="options"></div>`;
-
-      loadQuestion();
-      return;
-    }
-
-    showResults();
+  if(current>=questions.length){
+    endGame();
     return;
   }
 
-  const q = selectedQuestions[index];
-  document.getElementById("question").innerText = q.q;
+  let q=questions[current];
+  document.getElementById("question").innerText=q.q;
 
-  const optDiv = document.getElementById("options");
-  optDiv.innerHTML = "";
-
+  let optionsHTML="";
   q.a.forEach((opt,i)=>{
-    const btn = document.createElement("button");
-    btn.innerText = opt;
-    btn.onclick = ()=>{
-      if(i === q.c){
-        if(currentPlayer === 1) score1++;
-        else score2++;
-      }
-      index++;
-      loadQuestion();
-    };
-    optDiv.appendChild(btn);
+    optionsHTML+=`<button class="option" onclick="checkAnswer(${i})">${opt}</button>`;
   });
+
+  document.getElementById("options").innerHTML=optionsHTML;
+
+  document.getElementById("progressBar").style.width=
+  ((current/questions.length)*100)+"%";
 }
 
-function showResults(){
+function checkAnswer(selected){
+  let correct=questions[current].c;
 
-  let winner = "";
-  let winningScore = Math.max(score1, score2);
-  const totalQuestions = selectedQuestions.length;
+  if(mode==="pvp"){
+    if(turn===1){
+      if(selected===correct) score1++;
+      turn=2;
+      alert("Player 2 Turn");
+    }else{
+      if(selected===correct) score2++;
+      turn=1;
+      current++;
+    }
+  }
 
-  if(score1 > score2) winner = `🏆 ${player1} Wins!`;
-  else if(score2 > score1) winner = `🏆 ${player2} Wins!`;
-  else winner = "🤝 It's a Draw!";
+  if(mode==="ai"){
+    if(selected===correct) score1++;
 
-  // 🔥 SAVE AS ONE COMPLETED TEST
-  let testsTaken = parseInt(localStorage.getItem("ml_tests_taken") || "0");
-  let totalScore = parseInt(localStorage.getItem("ml_total_score") || "0");
-  let totalQs = parseInt(localStorage.getItem("ml_total_questions") || "0");
+    // Slightly Slow AI (random delay)
+    setTimeout(()=>{
+      if(Math.random()>0.4){ // 60% accuracy
+        score2++;
+      }
+      current++;
+      updateScores();
+      loadQuestion();
+    },1500);
 
-  testsTaken++;
-  totalScore += winningScore;
-  totalQs += totalQuestions;
+    updateScores();
+    return;
+  }
 
-  localStorage.setItem("ml_tests_taken", testsTaken);
-  localStorage.setItem("ml_total_score", totalScore);
-  localStorage.setItem("ml_total_questions", totalQs);
-
-  document.getElementById("game").innerHTML =
-    `<h2>Battle Results</h2>
-     <p>${player1}: ${score1}/5</p>
-     <p>${player2}: ${score2}/5</p>
-     <h2>${winner}</h2>
-     <button onclick="location.reload()">Play Again</button>`;
-}
-// 🔥 SUBJECT PERFORMANCE TRACKING
-
-let subjectStats = JSON.parse(localStorage.getItem("ml_subject_stats") || "{}");
-
-if(!subjectStats[level]){
-  subjectStats[level] = { score: 0, total: 0 };
+  updateScores();
+  loadQuestion();
 }
 
-subjectStats[level].score += score;
-subjectStats[level].total += quiz.length;
+function updateScores(){
+  document.getElementById("score1").innerText=score1;
+  document.getElementById("score2").innerText=score2;
+}
 
-localStorage.setItem("ml_subject_stats", JSON.stringify(subjectStats));
-  
+function endGame(){
+  document.getElementById("gameArea").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+
+  let text="Draw!";
+  if(score1>score2) text="Player 1 Wins! 🏆";
+  if(score2>score1) text=(mode==="ai")?"AI Wins! 🤖":"Player 2 Wins! 🏆";
+
+  document.getElementById("winnerText").innerText=text;
+}
+
 </script>
 
 </body>
