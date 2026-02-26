@@ -127,6 +127,8 @@ let score1=0;
 let score2=0;
 let mode="ai";
 let turn=1;
+let timer;
+let timeLeft=4;
 
 function startGame(selectedMode){
   mode=selectedMode;
@@ -140,6 +142,41 @@ function startGame(selectedMode){
   loadQuestion();
 }
 
+function startTimer(){
+  timeLeft=4;
+  document.getElementById("question").innerText =
+    questions[current].q + "  ⏳ " + timeLeft;
+
+  timer=setInterval(()=>{
+    timeLeft--;
+    document.getElementById("question").innerText =
+      questions[current].q + "  ⏳ " + timeLeft;
+
+    if(timeLeft<=0){
+      clearInterval(timer);
+      handleTimeout();
+    }
+  },1000);
+}
+
+function handleTimeout(){
+  if(mode==="pvp"){
+    if(turn===1){
+      turn=2;
+      alert("Player 2 Turn!");
+      loadQuestion();
+    }else{
+      turn=1;
+      current++;
+      loadQuestion();
+    }
+  }else{
+    // AI mode – just move to next
+    current++;
+    loadQuestion();
+  }
+}
+
 function loadQuestion(){
   if(current>=questions.length){
     endGame();
@@ -147,7 +184,6 @@ function loadQuestion(){
   }
 
   let q=questions[current];
-  document.getElementById("question").innerText=q.q;
 
   let optionsHTML="";
   q.a.forEach((opt,i)=>{
@@ -158,16 +194,23 @@ function loadQuestion(){
 
   document.getElementById("progressBar").style.width=
   ((current/questions.length)*100)+"%";
+
+  startTimer();
 }
 
 function checkAnswer(selected){
+  clearInterval(timer);
+
   let correct=questions[current].c;
 
   if(mode==="pvp"){
     if(turn===1){
       if(selected===correct) score1++;
       turn=2;
-      alert("Player 2 Turn");
+      alert("Player 2 Turn!");
+      loadQuestion();
+      updateScores();
+      return;
     }else{
       if(selected===correct) score2++;
       turn=1;
@@ -178,15 +221,14 @@ function checkAnswer(selected){
   if(mode==="ai"){
     if(selected===correct) score1++;
 
-    // Slightly Slow AI (random delay)
     setTimeout(()=>{
-      if(Math.random()>0.4){ // 60% accuracy
+      if(Math.random()>0.4){
         score2++;
       }
       current++;
       updateScores();
       loadQuestion();
-    },1500);
+    },1000);
 
     updateScores();
     return;
