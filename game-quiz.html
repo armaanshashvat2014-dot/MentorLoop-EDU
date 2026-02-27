@@ -164,6 +164,21 @@ function loadQuestion() {
 loadQuestion();
 
 </script>
+<script>
+function finishQuiz(score, totalQuestions){
 
+  let percentage = (score / totalQuestions) * 100;
+
+  if(percentage >= 80){
+
+    // ✅ Mark daily task complete
+    localStorage.setItem("quizCompletedToday", "true");
+
+    alert("Quiz Passed! Daily Challenge Unlocked ✅");
+
+  }
+
+}
+</script>
 </body>
 </html>
