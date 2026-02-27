@@ -108,9 +108,9 @@ function loadQuestion(){
 
       if(localStorage.getItem("quizDailyDate")!==today){
 
-        let pts=parseInt(localStorage.getItem("points")||0);
+        let pts=parseInt(localStorage.getItem("ml_points")||0);
         pts+=5;
-        localStorage.setItem("points",pts);
+        localStorage.setItem("ml_points",pts);
 
         localStorage.setItem("quizDailyDate",today);
       }
