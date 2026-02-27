@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Daily Activities | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.container{
+  width:95%;
+  max-width:650px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.card{
+  background:#1e293b;
+  padding:15px;
+  margin-bottom:15px;
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+
+button{
+  padding:8px 14px;
+  border:none;
+  border-radius:8px;
+  background:#22c55e;
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:disabled{
+  background:gray;
+  cursor:not-allowed;
+}
+
+.points-box{
+  text-align:center;
+  margin-bottom:20px;
+  background:#0f172a;
+  padding:10px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🔥 Daily Challenge</h1>
+
+<div class="points-box">
+  Total Points: <span id="pointsDisplay">0</span>
+</div>
+
+<div id="tasks"></div>
+
+</div>
+
+<script>
+
+// Ensure points exist
+if(!localStorage.getItem("points")){
+  localStorage.setItem("points", 0);
+}
+
+// Reset daily tracking
+const today = new Date().toDateString();
+if(localStorage.getItem("dailyDate") !== today){
+  localStorage.setItem("dailyDate", today);
+  localStorage.setItem("dailyClaimed", JSON.stringify([]));
+
+  // reset activity flags
+  localStorage.removeItem("quizCompletedToday");
+  localStorage.removeItem("doubtAskedToday");
+  localStorage.removeItem("answeredToday");
+  localStorage.removeItem("loginToday");
+  localStorage.removeItem("helpedToday");
+}
+
+let claimed = JSON.parse(localStorage.getItem("dailyClaimed")) || [];
+
+const taskData = [
+  {id:1, name:"Complete 1 Quiz", flag:"quizCompletedToday"},
+  {id:2, name:"Ask 1 Doubt", flag:"doubtAskedToday"},
+  {id:3, name:"Answer 1 Question", flag:"answeredToday"},
+  {id:4, name:"Help Another Student", flag:"helpedToday"},
+  {id:5, name:"Login Today", flag:"loginToday"}
+];
+
+const taskContainer = document.getElementById("tasks");
+
+taskData.forEach(task => {
+
+  let div = document.createElement("div");
+  div.className = "card";
+
+  let status = localStorage.getItem(task.flag) === "true";
+
+  let button = document.createElement("button");
+
+  if(claimed.includes(task.id)){
+      button.innerText = "Done ✅";
+      button.disabled = true;
+  } 
+  else if(status){
+      button.innerText = "Claim +5";
+      button.onclick = () => claimReward(task.id);
+  } 
+  else{
+      button.innerText = "Incomplete";
+      button.disabled = true;
+  }
+
+  div.innerHTML = `<div>${task.name}</div>`;
+  div.appendChild(button);
+
+  taskContainer.appendChild(div);
+
+});
+
+function claimReward(taskId){
+
+  if(claimed.includes(taskId)) return;
+
+  let pts = parseInt(localStorage.getItem("points"));
+  pts += 5;
+  localStorage.setItem("points", pts);
+
+  claimed.push(taskId);
+  localStorage.setItem("dailyClaimed", JSON.stringify(claimed));
+
+  location.reload();
+}
+
+document.getElementById("pointsDisplay").innerText =
+  localStorage.getItem("points");
+
+</script>
+
+</body>
+</html>
