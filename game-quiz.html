@@ -80,7 +80,6 @@ function randomInt(min, max) {
 
 // ---------- GENERATE 100 QUESTIONS ----------
 const questionBank = [];
-
 const operations = ["+", "-", "*", "/"];
 
 for (let i = 0; i < 100; i++) {
@@ -88,7 +87,6 @@ for (let i = 0; i < 100; i++) {
   let a = randomInt(5, 50);
   let b = randomInt(2, 20);
 
-  // Prevent same number
   while (a === b) {
     b = randomInt(2, 20);
   }
@@ -99,8 +97,8 @@ for (let i = 0; i < 100; i++) {
   if (op === "+") correctAnswer = a + b;
   if (op === "-") correctAnswer = a - b;
   if (op === "*") correctAnswer = a * b;
+
   if (op === "/") {
-    // Force clean division
     correctAnswer = randomInt(2, 20);
     b = randomInt(2, 10);
     a = correctAnswer * b;
@@ -108,7 +106,6 @@ for (let i = 0; i < 100; i++) {
 
   let options = [correctAnswer];
 
-  // Generate wrong answers
   while (options.length < 3) {
     let wrong = correctAnswer + randomInt(-15, 15);
     if (!options.includes(wrong) && wrong !== correctAnswer) {
@@ -133,10 +130,18 @@ let score = 0;
 function loadQuestion() {
 
   if (index >= questions.length) {
+
+    // ✅ CALL DAILY CHECK
+    finishQuiz(score, questions.length);
+
+    let percentage = Math.round((score / questions.length) * 100);
+
     document.querySelector(".card").innerHTML =
       `<h1>🎉 Quiz Complete!</h1>
        <p>Your score: <strong>${score} / ${questions.length}</strong></p>
+       <p>Percentage: <strong>${percentage}%</strong></p>
        <button onclick="location.reload()">Play Again</button>`;
+
     return;
   }
 
@@ -161,24 +166,19 @@ function loadQuestion() {
   document.getElementById("score").textContent = score;
 }
 
-loadQuestion();
-
-</script>
-<script>
 function finishQuiz(score, totalQuestions){
 
   let percentage = (score / totalQuestions) * 100;
 
   if(percentage >= 80){
-
-    // ✅ Mark daily task complete
     localStorage.setItem("quizCompletedToday", "true");
-
-    alert("Quiz Passed! Daily Challenge Unlocked ✅");
-
   }
 
 }
+
+loadQuestion();
+
 </script>
+
 </body>
 </html>
