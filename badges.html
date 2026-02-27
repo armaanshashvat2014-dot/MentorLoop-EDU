@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Badges | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0f172a,#1e293b);
+      color:white;
+      padding:30px;
+    }
+
+    h1{
+      text-align:center;
+      color:#22d3ee;
+      margin-bottom:10px;
+    }
+
+    .stats{
+      text-align:center;
+      margin-bottom:30px;
+      font-size:16px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:20px;
+    }
+
+    .badge{
+      background:#1e293b;
+      padding:20px;
+      border-radius:15px;
+      text-align:center;
+      box-shadow:0 8px 20px rgba(0,0,0,0.6);
+      transition:0.3s;
+    }
+
+    .locked{
+      opacity:0.4;
+      filter:grayscale(100%);
+    }
+
+    .unlocked{
+      border:2px solid #10b981;
+    }
+
+    .icon{
+      font-size:40px;
+      margin-bottom:10px;
+    }
+
+    .type{
+      font-size:12px;
+      margin-top:5px;
+      color:#94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🏅 Achievement Badges</h1>
+
+<div class="stats">
+  🔥 Streak: <strong><span id="streak">0</span></strong> days |
+  💬 Answers Given: <strong><span id="answers">0</span></strong>
+</div>
+
+<div class="grid" id="badgeGrid"></div>
+
+<script>
+
+let streak = parseInt(localStorage.getItem("streak") || 0);
+let answers = parseInt(localStorage.getItem("answersCount") || 0);
+
+document.getElementById("streak").innerText = streak;
+document.getElementById("answers").innerText = answers;
+
+const badges = [
+
+  // 🔥 Streak Badges
+  {name:"Warm Up", req:3, icon:"🔥", type:"streak"},
+  {name:"On Fire", req:7, icon:"🔥🔥", type:"streak"},
+  {name:"Unstoppable", req:14, icon:"🔥🔥🔥", type:"streak"},
+  {name:"Streak Master", req:30, icon:"🚀", type:"streak"},
+  {name:"Legend Flame", req:60, icon:"🌋", type:"streak"},
+
+  // 💬 Answer Badges
+  {name:"Helper", req:5, icon:"💬", type:"answers"},
+  {name:"Supporter", req:15, icon:"🤝", type:"answers"},
+  {name:"Mentor", req:30, icon:"🧠", type:"answers"},
+  {name:"Guide", req:75, icon:"📘", type:"answers"},
+  {name:"Grand Mentor", req:150, icon:"👑", type:"answers"}
+
+];
+
+const grid = document.getElementById("badgeGrid");
+
+badges.forEach(b => {
+
+  let unlocked = false;
+
+  if(b.type === "streak"){
+    unlocked = streak >= b.req;
+  }
+
+  if(b.type === "answers"){
+    unlocked = answers >= b.req;
+  }
+
+  let div = document.createElement("div");
+  div.className = "badge " + (unlocked ? "unlocked" : "locked");
+
+  div.innerHTML = `
+    <div class="icon">${b.icon}</div>
+    <h3>${b.name}</h3>
+    <div class="type">
+      ${b.type === "streak" ? 
+        (unlocked ? "Unlocked 🔥" : "Requires " + b.req + " day streak")
+        :
+        (unlocked ? "Unlocked 💬" : "Requires " + b.req + " answers")
+      }
+    </div>
+  `;
+
+  grid.appendChild(div);
+});
+
+</script>
+
+</body>
+</html>
