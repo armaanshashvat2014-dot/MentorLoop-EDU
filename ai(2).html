@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Math Solver</title>
+    <!-- External Math Engine -->
+    <script src="https://cdnjs.cloudflare.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
+        h2 { margin-bottom: 1.5rem; color: #38bdf8; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: white; font-size: 1rem; box-sizing: border-box; margin-bottom: 1rem; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #7dd3fc; }
+        #output { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; background: #0f172a; min-height: 50px; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 1.2rem; border-left: 4px solid #38bdf8; }
+        .error { color: #f87171; border-left-color: #f87171 !important; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>AI Math Solver</h2>
+    <input type="text" id="userInput" placeholder="e.g., derivative('x^2', 'x') or 5^3" onkeypress="if(event.key==='Enter') solve()">
+    <button onclick="solve()">Compute Solution</button>
+    <div id="output">Result will appear here...</div>
+</div>
+
+<script>
+    function solve() {
+        const input = document.getElementById('userInput').value;
+        const output = document.getElementById('output');
+        
+        try {
+            // Processing logic via MathJS engine
+            const result = math.evaluate(input);
+            output.innerText = result;
+            output.classList.remove('error');
+        } catch (err) {
+            output.innerText = "Invalid expression";
+            output.classList.add('error');
+        }
+    }
+</script>
+
+</body>
+</html>
