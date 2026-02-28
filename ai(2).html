@@ -3,44 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Math Solver</title>
-    <!-- External Math Engine -->
+    <title>AI Math Engine</title>
+    <!-- Loading MathJS with a fallback -->
     <script src="https://cdnjs.cloudflare.com"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
-        h2 { margin-bottom: 1.5rem; color: #38bdf8; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: white; font-size: 1rem; box-sizing: border-box; margin-bottom: 1rem; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #7dd3fc; }
-        #output { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; background: #0f172a; min-height: 50px; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 1.2rem; border-left: 4px solid #38bdf8; }
-        .error { color: #f87171; border-left-color: #f87171 !important; }
+        :root { --cobalt: #38bdf8; --dark: #0f172a; --slate: #1e293b; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--dark); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: var(--slate); padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 90%; max-width: 450px; border: 1px solid #334155; }
+        h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--cobalt); text-align: center; letter-spacing: -0.5px; }
+        .input-group { position: relative; margin-bottom: 1rem; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #334155; background: #0f172a; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; box-sizing: border-box; }
+        input:focus { border-color: var(--cobalt); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--cobalt); color: var(--dark); font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        #result-box { margin-top: 1.5rem; padding: 1.2rem; border-radius: 12px; background: rgba(15, 23, 42, 0.6); border: 1px dashed #475569; min-height: 60px; text-align: center; }
+        .label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        #answer { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; color: #22c55e; word-break: break-all; }
+        .error-text { color: #f87171 !important; font-size: 1rem !important; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>AI Math Solver</h2>
-    <input type="text" id="userInput" placeholder="e.g., derivative('x^2', 'x') or 5^3" onkeypress="if(event.key==='Enter') solve()">
-    <button onclick="solve()">Compute Solution</button>
-    <div id="output">Result will appear here...</div>
+<div class="container">
+    <h1>AI Math Engine</h1>
+    <div class="input-group">
+        <input type="text" id="mathInput" placeholder="Try 2 + 2 or sqrt(144) or 5^2" autocomplete="off">
+    </div>
+    <button onclick="calculate()">Solve Problem</button>
+    
+    <div id="result-box">
+        <span class="label">Result</span>
+        <div id="answer">---</div>
+    </div>
 </div>
 
 <script>
-    function solve() {
-        const input = document.getElementById('userInput').value;
-        const output = document.getElementById('output');
+    function calculate() {
+        const display = document.getElementById('answer');
+        let rawInput = document.getElementById('mathInput').value.trim();
         
+        if (!rawInput) {
+            display.innerHTML = "<span class='error-text'>Please enter a math problem</span>";
+            return;
+        }
+
+        // AI Pre-processing: Fixes common user shorthand like "5x" to "5*x"
+        let processedInput = rawInput.replace(/(\d)([a-zA-Z])/g, '$1*$2');
+
         try {
-            // Processing logic via MathJS engine
-            const result = math.evaluate(input);
-            output.innerText = result;
-            output.classList.remove('error');
+            let result;
+            // Strategy 1: Try MathJS (Advanced math)
+            if (typeof math !== 'undefined') {
+                result = math.evaluate(processedInput);
+            } 
+            // Strategy 2: Fallback to Native JS (Simple math)
+            else {
+                result = eval(processedInput.replace(/\^/g, '**'));
+            }
+
+            // Formatting the result
+            if (typeof result === 'function') throw new Error();
+            display.innerText = result;
+            display.classList.remove('error-text');
+            
         } catch (err) {
-            output.innerText = "Invalid expression";
-            output.classList.add('error');
+            display.innerHTML = "<span class='error-text'>Invalid Expression</span>";
         }
     }
+
+    // Allow "Enter" key to solve
+    document.getElementById('mathInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') calculate();
+    });
 </script>
 
 </body>
