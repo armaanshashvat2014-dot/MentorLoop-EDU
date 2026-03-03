@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Math Engine</title>
-    <!-- Loading MathJS with a fallback -->
+    <!-- Fixed MathJS Link -->
     <script src="https://cdnjs.cloudflare.com"></script>
     <style>
         :root { --cobalt: #38bdf8; --dark: #0f172a; --slate: #1e293b; }
@@ -20,6 +20,7 @@
         .label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
         #answer { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; color: #22c55e; word-break: break-all; }
         .error-text { color: #f87171 !important; font-size: 1rem !important; }
+        .hint { font-size: 0.75rem; color: #64748b; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -27,7 +28,8 @@
 <div class="container">
     <h1>AI Math Engine</h1>
     <div class="input-group">
-        <input type="text" id="mathInput" placeholder="Use only math symbols and numbers" autocomplete="off">
+        <!-- Added a hint so users know how to type square roots -->
+        <input type="text" id="mathInput" placeholder="e.g. sqrt(16) or 5 + 5" autocomplete="off">
     </div>
     <button onclick="calculate()">Solve Problem</button>
     
@@ -35,34 +37,51 @@
         <span class="label">Result</span>
         <div id="answer">---</div>
     </div>
+    <div class="hint">Tip: Type "sqrt(25)" or "sqrt 25"</div>
 </div>
 
 <script>
     function calculate() {
         const display = document.getElementById('answer');
-        let rawInput = document.getElementById('mathInput').value.trim();
+        let rawInput = document.getElementById('mathInput').value.trim().toLowerCase();
         
         if (!rawInput) {
             display.innerHTML = "<span class='error-text'>Please enter a math problem</span>";
             return;
         }
 
-        // AI Pre-processing: Fixes common user shorthand like "5x" to "5*x"
+        // --- AI PRE-PROCESSING ---
+        // 1. Fixes "5x" to "5*x"
         let processedInput = rawInput.replace(/(\d)([a-zA-Z])/g, '$1*$2');
+        
+        // 2. Fixes "sqrt 25" (missing brackets) to "sqrt(25)"
+        processedInput = processedInput.replace(/sqrt\s+(\d+)/g, 'sqrt($1)');
+        
+        // 3. Handles the √ symbol if the user pastes it
+        processedInput = processedInput.replace(/√(\d+)/g, 'sqrt($1)');
 
         try {
             let result;
-            // Strategy 1: Try MathJS (Advanced math)
+            
+            // Strategy 1: MathJS (Handles sqrt natively)
             if (typeof math !== 'undefined') {
                 result = math.evaluate(processedInput);
             } 
-            // Strategy 2: Fallback to Native JS (Simple math)
+            // Strategy 2: Fallback to Native JS
             else {
-                result = eval(processedInput.replace(/\^/g, '**'));
+                // If using native JS, we change 'sqrt' to 'Math.sqrt'
+                let jsInput = processedInput.replace(/sqrt/g, 'Math.sqrt').replace(/\^/g, '**');
+                result = eval(jsInput);
             }
 
             // Formatting the result
-            if (typeof result === 'function') throw new Error();
+            if (result === undefined || typeof result === 'function') throw new Error();
+            
+            // Rounding to 4 decimal places if it's a long decimal
+            if (!Number.isInteger(result) && typeof result === 'number') {
+                result = result.toFixed(4);
+            }
+
             display.innerText = result;
             display.classList.remove('error-text');
             
@@ -71,7 +90,6 @@
         }
     }
 
-    // Allow "Enter" key to solve
     document.getElementById('mathInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') calculate();
     });
