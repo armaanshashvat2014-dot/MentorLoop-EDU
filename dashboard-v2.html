@@ -181,9 +181,7 @@ iframe {
       <p><strong>Points:</strong> <span id="points">0</span></p>
 <p><strong>🔥 Streak:</strong> <span id="streak">0</span> days</p>
     <p><strong>🔥 Did you know we can score points by answering questions</strong></p>
-      <a href="badges.html" class="btn" style="background:#22c55e;">
-        Find all badges
-      </a>
+      
       <a href="ai(2).html" class="btn" style="background:#22c55e;">
         ✍️ Meet our own math ai for solving math expressions
       </a>
@@ -279,7 +277,9 @@ function renderBadges() {
     { name: "🤔 Curious Starter", min: 110 },
     { name: "💡 Active Learner", min: 200 },
     { name: "🧠 Knowledge Helper", min: 540 },
-    { name: "👑 Mentor Champ", min: 1000 }
+    { name: "👑 Mentor Champ", min: 1000},
+    {name: "👑 The winner", min: 11000},
+    {name: "👑 The best", min: 14000}
   ];
 
   const box = document.getElementById("badges");
@@ -388,6 +388,7 @@ document.getElementById("weakest").innerText = weakest;
 </script>
 </body>
 </html>
+
 
 
 
