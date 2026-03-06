@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.card{
+  background:#1e293b;
+  padding:30px;
+  border-radius:16px;
+  width:95%;
+  max-width:600px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
+}
+
+h1{
+  text-align:center;
+  color:#22d3ee;
+  margin-bottom:20px;
+}
+
+.stat{
+  background:#0f172a;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  font-size:16px;
+}
+
+.badges{
+  margin-top:25px;
+}
+
+.badge-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
+  gap:12px;
+  margin-top:10px;
+}
+
+.badge{
+  background:#0f172a;
+  padding:12px;
+  border-radius:8px;
+  text-align:center;
+  font-size:14px;
+}
+
+.locked{
+  opacity:0.4;
+  filter:grayscale(100%);
+}
+
+.unlocked{
+  border:2px solid #10b981;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:25px;
+  border:none;
+  border-radius:10px;
+  background:#10b981;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#059669;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>👤 Your Profile</h1>
+
+<div class="stat">
+<span>Username</span>
+<strong id="username">Student</strong>
+</div>
+
+<div class="stat">
+<span>🔥 Current Streak</span>
+<strong id="streak">0</strong>
+</div>
+
+<div class="stat">
+<span>⭐ Points</span>
+<strong id="points">0</strong>
+</div>
+
+<div class="badges">
+<h2>🏅 Badges</h2>
+<div class="badge-grid" id="badgeGrid"></div>
+</div>
+
+<button onclick="location.href='dashboard.html'">
+⬅ Back to Dashboard
+</button>
+
+</div>
+
+<script>
+
+// USER DATA
+let username = localStorage.getItem("username") || "Student";
+let streak = parseInt(localStorage.getItem("ml_streak") || 0);
+let points = parseInt(localStorage.getItem("ml_points") || 0);
+
+document.getElementById("username").innerText = username;
+document.getElementById("streak").innerText = streak;
+document.getElementById("points").innerText = points;
+
+
+// BADGES (based on streak + points)
+
+const badges = [
+
+{ name:"Getting Started", req:1, type:"streak", icon:"🔥" },
+{ name:"On Fire", req:5, type:"streak", icon:"🔥🔥" },
+{ name:"Unstoppable", req:10, type:"streak", icon:"🚀" },
+{ name:"Legend Streak", req:30, type:"streak", icon:"🌋" },
+
+{ name:"Point Collector", req:50, type:"points", icon:"⭐" },
+{ name:"Achiever", req:150, type:"points", icon:"🏅" },
+{ name:"Champion", req:300, type:"points", icon:"🏆" },
+{ name:"Elite Learner", req:600, type:"points", icon:"👑" }
+
+];
+
+const grid = document.getElementById("badgeGrid");
+
+badges.forEach(b => {
+
+let unlocked = false;
+
+if(b.type === "streak") unlocked = streak >= b.req;
+if(b.type === "points") unlocked = points >= b.req;
+
+let div = document.createElement("div");
+
+div.className = "badge " + (unlocked ? "unlocked" : "locked");
+
+div.innerHTML = `
+<div style="font-size:26px">${b.icon}</div>
+<div>${b.name}</div>
+`;
+
+grid.appendChild(div);
+
+});
+
+</script>
+
+</body>
+</html>
