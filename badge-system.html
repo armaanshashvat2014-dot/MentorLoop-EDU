@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Badge System</title>
+
+<style>
+@keyframes slideIn{
+  from{
+    transform:translateX(100px);
+    opacity:0;
+  }
+  to{
+    transform:translateX(0);
+    opacity:1;
+  }
+}
+
+.badge-popup{
+  position:fixed;
+  bottom:30px;
+  right:30px;
+  background:#1e293b;
+  color:white;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  font-family:'Segoe UI',sans-serif;
+  z-index:9999;
+  animation:slideIn 0.5s ease;
+  text-align:center;
+}
+</style>
+
+</head>
+<body>
+
+<script>
+
+function showBadgePopup(badge){
+
+  const popup = document.createElement("div");
+  popup.className = "badge-popup";
+
+  popup.innerHTML = `
+  <div style="font-size:28px">${badge.icon}</div>
+  <div style="font-weight:bold">Badge Unlocked!</div>
+  <div>${badge.name}</div>
+  `;
+
+  document.body.appendChild(popup);
+
+  setTimeout(()=>{
+    popup.remove();
+  },4000);
+}
+
+function checkBadges(){
+
+  const streak = parseInt(localStorage.getItem("ml_streak") || 0);
+  const points = parseInt(localStorage.getItem("ml_points") || 0);
+
+  const badges = [
+
+    {name:"Getting Started",req:1,type:"streak",icon:"🔥"},
+    {name:"On Fire",req:5,type:"streak",icon:"🔥🔥"},
+    {name:"Unstoppable",req:10,type:"streak",icon:"🚀"},
+    {name:"Legend Streak",req:30,type:"streak",icon:"🌋"},
+
+    {name:"Point Collector",req:50,type:"points",icon:"⭐"},
+    {name:"Achiever",req:150,type:"points",icon:"🏅"},
+    {name:"Champion",req:300,type:"points",icon:"🏆"},
+    {name:"Elite Learner",req:600,type:"points",icon:"👑"}
+
+  ];
+
+  let unlocked = JSON.parse(localStorage.getItem("ml_badges") || "[]");
+
+  badges.forEach(b => {
+
+    let earned = false;
+
+    if(b.type === "streak") earned = streak >= b.req;
+    if(b.type === "points") earned = points >= b.req;
+
+    if(earned && !unlocked.includes(b.name)){
+
+      unlocked.push(b.name);
+      localStorage.setItem("ml_badges",JSON.stringify(unlocked));
+
+      showBadgePopup(b);
+    }
+
+  });
+
+}
+
+checkBadges();
+
+</script>
+
+</body>
+</html>
