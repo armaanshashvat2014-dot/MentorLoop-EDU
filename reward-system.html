@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Reward System</title>
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:transparent;
+}
+
+@keyframes slideIn{
+from{
+transform:translateX(120px);
+opacity:0;
+}
+to{
+transform:translateX(0);
+opacity:1;
+}
+}
+
+.rewardPopup{
+position:fixed;
+bottom:30px;
+right:30px;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+padding:20px;
+border-radius:14px;
+width:220px;
+box-shadow:0 10px 30px rgba(0,0,0,0.6);
+animation:slideIn .5s ease;
+z-index:9999;
+text-align:center;
+border:2px solid #22c55e;
+}
+
+.rewardIcon{
+font-size:32px;
+margin-bottom:6px;
+}
+
+.rewardTitle{
+font-weight:bold;
+color:#22d3ee;
+margin-bottom:4px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<script>
+
+function showReward(reward){
+
+let popup=document.createElement("div");
+popup.className="rewardPopup";
+
+popup.innerHTML=`
+<div class="rewardIcon">${reward.icon}</div>
+<div class="rewardTitle">Reward Unlocked!</div>
+<div>${reward.name}</div>
+`;
+
+document.body.appendChild(popup);
+
+setTimeout(()=>{
+popup.remove();
+},4000);
+
+}
+
+function checkRewards(){
+
+let points=parseInt(localStorage.getItem("ml_points")||0);
+
+let rewards=[
+
+{name:"Starter Reward",req:50,icon:"🎁"},
+{name:"Bronze Reward",req:100,icon:"🥉"},
+{name:"Silver Reward",req:250,icon:"🥈"},
+{name:"Gold Reward",req:500,icon:"🥇"},
+{name:"Elite Reward",req:1000,icon:"👑"}
+
+];
+
+let claimed=JSON.parse(localStorage.getItem("ml_rewards")||"[]");
+
+rewards.forEach(r=>{
+
+if(points>=r.req && !claimed.includes(r.name)){
+
+claimed.push(r.name);
+localStorage.setItem("ml_rewards",JSON.stringify(claimed));
+
+showReward(r);
+
+}
+
+});
+
+}
+
+checkRewards();
+
+</script>
+
+</body>
+</html>
