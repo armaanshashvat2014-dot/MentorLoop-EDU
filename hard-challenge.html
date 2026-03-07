@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hard Challenge | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a);
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+color:#e2e8f0;
+}
+
+.card{
+background:#0f172a;
+padding:35px;
+border-radius:18px;
+width:95%;
+max-width:650px;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+border:1px solid rgba(34,211,238,.2);
+}
+
+h1{
+text-align:center;
+color:#22d3ee;
+margin-bottom:20px;
+}
+
+#question{
+font-size:18px;
+margin-bottom:15px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#1e293b;
+color:white;
+cursor:pointer;
+transition:.25s;
+}
+
+button:hover{
+background:#22d3ee;
+color:#020617;
+}
+
+.score{
+margin-top:15px;
+text-align:right;
+font-weight:bold;
+color:#22d3ee;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1 id="title">Hard Challenge</h1>
+
+<p id="question"></p>
+<div id="options"></div>
+
+<div class="score">
+Score: <span id="score">0</span>
+</div>
+
+</div>
+
+<script>
+
+// ---------- SUBJECT FROM URL ----------
+const params=new URLSearchParams(window.location.search);
+const subject=params.get("subject") || "math";
+
+// ---------- QUESTION BANK ----------
+const HARD_QUESTIONS={
+
+math:[
+{q:"12² + 8² =",a:["208","200","220"],c:0},
+{q:"√144 + √81 =",a:["21","23","25"],c:0},
+{q:"15 × 14 =",a:["210","200","220"],c:0},
+{q:"50% of 360 =",a:["180","150","160"],c:0},
+{q:"9³ =",a:["729","512","656"],c:0}
+],
+
+science:[
+{q:"Unit of electric resistance?",a:["Ohm","Volt","Ampere"],c:0},
+{q:"Gas used in photosynthesis?",a:["CO₂","O₂","N₂"],c:0},
+{q:"Largest human organ?",a:["Skin","Heart","Liver"],c:0},
+{q:"Speed of light?",a:["3×10⁸ m/s","3×10⁶ m/s","3×10⁵ m/s"],c:0},
+{q:"Planet with strongest gravity?",a:["Jupiter","Earth","Mars"],c:0}
+],
+
+gk:[
+{q:"Largest democracy?",a:["India","USA","Brazil"],c:0},
+{q:"Oldest university?",a:["University of Bologna","Oxford","Harvard"],c:0},
+{q:"UN founded in?",a:["1945","1919","1950"],c:0},
+{q:"Largest island?",a:["Greenland","Australia","Madagascar"],c:0},
+{q:"Deepest ocean trench?",a:["Mariana","Java","Puerto Rico"],c:0}
+]
+
+};
+
+// ---------- SELECT QUESTIONS ----------
+let questions=[...HARD_QUESTIONS[subject]];
+
+document.getElementById("title").innerText=
+"🔥 Hard "+subject.toUpperCase()+" Challenge";
+
+// ---------- GAME ----------
+let index=0;
+let score=0;
+
+function loadQuestion(){
+
+if(index>=questions.length){
+
+let high=parseInt(localStorage.getItem("hard_"+subject+"_high")||0);
+
+if(score>high){
+localStorage.setItem("hard_"+subject+"_high",score);
+high=score;
+}
+
+document.querySelector(".card").innerHTML=
+`<h1>🏆 Challenge Complete</h1>
+<p>Your Score: ${score}/${questions.length}</p>
+<p>Highest Score: ${high}</p>
+<button onclick="location.reload()">Retry</button>`;
+
+return;
+
+}
+
+const q=questions[index];
+
+document.getElementById("question").textContent=q.q;
+
+const options=document.getElementById("options");
+
+options.innerHTML="";
+
+q.a.forEach((opt,i)=>{
+
+const btn=document.createElement("button");
+
+btn.textContent=opt;
+
+btn.onclick=()=>{
+
+if(i===q.c) score++;
+
+index++;
+
+document.getElementById("score").innerText=score;
+
+loadQuestion();
+
+};
+
+options.appendChild(btn);
+
+});
+
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
