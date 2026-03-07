@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Random Facts | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:40px 20px;
+}
+
+.page-title{
+font-size:2.5rem;
+margin-bottom:40px;
+background:linear-gradient(90deg,#22d3ee,#10b981);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.grid{
+max-width:900px;
+width:100%;
+display:grid;
+gap:25px;
+}
+
+.fact-card{
+background:#1e293b;
+padding:40px;
+border-radius:20px;
+box-shadow:0 20px 45px rgba(0,0,0,0.6);
+transition:0.35s;
+}
+
+.fact-card:hover{
+transform:translateY(-8px) scale(1.02);
+box-shadow:0 30px 70px rgba(0,0,0,0.8);
+}
+
+.fact-card h1{
+font-size:1.7rem;
+font-weight:900;
+line-height:1.5;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2 class="page-title">✨ Positve Quotes</h2>
+
+<div class="grid" id="factsContainer"></div>
+
+<script>
+
+const facts = [
+  "Every day is a fresh start.",
+"You are capable of amazing things.",
+"Kindness is a superpower.",
+"Your potential is limitless.",
+"Believe in the magic of small steps.",
+"Gratitude turns what we have into enough.",
+"You are stronger than you think.",
+"Challenges are opportunities in disguise.",
+"The best is yet to come.",
+"Happiness is a choice you make.",
+"Your growth has no ceiling.",
+"Inner peace is the greatest wealth.",
+"You belong in the room you're in.",
+"Be the light in someone's day.",
+"Courage is trying again tomorrow.",
+"You are worthy of love and respect.",
+"Dream big and act bold.",
+"Focus on the good.",
+"Confidence is built, not born.",
+"Your unique voice matters.",
+"Mistakes are just lessons in progress.",
+"Creativity is intelligence having fun.",
+"You have the power to create change.",
+"Patience is a form of wisdom.",
+"Self-care is a necessity, not a luxury.",
+"Success is a journey, not a destination.",
+"The world needs your authentic self.",
+"Spread joy wherever you go.",
+"Stay curious about everything.",
+"Resilience is your inner anchor.",
+"Love conquers all fears.",
+"Celebrate your progress, no matter how small.",
+"You are the author of your own story.",
+"Find beauty in the ordinary.",
+"Action is the key to all success.",
+"Hope is a powerful engine.",
+"Your vibe attracts your tribe.",
+"Forgiveness is freedom for the soul.",
+"You are an original work of art.",
+"Consistency is the secret sauce.",
+"Empathy bridges the gaps between us.",
+"Adventure awaits those who seek it.",
+"Your effort is never wasted.",
+"Stay grounded while reaching for stars.",
+"Life is a beautiful struggle.",
+"Humor heals the spirit.",
+"Integrity is your true compass.",
+"You are equipped for this moment.",
+"Breathe in calm, breathe out doubt.",
+"Your energy is contagious.",
+"Keep your head up and heart open.",
+"Small acts of love change the world."
+
+];
+
+function getRandomFacts(){
+
+const shuffled = [...facts].sort(() => Math.random() - 0.5);
+return shuffled.slice(0,5);
+
+}
+
+const selectedFacts = getRandomFacts();
+const container = document.getElementById("factsContainer");
+
+selectedFacts.forEach(fact => {
+
+const card = document.createElement("div");
+card.className = "fact-card";
+
+card.innerHTML = `<h1><b>${fact}</b></h1>`;
+
+container.appendChild(card);
+
+});
+
+</script>
+
+</body>
+</html>
