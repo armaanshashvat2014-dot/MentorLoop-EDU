@@ -1,228 +1,224 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Science Sprint | MentorLoop EDU</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Science Sprint | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top, #0f172a, #020617);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: #e2e8f0;
-    }
+<style>
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:radial-gradient(circle at top,#0f172a,#020617);
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+color:#e2e8f0;
+}
 
-    .card {
-      background: rgba(15, 23, 42, 0.95);
-      padding: 35px;
-      border-radius: 20px;
-      width: 95%;
-      max-width: 650px;
-      box-shadow: 0 0 40px rgba(34, 211, 238, 0.2);
-      border: 1px solid rgba(34, 211, 238, 0.3);
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.4s ease-in-out;
-    }
+.card{
+background:rgba(15,23,42,.95);
+padding:35px;
+border-radius:20px;
+width:95%;
+max-width:650px;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+border:1px solid rgba(34,211,238,.3);
+backdrop-filter:blur(10px);
+animation:fadeIn .4s ease-in-out;
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1;transform:translateY(0)}
+}
 
-    h1 {
-      text-align: center;
-      color: #22d3ee;
-      margin-bottom: 25px;
-      letter-spacing: 1px;
-    }
+h1{
+text-align:center;
+color:#22d3ee;
+margin-bottom:25px;
+}
 
-    #question {
-      margin-bottom: 20px;
-      font-size: 18px;
-      line-height: 1.5;
-    }
+#question{
+margin-bottom:20px;
+font-size:18px;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      background: #1e293b;
-      color: white;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.25s ease;
-      font-size: 15px;
-    }
+button{
+width:100%;
+padding:12px;
+margin-top:12px;
+background:#1e293b;
+color:white;
+border:1px solid #334155;
+border-radius:10px;
+cursor:pointer;
+transition:.25s;
+}
 
-    button:hover {
-      background: #22d3ee;
-      color: #020617;
-      transform: scale(1.02);
-    }
+button:hover{
+background:#22d3ee;
+color:#020617;
+transform:scale(1.02);
+}
 
-    .score-box {
-      margin-top: 20px;
-      text-align: right;
-      font-weight: bold;
-      color: #22d3ee;
-    }
+.score-box{
+margin-top:20px;
+text-align:right;
+font-weight:bold;
+color:#22d3ee;
+}
 
-    .progress {
-      height: 6px;
-      background: #1e293b;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
+.progress{
+height:6px;
+background:#1e293b;
+border-radius:5px;
+margin-bottom:20px;
+overflow:hidden;
+}
 
-    .progress-bar {
-      height: 100%;
-      background: #22d3ee;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-  </style>
+.progress-bar{
+height:100%;
+background:#22d3ee;
+width:0%;
+transition:width .3s ease;
+}
+</style>
 </head>
 
 <body>
 
 <div class="card">
-  <h1>⚛️Science Sprint</h1>
 
-  <div class="progress">
-    <div class="progress-bar" id="progress"></div>
-  </div>
+<h1>⚛️ Science Sprint</h1>
 
-  <p id="question"></p>
-  <div id="options"></div>
-  <div class="score-box">Score: <span id="score">0</span></div>
+<div class="progress">
+<div class="progress-bar" id="progress"></div>
 </div>
-  <script>
+
+<p id="question"></p>
+<div id="options"></div>
+
+<div class="score-box">
+Score: <span id="score">0</span>
+</div>
+
+</div>
+
+<script>
 
 // ---------- SHUFFLE ----------
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+return a;
 }
 
-// ---------- 100 UNIQUE SCIENCE QUESTIONS ----------
-const scienceQuestions = [
-{q:"What planet is known as the Red Planet?", a:["Mars","Venus","Jupiter"], c:0},
-{q:"What gas do plants absorb?", a:["Oxygen","Carbon Dioxide","Nitrogen"], c:1},
-{q:"What is the chemical symbol for Gold?", a:["Au","Ag","Gd"], c:0},
-{q:"What force keeps objects on Earth?", a:["Magnetism","Gravity","Friction"], c:1},
-{q:"What part of cell contains DNA?", a:["Nucleus","Membrane","Cytoplasm"], c:0},
-{q:"What is H2O?", a:["Water","Hydrogen","Salt"], c:0},
-{q:"What organ pumps blood?", a:["Heart","Brain","Lungs"], c:0},
-{q:"Speed of light is?", a:["300,000 km/s","150,000 km/s","1,000 km/s"], c:0},
-{q:"Largest planet?", a:["Earth","Saturn","Jupiter"], c:2},
-{q:"What gas do humans breathe?", a:["Oxygen","Helium","Nitrogen"], c:0},
+// ---------- QUESTIONS ----------
+const scienceQuestions=[
 
-{q:"Boiling point of water?", a:["100°C","90°C","50°C"], c:0},
-{q:"Earth revolves around?", a:["Moon","Sun","Mars"], c:1},
-{q:"Unit of force?", a:["Newton","Watt","Joule"], c:0},
-{q:"Chemical symbol for Sodium?", a:["Na","So","Sn"], c:0},
-{q:"Photosynthesis occurs in?", a:["Roots","Leaves","Stem"], c:1},
-{q:"Hardest natural substance?", a:["Diamond","Iron","Gold"], c:0},
-{q:"Human body temperature?", a:["37°C","40°C","35°C"], c:0},
-{q:"Center of atom?", a:["Electron","Nucleus","Proton"], c:1},
-{q:"Energy stored in food?", a:["Chemical","Kinetic","Sound"], c:0},
-{q:"Smallest unit of life?", a:["Atom","Cell","Tissue"], c:1},
+{q:"What planet is known as the Red Planet?",a:["Mars","Venus","Jupiter"],c:0},
+{q:"What gas do plants absorb?",a:["Oxygen","Carbon Dioxide","Nitrogen"],c:1},
+{q:"What is the chemical symbol for Gold?",a:["Au","Ag","Gd"],c:0},
+{q:"What force keeps objects on Earth?",a:["Magnetism","Gravity","Friction"],c:1},
+{q:"What part of cell contains DNA?",a:["Nucleus","Membrane","Cytoplasm"],c:0},
+{q:"What is H2O?",a:["Water","Hydrogen","Salt"],c:0},
+{q:"What organ pumps blood?",a:["Heart","Brain","Lungs"],c:0},
+{q:"Speed of light is?",a:["300,000 km/s","150,000 km/s","1,000 km/s"],c:0},
+{q:"Largest planet?",a:["Earth","Saturn","Jupiter"],c:2},
+{q:"What gas do humans breathe?",a:["Oxygen","Helium","Nitrogen"],c:0},
 
-{q:"What gas forms ozone layer?", a:["Oxygen","Ozone","Nitrogen"], c:1},
-{q:"Unit of electric current?", a:["Volt","Ampere","Watt"], c:1},
-{q:"Chemical symbol of Iron?", a:["Ir","Fe","In"], c:1},
-{q:"Largest organ in body?", a:["Heart","Skin","Liver"], c:1},
-{q:"What causes tides?", a:["Sun","Wind","Moon"], c:2},
-{q:"Unit of power?", a:["Joule","Watt","Volt"], c:1},
-{q:"What is DNA?", a:["Protein","Genetic Material","Vitamin"], c:1},
-{q:"Chemical symbol for Oxygen?", a:["Ox","O","Og"], c:1},
-{q:"Gas used in balloons?", a:["Helium","Hydrogen","Nitrogen"], c:0},
-{q:"Which planet has rings?", a:["Earth","Mars","Saturn"], c:2},
+{q:"Boiling point of water?",a:["100°C","90°C","50°C"],c:0},
+{q:"Earth revolves around?",a:["Moon","Sun","Mars"],c:1},
+{q:"Unit of force?",a:["Newton","Watt","Joule"],c:0},
+{q:"Chemical symbol for Sodium?",a:["Na","So","Sn"],c:0},
+{q:"Photosynthesis occurs in?",a:["Roots","Leaves","Stem"],c:1},
+{q:"Hardest natural substance?",a:["Diamond","Iron","Gold"],c:0},
+{q:"Human body temperature?",a:["37°C","40°C","35°C"],c:0},
+{q:"Center of atom?",a:["Electron","Nucleus","Proton"],c:1},
+{q:"Energy stored in food?",a:["Chemical","Kinetic","Sound"],c:0},
+{q:"Smallest unit of life?",a:["Atom","Cell","Tissue"],c:1}
 
-{q:"Primary source of energy?", a:["Sun","Moon","Wind"], c:0},
-{q:"Fastest land animal?", a:["Lion","Cheetah","Tiger"], c:1},
-{q:"Gas plants release?", a:["Oxygen","Carbon Dioxide","Nitrogen"], c:0},
-{q:"Unit of temperature?", a:["Kelvin","Meter","Second"], c:0},
-{q:"Chemical symbol for Silver?", a:["Ag","Si","Sv"], c:0},
-{q:"Which vitamin from sunlight?", a:["A","C","D"], c:2},
-{q:"Device to see stars?", a:["Microscope","Telescope","Periscope"], c:1},
-{q:"Energy of motion?", a:["Potential","Thermal","Kinetic"], c:2},
-{q:"Blood cells carry?", a:["Oxygen","Water","Carbon"], c:0},
-{q:"What is CO2?", a:["Oxygen","Carbon Dioxide","Nitrogen"], c:1},
-
-// Continue filling to 100...
 ];
 
-// Make sure total is exactly 100
-if (scienceQuestions.length !== 100) {
-  console.warn("Add more questions until total = 100");
+let questions=shuffle([...scienceQuestions]).slice(0,10);
+
+let index=0;
+let score=0;
+
+function loadQuestion(){
+
+if(index>=questions.length){
+
+let percent=Math.round((score/questions.length)*100);
+
+// ⭐ SAVE LAST QUIZ SCORE
+localStorage.setItem("ml_last_quiz_score",percent);
+
+// 🔥 DAILY REWARD
+if(percent>=80){
+
+const today=new Date().toDateString();
+
+if(localStorage.getItem("quizDailyDate")!==today){
+
+let pts=parseInt(localStorage.getItem("ml_points")||0);
+pts+=5;
+
+localStorage.setItem("ml_points",pts);
+localStorage.setItem("quizDailyDate",today);
+
 }
 
-// ---------- GAME LOGIC ----------
-let usedQuestions = [];
-let score = 0;
-
-function getRandomQuestion() {
-  if (usedQuestions.length === scienceQuestions.length) {
-    return null; // no repeats
-  }
-
-  let index;
-  do {
-    index = Math.floor(Math.random() * scienceQuestions.length);
-  } while (usedQuestions.includes(index));
-
-  usedQuestions.push(index);
-  return scienceQuestions[index];
 }
 
-let currentQuestion;
-let totalQuestions = 10;
-let questionCount = 0;
+document.querySelector(".card").innerHTML=
+`<h1>🎉 Quiz Complete!</h1>
+<p>Your score: <strong>${score}/${questions.length}</strong></p>
+<p>Percentage: <strong>${percent}%</strong></p>
+<button onclick="location.reload()">Play Again</button>`;
 
-function loadQuestion() {
+return;
 
-  if (questionCount >= totalQuestions) {
-    document.querySelector(".card").innerHTML =
-      `<h1>Quiz Complete!</h1>
-       <p>Your score: <strong>${score} / ${totalQuestions}</strong></p>
-       <button onclick="location.reload()">Play Again</button>`;
-    return;
-  }
+}
 
-  currentQuestion = getRandomQuestion();
-  questionCount++;
+const q=questions[index];
 
-  document.getElementById("question").textContent = currentQuestion.q;
+document.getElementById("question").textContent=q.q;
 
-  const options = document.getElementById("options");
-  options.innerHTML = "";
+const options=document.getElementById("options");
+options.innerHTML="";
 
-  currentQuestion.a.forEach((opt, i) => {
-    const btn = document.createElement("button");
-    btn.textContent = opt;
-    btn.onclick = () => {
-      if (i === currentQuestion.c) score++;
-      document.getElementById("score").textContent = score;
-      loadQuestion();
-    };
-    options.appendChild(btn);
-  });
+q.a.forEach((opt,i)=>{
+
+const btn=document.createElement("button");
+
+btn.textContent=opt;
+
+btn.onclick=()=>{
+if(i===q.c) score++;
+
+index++;
+
+document.getElementById("score").textContent=score;
+
+document.getElementById("progress").style.width=
+((index/questions.length)*100)+"%";
+
+loadQuestion();
+};
+
+options.appendChild(btn);
+
+});
+
 }
 
 loadQuestion();
 
 </script>
+
 </body>
 </html>
-
-
