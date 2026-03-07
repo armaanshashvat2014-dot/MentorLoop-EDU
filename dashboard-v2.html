@@ -177,31 +177,8 @@ color:var(--text);
 background:var(--card);
 }
 
-/* THEMES */
 
-.theme-ocean{
---bg1:#0f2027;
---bg2:#203a43;
---card:#2c5364;
---text:white;
---accent:#38bdf8;
-}
 
-.theme-sunset{
---bg1:#3a1c71;
---bg2:#d76d77;
---card:#6a0572;
---text:white;
---accent:#ffb347;
-}
-
-.theme-light{
---bg1:#f1f5f9;
---bg2:#e2e8f0;
---card:white;
---text:#111827;
---accent:#2563eb;
-}
 }
 </style>
 </head>
@@ -253,13 +230,7 @@ background:var(--card);
   <div class="progress-fill" id="certProgress"></div>
 </div>
 <p class="small"><span id="certText"></span></p>
-<p>Change theme</p>
-  <select id="themeSelector">
-<option value="">🌙 Dark</option>
-<option value="theme-ocean">🌊 Ocean</option>
-<option value="theme-sunset">🌸 Sunset</option>
-<option value="theme-light">🌞 Light</option>
-</select>
+
 </div>
     <!-- ACTIONS -->
     <div class="card">
@@ -443,32 +414,10 @@ document.getElementById("strongest").innerText = strongest;
 document.getElementById("weakest").innerText = weakest;
     
 </script>
-  <script>
 
-const selector = document.getElementById("themeSelector");
-
-const savedTheme = localStorage.getItem("ml_theme");
-
-if(savedTheme){
-document.body.classList.add(savedTheme);
-selector.value = savedTheme;
-}
-
-selector.addEventListener("change",function(){
-
-document.body.className="";
-
-if(this.value){
-document.body.classList.add(this.value);
-}
-
-localStorage.setItem("ml_theme",this.value);
-
-});
-
-</script>
 </body>
 </html>
+
 
 
 
