@@ -245,7 +245,12 @@ line-height:1.4;
   Harder levels:<a href="hard-challenge.html?subject=math" class="btn">Math</a>
   <a href="hard-challenge.html?subject=science" class="btn">Science</a>
   <b> GK and Geography are not counted by the Study Helper</b>
-  
+<h2>🎯 Daily Missions</h2>
+
+<ul id="missionsList"></ul>
+
+<p class="small">Complete missions to earn points.</p>
+
 <p style="margin-top:15px;"><strong>Certificate Progress (100 Tests)</strong></p>
 <div class="progress-bar">
   <div class="progress-fill" id="certProgress"></div>
@@ -465,8 +470,89 @@ document.getElementById("studyTip").innerText = tip;
 studyHelper();
 
 </script>
+  <script>
+
+const missions = [
+{task:"Complete a Math Quiz", points:5},
+{task:"Complete a Science Quiz", points:5},
+{task:"Complete a GK Quiz", points:5},
+{task:"Answer a Question", points:4},
+{task:"Ask a Doubt", points:3},
+{task:"Play a Battle", points:6},
+{task:"Read a Fun Fact", points:2},
+{task:"Solve a Hard Challenge", points:8}
+];
+
+function loadMissions(){
+
+const today = new Date().toDateString();
+const savedDate = localStorage.getItem("ml_mission_date");
+
+let todaysMissions;
+
+if(savedDate === today){
+
+todaysMissions = JSON.parse(localStorage.getItem("ml_missions"));
+
+}else{
+
+// pick 3 random missions
+todaysMissions = missions.sort(()=>0.5-Math.random()).slice(0,3);
+
+localStorage.setItem("ml_missions",JSON.stringify(todaysMissions));
+localStorage.setItem("ml_mission_date",today);
+
+}
+
+renderMissions(todaysMissions);
+
+}
+
+function renderMissions(missionsToday){
+
+const list = document.getElementById("missionsList");
+list.innerHTML="";
+
+missionsToday.forEach((m,i)=>{
+
+const li=document.createElement("li");
+
+const doneKey="ml_mission_done_"+i;
+
+let done=localStorage.getItem(doneKey);
+
+li.innerText = done ? "✅ "+m.task+" (+ "+m.points+" pts)" : m.task+" (+ "+m.points+" pts)";
+
+li.onclick=function(){
+
+if(!done){
+
+let pts=parseInt(localStorage.getItem("ml_points")||0);
+pts+=m.points;
+
+localStorage.setItem("ml_points",pts);
+localStorage.setItem(doneKey,"true");
+
+li.innerText="✅ "+m.task+" (+ "+m.points+" pts)";
+
+document.getElementById("points").innerText=pts;
+
+}
+
+};
+
+list.appendChild(li);
+
+});
+
+}
+
+loadMissions();
+
+</script>
 </body>
 </html>
+
 
 
 
