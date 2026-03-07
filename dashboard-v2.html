@@ -177,7 +177,24 @@ color:var(--text);
 background:var(--card);
 }
 
+.study-helper{
+background:#1e293b;
+padding:20px;
+border-radius:14px;
+margin-top:25px;
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
+border-left:4px solid #22d3ee;
+}
 
+.study-helper h3{
+margin-bottom:8px;
+color:#22d3ee;
+}
+
+.study-helper p{
+font-size:15px;
+line-height:1.4;
+}
 
 }
 </style>
@@ -230,7 +247,10 @@ background:var(--card);
   <div class="progress-fill" id="certProgress"></div>
 </div>
 <p class="small"><span id="certText"></span></p>
-
+<div class="study-helper">
+<h3>💡 Study Helper</h3>
+<p id="studyTip">Analyzing your progress...</p>
+</div>
 </div>
     <!-- ACTIONS -->
     <div class="card">
@@ -414,9 +434,42 @@ document.getElementById("strongest").innerText = strongest;
 document.getElementById("weakest").innerText = weakest;
     
 </script>
+<script>
 
+function studyHelper(){
+
+let streak = parseInt(localStorage.getItem("ml_streak") || 0);
+let points = parseInt(localStorage.getItem("ml_points") || 0);
+let lastScore = parseInt(localStorage.getItem("ml_last_quiz_score") || 0);
+
+let tip = "Keep learning! You're doing great.";
+
+if(lastScore < 50){
+tip = "Your last quiz score was low. Try reviewing the topic before attempting another quiz.";
+}
+
+else if(lastScore >= 80){
+tip = "Great job on your last quiz! Try a harder challenge to improve further.";
+}
+
+if(streak >= 5){
+tip = "Amazing! You're on a " + streak + "-day streak. Keep the momentum going!";
+}
+
+if(points >= 200){
+tip = "You're gaining lots of points. Try unlocking new badges or completing challenges.";
+}
+
+document.getElementById("studyTip").innerText = tip;
+
+}
+
+studyHelper();
+
+</script>
 </body>
 </html>
+
 
 
 
