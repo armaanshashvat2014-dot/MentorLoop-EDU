@@ -101,7 +101,10 @@ function loadQuestion(){
 
     let percent=Math.round((score/questions.length)*100);
 
-    // 🔥 DAILY LOGIC — GUARANTEED
+    // ⭐ SAVE LAST QUIZ SCORE FOR STUDY HELPER
+    localStorage.setItem("ml_last_quiz_score",percent);
+
+    // 🔥 DAILY REWARD LOGIC
     if(percent>=80){
 
       const today=new Date().toDateString();
