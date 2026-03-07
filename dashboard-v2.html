@@ -438,19 +438,20 @@ document.getElementById("weakest").innerText = weakest;
 
 function studyHelper(){
 
-let streak = parseInt(localStorage.getItem("ml_streak") || 0);
-let points = parseInt(localStorage.getItem("ml_points") || 0);
 let lastScore = parseInt(localStorage.getItem("ml_last_quiz_score") || 0);
 
-let tip = "Keep learning! You're doing great.";
+let tip = "Try completing a quiz to start improving your knowledge.";
 
-if(lastScore < 50){
-tip = "Your last quiz score was low. Try reviewing the topic before attempting another quiz.";
+if(lastScore > 0 && lastScore < 50){
+tip = "Your last quiz score was low. Review the topic and try again.";
+}
+
+else if(lastScore >= 50 && lastScore < 80){
+tip = "You're doing okay. Try practicing a few more quizzes to improve your score.";
 }
 
 else if(lastScore >= 80){
-tip = "Great job on your last quiz! Try a harder challenge to improve further, for math,this https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/hard-challenge.html?subject=math, gk and science, just change math to science or gk.
-       ";
+tip = "Great job on your last quiz! Try a harder challenge to improve even more.";
 }
 
 document.getElementById("studyTip").innerText = tip;
@@ -462,6 +463,7 @@ studyHelper();
 </script>
 </body>
 </html>
+
 
 
 
