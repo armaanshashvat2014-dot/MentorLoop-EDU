@@ -452,14 +452,6 @@ else if(lastScore >= 80){
 tip = "Great job on your last quiz! Try a harder challenge to improve further.";
 }
 
-if(streak >= 5){
-tip = "Amazing! You're on a " + streak + "-day streak. Keep the momentum going!";
-}
-
-if(points >= 200){
-tip = "You're gaining lots of points. Try unlocking new badges or completing challenges.";
-}
-
 document.getElementById("studyTip").innerText = tip;
 
 }
@@ -469,6 +461,7 @@ studyHelper();
 </script>
 </body>
 </html>
+
 
 
 
