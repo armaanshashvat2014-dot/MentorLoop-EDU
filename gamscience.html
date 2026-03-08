@@ -219,6 +219,28 @@ options.appendChild(btn);
 loadQuestion();
 
 </script>
+<script>
 
+// DAILY ACTIVITY REWARD FOR SCIENCE QUIZ
+
+(function(){
+
+const today = new Date().toDateString();
+const key = "ml_daily_science_quiz";
+
+if(localStorage.getItem(key) !== today){
+
+let pts = parseInt(localStorage.getItem("ml_points") || 0);
+
+pts += 5;
+
+localStorage.setItem("ml_points", pts);
+localStorage.setItem(key, today);
+
+}
+
+})();
+
+</script>
 </body>
 </html>
