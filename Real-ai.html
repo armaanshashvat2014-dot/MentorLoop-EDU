@@ -2,10 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop AI Tutor</title>
+<title>MentorLoop AI</title>
 
 <style>
-
 body{
 font-family:Arial;
 background:#0f172a;
@@ -18,92 +17,55 @@ margin:0;
 }
 
 .container{
-width:700px;
+width:600px;
 background:#1e293b;
 padding:20px;
 border-radius:12px;
-box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
 
-h1{
-text-align:center;
-}
-
-#points{
-text-align:right;
-font-weight:bold;
-color:#38bdf8;
-}
-
-.chat{
-height:250px;
+#chat{
+height:350px;
 overflow-y:auto;
 background:#020617;
 padding:15px;
 border-radius:8px;
-margin-bottom:15px;
+margin-bottom:10px;
 }
 
 input{
-width:75%;
+width:80%;
 padding:10px;
 border:none;
 border-radius:6px;
 }
 
 button{
-padding:10px 15px;
+padding:10px;
 border:none;
 border-radius:6px;
 background:#38bdf8;
 cursor:pointer;
 }
-
-.quiz{
-margin-top:20px;
-background:#020617;
-padding:15px;
-border-radius:8px;
-}
-
-.option{
-margin:6px 0;
-padding:6px;
-background:#1e293b;
-border-radius:5px;
-cursor:pointer;
-}
-
-.option:hover{
-background:#334155;
-}
-
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>Mentor AI</h1>
+<h2>MentorLoop AI</h2>
 
-<div id="points">Points: <span id="score">0</span></div>
+<div id="chat"></div>
 
-<div class="chat" id="chat"></div>
-
-<input id="question" placeholder="Ask a study question...">
-<button onclick="askAI()">Ask</button>
-
-<button onclick="generateQuiz()">Generate Quiz</button>
-
-<div class="quiz" id="quiz"></div>
+<input id="question" placeholder="Ask something...">
+<button onclick="askAI()">Send</button>
 
 </div>
 
 <script>
 
-let score = localStorage.getItem("mentorPoints") || 0
-document.getElementById("score").innerText = score
+const API_KEY = "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"
 
 function addMessage(role,text){
 
@@ -129,67 +91,37 @@ addMessage("You",question)
 
 document.getElementById("question").value=""
 
-addMessage("AI","Thinking...")
+addMessage("AI","⚡ Thinking...")
 
-let response = await fetch(
-"https://api-inference.huggingface.co/models/google/flan-t5-base",
-{
+let response = await fetch("https://openrouter.ai/api/v1/chat/completions",{
+
 method:"POST",
+
 headers:{
+"Authorization":"Bearer "+API_KEY,
 "Content-Type":"application/json"
 },
+
 body:JSON.stringify({
-inputs:"Explain simply for a student: "+question
+
+model:"openai/gpt-3.5-turbo",
+
+messages:[
+{
+role:"user",
+content:question
+}
+]
+
 })
+
 })
 
 let data = await response.json()
 
-let reply = data[0]?.generated_text || "Couldn't answer."
+let reply = data.choices[0].message.content
 
 document.getElementById("chat").lastChild.innerHTML="<b>AI:</b> "+reply
-
-}
-
-async function generateQuiz(){
-
-let topic = prompt("Enter a topic for the quiz")
-
-if(!topic) return
-
-document.getElementById("quiz").innerHTML="Generating quiz..."
-
-let response = await fetch(
-"https://api-inference.huggingface.co/models/google/flan-t5-base",
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-inputs:"Create a simple multiple choice question about "+topic+" with 4 options and say the correct answer."
-})
-})
-
-let data = await response.json()
-
-let text = data[0]?.generated_text || "Couldn't generate quiz."
-
-let quizDiv = document.getElementById("quiz")
-
-quizDiv.innerHTML="<b>Quiz:</b><br>"+text+"<br><br><button onclick='correctAnswer()'>I got it right</button>"
-
-}
-
-function correctAnswer(){
-
-score++
-
-localStorage.setItem("mentorPoints",score)
-
-document.getElementById("score").innerText=score
-
-alert("Correct! +1 point ⭐")
 
 }
 
