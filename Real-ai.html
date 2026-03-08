@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Simple AI</title>
+<title>MentorLoop AI Tutor</title>
 
 <style>
 
 body{
-font-family:Arial, sans-serif;
+font-family:Arial;
 background:#0f172a;
 color:white;
 display:flex;
@@ -18,42 +18,64 @@ margin:0;
 }
 
 .container{
+width:700px;
 background:#1e293b;
-padding:30px;
+padding:20px;
 border-radius:12px;
-width:500px;
-text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
 
-input{
-width:85%;
-padding:12px;
+h1{
+text-align:center;
+}
+
+#points{
+text-align:right;
+font-weight:bold;
+color:#38bdf8;
+}
+
+.chat{
+height:250px;
+overflow-y:auto;
+background:#020617;
+padding:15px;
 border-radius:8px;
+margin-bottom:15px;
+}
+
+input{
+width:75%;
+padding:10px;
 border:none;
-font-size:16px;
-margin-top:10px;
+border-radius:6px;
 }
 
 button{
-margin-top:15px;
-padding:10px 20px;
+padding:10px 15px;
 border:none;
-border-radius:8px;
+border-radius:6px;
 background:#38bdf8;
-color:black;
-font-size:16px;
 cursor:pointer;
 }
 
-button:hover{
-background:#0ea5e9;
+.quiz{
+margin-top:20px;
+background:#020617;
+padding:15px;
+border-radius:8px;
 }
 
-#answer{
-margin-top:20px;
-font-size:18px;
-line-height:1.5;
+.option{
+margin:6px 0;
+padding:6px;
+background:#1e293b;
+border-radius:5px;
+cursor:pointer;
+}
+
+.option:hover{
+background:#334155;
 }
 
 </style>
@@ -63,43 +85,111 @@ line-height:1.5;
 
 <div class="container">
 
-<h1>Ask AI</h1>
+<h1>Mentor AI</h1>
 
-<input id="question" placeholder="Ask anything...">
+<div id="points">Points: <span id="score">0</span></div>
 
-<br>
+<div class="chat" id="chat"></div>
 
+<input id="question" placeholder="Ask a study question...">
 <button onclick="askAI()">Ask</button>
 
-<div id="answer"></div>
+<button onclick="generateQuiz()">Generate Quiz</button>
+
+<div class="quiz" id="quiz"></div>
 
 </div>
 
 <script>
 
+let score = localStorage.getItem("mentorPoints") || 0
+document.getElementById("score").innerText = score
+
+function addMessage(role,text){
+
+let chat = document.getElementById("chat")
+
+let div = document.createElement("div")
+
+div.innerHTML = "<b>"+role+":</b> "+text
+
+chat.appendChild(div)
+
+chat.scrollTop = chat.scrollHeight
+
+}
+
 async function askAI(){
 
 let question = document.getElementById("question").value
 
-document.getElementById("answer").innerText = "Thinking..."
+if(!question) return
+
+addMessage("You",question)
+
+document.getElementById("question").value=""
+
+addMessage("AI","Thinking...")
 
 let response = await fetch(
-"https://api-inference.huggingface.co/models/google/flan-t5-large",
+"https://api-inference.huggingface.co/models/google/flan-t5-base",
 {
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-inputs:question
+inputs:"Explain simply for a student: "+question
 })
 })
 
 let data = await response.json()
 
-let reply = data[0]?.generated_text || "No response"
+let reply = data[0]?.generated_text || "Couldn't answer."
 
-document.getElementById("answer").innerText = reply
+document.getElementById("chat").lastChild.innerHTML="<b>AI:</b> "+reply
+
+}
+
+async function generateQuiz(){
+
+let topic = prompt("Enter a topic for the quiz")
+
+if(!topic) return
+
+document.getElementById("quiz").innerHTML="Generating quiz..."
+
+let response = await fetch(
+"https://api-inference.huggingface.co/models/google/flan-t5-base",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+inputs:"Create a simple multiple choice question about "+topic+" with 4 options and say the correct answer."
+})
+})
+
+let data = await response.json()
+
+let text = data[0]?.generated_text || "Couldn't generate quiz."
+
+let quizDiv = document.getElementById("quiz")
+
+quizDiv.innerHTML="<b>Quiz:</b><br>"+text+"<br><br><button onclick='correctAnswer()'>I got it right</button>"
+
+}
+
+function correctAnswer(){
+
+score++
+
+localStorage.setItem("mentorPoints",score)
+
+document.getElementById("score").innerText=score
+
+alert("Correct! +1 point ⭐")
 
 }
 
