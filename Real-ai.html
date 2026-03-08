@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Simple AI</title>
+
+<style>
+
+body{
+font-family:Arial, sans-serif;
+background:#0f172a;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.container{
+background:#1e293b;
+padding:30px;
+border-radius:12px;
+width:500px;
+text-align:center;
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+input{
+width:85%;
+padding:12px;
+border-radius:8px;
+border:none;
+font-size:16px;
+margin-top:10px;
+}
+
+button{
+margin-top:15px;
+padding:10px 20px;
+border:none;
+border-radius:8px;
+background:#38bdf8;
+color:black;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#0ea5e9;
+}
+
+#answer{
+margin-top:20px;
+font-size:18px;
+line-height:1.5;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Ask AI</h1>
+
+<input id="question" placeholder="Ask anything...">
+
+<br>
+
+<button onclick="askAI()">Ask</button>
+
+<div id="answer"></div>
+
+</div>
+
+<script>
+
+async function askAI(){
+
+let question = document.getElementById("question").value
+
+document.getElementById("answer").innerText = "Thinking..."
+
+let response = await fetch(
+"https://api-inference.huggingface.co/models/google/flan-t5-large",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+inputs:question
+})
+})
+
+let data = await response.json()
+
+let reply = data[0]?.generated_text || "No response"
+
+document.getElementById("answer").innerText = reply
+
+}
+
+</script>
+
+</body>
+</html>
