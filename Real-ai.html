@@ -2,9 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Ultimate Math AI Tutor</title>
+<title>Smart STEM AI Tutor</title>
 
 <style>
+
 body{
 font-family:Arial;
 background:#0f172a;
@@ -17,14 +18,14 @@ margin:0;
 }
 
 .container{
-width:720px;
+width:750px;
 background:#1e293b;
 padding:20px;
 border-radius:12px;
 }
 
 #chat{
-height:350px;
+height:360px;
 overflow-y:auto;
 background:#020617;
 padding:15px;
@@ -32,9 +33,9 @@ border-radius:8px;
 margin-bottom:10px;
 }
 
-.message{margin:6px 0;}
-.user{color:#38bdf8;}
-.ai{color:#22c55e;}
+.message{margin:6px 0}
+.user{color:#38bdf8}
+.ai{color:#22c55e}
 
 input{
 width:80%;
@@ -56,6 +57,7 @@ margin-top:10px;
 background:white;
 border-radius:6px;
 }
+
 </style>
 </head>
 
@@ -63,18 +65,28 @@ border-radius:6px;
 
 <div class="container">
 
-<h2>Ultimate Math AI Tutor</h2>
+<h2>Smart STEM AI Tutor</h2>
 
 <div id="chat"></div>
 
-<input id="input" placeholder="Ask math or chat...">
+<input id="input" placeholder="Ask math, science, or chat...">
 <button onclick="send()">Send</button>
 
-<canvas id="graph" width="650" height="220"></canvas>
+<canvas id="graph" width="680" height="230"></canvas>
 
 </div>
 
 <script>
+
+/* MEMORY SYSTEM */
+
+let knowledge = JSON.parse(localStorage.getItem("aiKnowledge")) || {}
+
+function saveKnowledge(){
+localStorage.setItem("aiKnowledge",JSON.stringify(knowledge))
+}
+
+/* CHAT */
 
 function addMessage(role,text){
 
@@ -92,238 +104,232 @@ chat.scrollTop=chat.scrollHeight
 
 }
 
+/* LEARNING SYSTEM */
+
+function learningSystem(text){
+
+if(text.includes(" is ")){
+
+let parts=text.split(" is ")
+
+let key=parts[0].trim()
+let value=parts[1].trim()
+
+knowledge[key]=value
+
+saveKnowledge()
+
+return "Got it. I learned that "+key+" is "+value
+}
+
+if(text.startsWith("what is ")){
+
+let key=text.replace("what is ","").trim()
+
+if(knowledge[key])
+return key+" is "+knowledge[key]
+}
+
+return null
+
+}
+
 /* BASIC MATH */
 
 function solveMath(expr){
+
 try{
+
 let result=Function('"use strict";return ('+expr+')')()
+
 return "Answer: "+result
+
 }catch{
+
 return null
-}
+
 }
 
-/* FRACTIONS */
-
-function fractionMath(text){
-if(text.includes("/")){
-try{
-let result=Function('"use strict";return ('+text+')')()
-return "Fraction result: "+result
-}catch{
-return null
-}
-}
-return null
 }
 
-/* SQUARE ROOT */
+/* SQRT */
 
 function sqrtCommand(text){
+
 if(text.startsWith("sqrt")){
-let num=parseFloat(text.split(" ")[1])
-if(!isNaN(num))
-return "√"+num+" = "+Math.sqrt(num)
-}
-return null
+
+let n=parseFloat(text.split(" ")[1])
+
+return "√"+n+" = "+Math.sqrt(n)
+
 }
 
-/* TRIGONOMETRY */
+return null
+
+}
+
+/* TRIG */
 
 function trigCommand(text){
 
-let parts=text.split(" ")
-let cmd=parts[0]
-let value=parseFloat(parts[1])
+let p=text.split(" ")
 
-if(isNaN(value)) return null
+let cmd=p[0]
 
-let rad=value*Math.PI/180
+let v=parseFloat(p[1])
 
-if(cmd==="sin") return "sin("+value+"°) = "+Math.sin(rad)
-if(cmd==="cos") return "cos("+value+"°) = "+Math.cos(rad)
-if(cmd==="tan") return "tan("+value+"°) = "+Math.tan(rad)
+let rad=v*Math.PI/180
 
-if(cmd==="asin") return "asin("+value+") = "+(Math.asin(value)*180/Math.PI)+"°"
-if(cmd==="acos") return "acos("+value+") = "+(Math.acos(value)*180/Math.PI)+"°"
-if(cmd==="atan") return "atan("+value+") = "+(Math.atan(value)*180/Math.PI)+"°"
+if(cmd==="sin") return "sin("+v+"°) = "+Math.sin(rad)
+
+if(cmd==="cos") return "cos("+v+"°) = "+Math.cos(rad)
+
+if(cmd==="tan") return "tan("+v+"°) = "+Math.tan(rad)
 
 return null
+
 }
 
-/* EQUATION */
+/* EQUATIONS */
 
 function solveEquation(text){
 
-let match=text.match(/([0-9]*)x([+-][0-9]+)?=([0-9]+)/)
+let m=text.match(/([0-9]*)x([+-][0-9]+)?=([0-9]+)/)
 
-if(!match) return null
+if(!m) return null
 
-let a=parseFloat(match[1]||1)
-let b=parseFloat(match[2]||0)
-let c=parseFloat(match[3])
+let a=parseFloat(m[1]||1)
+
+let b=parseFloat(m[2]||0)
+
+let c=parseFloat(m[3])
 
 let x=(c-b)/a
 
-return "Solve: "+text+" → x = "+x
-}
+return "x = "+x
 
-/* QUADRATIC */
-
-function solveQuadratic(text){
-
-let match=text.match(/x\^2([+-]\d+)x([+-]\d+)=0/)
-
-if(!match) return null
-
-let b=parseFloat(match[1])
-let c=parseFloat(match[2])
-
-let disc=b*b-4*c
-
-let x1=(-b+Math.sqrt(disc))/2
-let x2=(-b-Math.sqrt(disc))/2
-
-return "Quadratic roots: "+x1+" , "+x2
 }
 
 /* DERIVATIVE */
 
 function derivative(text){
 
-if(text.startsWith("d/dx")){
+if(text==="d/dx x^2")
 
-let expr=text.replace("d/dx","").trim()
-
-if(expr==="x^2") return "Derivative of x² is 2x"
-if(expr==="x^3") return "Derivative of x³ is 3x²"
-if(expr==="sin x") return "Derivative of sin(x) is cos(x)"
-if(expr==="cos x") return "Derivative of cos(x) is -sin(x)"
-
-return "Derivative rule not known yet."
-}
+return "Derivative of x² = 2x"
 
 return null
+
 }
 
 /* INTEGRAL */
 
 function integral(text){
 
-if(text.startsWith("integral")){
+if(text==="integral x^2")
 
-let expr=text.replace("integral","").trim()
-
-if(expr==="x") return "∫x dx = x²/2 + C"
-if(expr==="x^2") return "∫x² dx = x³/3 + C"
-if(expr==="sin x") return "∫sin(x) dx = -cos(x) + C"
-if(expr==="cos x") return "∫cos(x) dx = sin(x) + C"
-
-return "Integral rule not known yet."
-}
+return "∫x² dx = x³/3 + C"
 
 return null
+
 }
 
 /* PROBABILITY */
 
 function factorial(n){
-if(n<0) return null
-let result=1
-for(let i=1;i<=n;i++) result*=i
-return result
-}
 
-function combination(n,r){
-return factorial(n)/(factorial(r)*factorial(n-r))
-}
+let r=1
 
-function permutation(n,r){
-return factorial(n)/factorial(n-r)
+for(let i=1;i<=n;i++) r*=i
+
+return r
+
 }
 
 function probabilityCommand(text){
 
-let parts=text.split(" ")
+let p=text.split(" ")
 
-if(parts[0]==="factorial"){
-let n=parseInt(parts[1])
-return n+"! = "+factorial(n)
-}
+if(p[0]==="factorial")
 
-if(parts[0]==="ncr"){
-let n=parseInt(parts[1])
-let r=parseInt(parts[2])
-return "nCr = "+combination(n,r)
-}
-
-if(parts[0]==="npr"){
-let n=parseInt(parts[1])
-let r=parseInt(parts[2])
-return "nPr = "+permutation(n,r)
-}
-
-if(parts[0]==="prob"){
-let success=parseFloat(parts[1])
-let total=parseFloat(parts[2])
-return "Probability = "+(success/total)
-}
+return factorial(parseInt(p[1]))
 
 return null
+
 }
 
 /* STATISTICS */
 
 function statsCommand(text){
 
-let parts=text.split(" ")
-let type=parts[0]
+let p=text.split(" ")
 
-if(!parts[1]) return null
+if(p[0]==="mean"){
 
-let nums=parts[1].split(",").map(Number)
+let nums=p[1].split(",").map(Number)
 
-if(type==="mean"){
-let sum=nums.reduce((a,b)=>a+b,0)
-return "Mean = "+(sum/nums.length)
-}
+return nums.reduce((a,b)=>a+b)/nums.length
 
-if(type==="median"){
-nums.sort((a,b)=>a-b)
-let mid=Math.floor(nums.length/2)
-if(nums.length%2===0)
-return "Median = "+(nums[mid-1]+nums[mid])/2
-else
-return "Median = "+nums[mid]
-}
-
-if(type==="mode"){
-let count={}
-nums.forEach(n=>count[n]=(count[n]||0)+1)
-let max=0
-let mode=null
-for(let k in count){
-if(count[k]>max){
-max=count[k]
-mode=k
-}
-}
-return "Mode = "+mode
-}
-
-if(type==="variance"){
-let mean=nums.reduce((a,b)=>a+b)/nums.length
-let variance=nums.reduce((a,b)=>a+(b-mean)**2,0)/nums.length
-return "Variance = "+variance
-}
-
-if(type==="std"){
-let mean=nums.reduce((a,b)=>a+b)/nums.length
-let variance=nums.reduce((a,b)=>a+(b-mean)**2,0)/nums.length
-return "Standard Deviation = "+Math.sqrt(variance)
 }
 
 return null
+
+}
+
+/* PHYSICS */
+
+function physicsCommand(text){
+
+let p=text.split(" ")
+
+if(p[0]==="force")
+
+return p[1]*p[2]+" N"
+
+if(p[0]==="velocity")
+
+return p[1]/p[2]+" m/s"
+
+return null
+
+}
+
+/* COMPUTER SCIENCE */
+
+function csCommand(text){
+
+let p=text.split(" ")
+
+if(p[0]==="binary")
+
+return parseInt(p[1]).toString(2)
+
+if(p[0]==="hex")
+
+return parseInt(p[1]).toString(16)
+
+return null
+
+}
+
+/* CHAT */
+
+function chatCommand(text){
+
+if(text.includes("hello"))
+
+return "Hello! I'm a smart STEM tutor."
+
+if(text.includes("how are you"))
+
+return "I'm doing great."
+
+if(text.includes("help"))
+
+return "You can ask math, science, programming, or teach me new facts."
+
+return null
+
 }
 
 /* GRAPH */
@@ -331,6 +337,7 @@ return null
 function plotGraph(expr){
 
 let canvas=document.getElementById("graph")
+
 let ctx=canvas.getContext("2d")
 
 ctx.clearRect(0,0,canvas.width,canvas.height)
@@ -342,15 +349,21 @@ for(let x=-10;x<=10;x+=0.1){
 let y
 
 try{
+
 y=Function("x","return "+expr)(x)
+
 }catch{
+
 return
+
 }
 
 let px=(x+10)*30
+
 let py=110-y*10
 
 if(x===-10) ctx.moveTo(px,py)
+
 else ctx.lineTo(px,py)
 
 }
@@ -359,55 +372,41 @@ ctx.stroke()
 
 }
 
-/* AI LOGIC */
+/* AI CORE */
 
 function aiReply(text){
 
 text=text.toLowerCase()
 
-let trig=trigCommand(text)
-if(trig) return trig
+let r
 
-let sqrt=sqrtCommand(text)
-if(sqrt) return sqrt
-
-let frac=fractionMath(text)
-if(frac) return frac
-
-let eq=solveEquation(text)
-if(eq) return eq
-
-let quad=solveQuadratic(text)
-if(quad) return quad
-
-let der=derivative(text)
-if(der) return der
-
-let integ=integral(text)
-if(integ) return integ
-
-let prob=probabilityCommand(text)
-if(prob) return prob
-
-let stats=statsCommand(text)
-if(stats) return stats
+r=learningSystem(text); if(r) return r
+r=chatCommand(text); if(r) return r
+r=trigCommand(text); if(r) return r
+r=sqrtCommand(text); if(r) return r
+r=solveEquation(text); if(r) return r
+r=derivative(text); if(r) return r
+r=integral(text); if(r) return r
+r=probabilityCommand(text); if(r) return r
+r=statsCommand(text); if(r) return r
+r=physicsCommand(text); if(r) return r
+r=csCommand(text); if(r) return r
 
 if(text.startsWith("graph")){
+
 let expr=text.replace("graph","").trim()
+
 plotGraph(expr)
-return "Graph plotted for "+expr
+
+return "Graph plotted."
+
 }
 
-let math=solveMath(text)
-if(math) return math
+r=solveMath(text)
 
-if(text.includes("hello"))
-return "Hello! I can solve math, statistics, probability, calculus,algebra,graphs and more. For algebra, only leave it life this for e.g.:12x=12"
+if(r) return r
 
-if(text.includes("help"))
-return "Examples: sqrt 81, sin 30, ncr 10 3, mean 2,4,6,8, d/dx x^2, integral x^2, graph x*x"
-
-return "I mainly help with math."
+return "Tell me something new or ask a STEM question."
 
 }
 
@@ -426,7 +425,9 @@ addMessage("user",text)
 let reply=aiReply(text)
 
 setTimeout(()=>{
+
 addMessage("ai",reply)
+
 },200)
 
 input.value=""
