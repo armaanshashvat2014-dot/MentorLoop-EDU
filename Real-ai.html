@@ -69,7 +69,7 @@ border-radius:6px;
 
 <div id="chat"></div>
 
-<input id="input" placeholder="Ask math, science, or chat...">
+<input id="input" placeholder="Ask something...">
 <button onclick="send()">Send</button>
 
 <canvas id="graph" width="680" height="230"></canvas>
@@ -78,12 +78,12 @@ border-radius:6px;
 
 <script>
 
-/* MEMORY STORAGE */
+/* KNOWLEDGE STORAGE */
 
-let knowledge = JSON.parse(localStorage.getItem("aiKnowledge")) || {}
+let knowledge = JSON.parse(localStorage.getItem("knowledge")) || []
 
 function saveKnowledge(){
-localStorage.setItem("aiKnowledge",JSON.stringify(knowledge))
+localStorage.setItem("knowledge",JSON.stringify(knowledge))
 }
 
 /* CHAT DISPLAY */
@@ -104,7 +104,7 @@ chat.scrollTop=chat.scrollHeight
 
 }
 
-/* SMART LEARNING SYSTEM */
+/* LEARNING SYSTEM */
 
 function learningSystem(text){
 
@@ -114,33 +114,32 @@ if(text.includes(" is ")){
 
 let parts=text.split(" is ")
 
-let key=parts[0].trim()
-let value=parts[1].trim()
+let subject=parts[0].trim()
+let fact=parts[1].trim()
 
-knowledge[key]=value
+knowledge.push({
+subject:subject,
+fact:fact
+})
 
 saveKnowledge()
 
-return "Got it. I learned that "+key+" is "+value
+return "Okay, I learned that "+subject+" is "+fact
 }
 
-// asking
+// answering
 
 if(text.startsWith("what is ")){
 
 let question=text.replace("what is ","").trim()
 
-// direct key match
+for(let k of knowledge){
 
-if(knowledge[question])
-return question+" is "+knowledge[question]
+if(k.subject===question)
+return k.subject+" is "+k.fact
 
-// search stored facts
-
-for(let k in knowledge){
-
-if(knowledge[k].includes(question))
-return k+" is "+knowledge[k]
+if(k.fact.includes(question))
+return k.subject+" is "+k.fact
 
 }
 
@@ -179,7 +178,7 @@ return null
 
 }
 
-/* TRIGONOMETRY */
+/* TRIG */
 
 function trigCommand(text){
 
@@ -187,8 +186,6 @@ let p=text.split(" ")
 
 let cmd=p[0]
 let v=parseFloat(p[1])
-
-if(isNaN(v)) return null
 
 let rad=v*Math.PI/180
 
@@ -200,7 +197,7 @@ return null
 
 }
 
-/* EQUATION SOLVER */
+/* EQUATION */
 
 function solveEquation(text){
 
@@ -223,7 +220,7 @@ return "x = "+x
 function derivative(text){
 
 if(text==="d/dx x^2")
-return "Derivative of x² = 2x"
+return "Derivative = 2x"
 
 return null
 
@@ -235,47 +232,6 @@ function integral(text){
 
 if(text==="integral x^2")
 return "∫x² dx = x³/3 + C"
-
-return null
-
-}
-
-/* PROBABILITY */
-
-function factorial(n){
-
-let r=1
-
-for(let i=1;i<=n;i++) r*=i
-
-return r
-
-}
-
-function probabilityCommand(text){
-
-let p=text.split(" ")
-
-if(p[0]==="factorial")
-return factorial(parseInt(p[1]))
-
-return null
-
-}
-
-/* STATISTICS */
-
-function statsCommand(text){
-
-let p=text.split(" ")
-
-if(p[0]==="mean"){
-
-let nums=p[1].split(",").map(Number)
-
-return nums.reduce((a,b)=>a+b)/nums.length
-
-}
 
 return null
 
@@ -313,7 +269,7 @@ return null
 
 }
 
-/* CHAT RESPONSES */
+/* CHAT */
 
 function chatCommand(text){
 
@@ -321,16 +277,16 @@ if(text.includes("hello")||text.includes("hi"))
 return "Hello! I'm your STEM AI tutor."
 
 if(text.includes("how are you"))
-return "I'm doing great and ready to help."
+return "I'm doing great."
 
 if(text.includes("help"))
-return "You can ask math, science, programming, or teach me new facts."
+return "You can ask math, physics, programming, or teach me facts."
 
 return null
 
 }
 
-/* GRAPHING */
+/* GRAPH */
 
 function plotGraph(expr){
 
@@ -378,30 +334,23 @@ r=sqrtCommand(text); if(r) return r
 r=solveEquation(text); if(r) return r
 r=derivative(text); if(r) return r
 r=integral(text); if(r) return r
-r=probabilityCommand(text); if(r) return r
-r=statsCommand(text); if(r) return r
 r=physicsCommand(text); if(r) return r
 r=csCommand(text); if(r) return r
 
 if(text.startsWith("graph")){
-
 let expr=text.replace("graph","").trim()
-
 plotGraph(expr)
-
 return "Graph plotted."
-
 }
 
 r=solveMath(text)
-
 if(r) return r
 
 return "Tell me something new or ask a STEM question."
 
 }
 
-/* SEND MESSAGE */
+/* SEND */
 
 function send(){
 
