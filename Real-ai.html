@@ -2,10 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Smart STEM AI Tutor</title>
+<title>Smart STEM AI</title>
 
 <style>
-
 body{
 font-family:Arial;
 background:#0f172a;
@@ -33,15 +32,14 @@ border-radius:8px;
 margin-bottom:10px;
 }
 
-.message{margin:6px 0}
 .user{color:#38bdf8}
 .ai{color:#22c55e}
 
 input{
 width:80%;
 padding:10px;
-border:none;
 border-radius:6px;
+border:none;
 }
 
 button{
@@ -51,13 +49,6 @@ border-radius:6px;
 background:#38bdf8;
 cursor:pointer;
 }
-
-canvas{
-margin-top:10px;
-background:white;
-border-radius:6px;
-}
-
 </style>
 </head>
 
@@ -65,20 +56,18 @@ border-radius:6px;
 
 <div class="container">
 
-<h2>Smart STEM AI Tutor</h2>
+<h2>Smart STEM AI</h2>
 
 <div id="chat"></div>
 
 <input id="input" placeholder="Ask something...">
 <button onclick="send()">Send</button>
 
-<canvas id="graph" width="680" height="230"></canvas>
-
 </div>
 
 <script>
 
-/* KNOWLEDGE STORAGE */
+/* MEMORY */
 
 let knowledge = JSON.parse(localStorage.getItem("knowledge")) || []
 
@@ -86,7 +75,7 @@ function saveKnowledge(){
 localStorage.setItem("knowledge",JSON.stringify(knowledge))
 }
 
-/* CHAT DISPLAY */
+/* CHAT UI */
 
 function addMessage(role,text){
 
@@ -94,9 +83,7 @@ let chat=document.getElementById("chat")
 
 let div=document.createElement("div")
 
-div.className="message "+role
-
-div.innerHTML="<b>"+role+":</b> "+text
+div.innerHTML="<b class='"+role+"'>"+role+":</b> "+text
 
 chat.appendChild(div)
 
@@ -108,38 +95,40 @@ chat.scrollTop=chat.scrollHeight
 
 function learningSystem(text){
 
-// learning
+let lower=text.toLowerCase()
 
-if(text.includes(" is ")){
+/* learn facts */
 
-let parts=text.split(" is ")
+if(lower.includes(" is ")){
+
+let parts=text.split(/ is /i)
 
 let subject=parts[0].trim()
-let fact=parts[1].trim()
+let fact=parts.slice(1).join(" is ").trim()
 
 knowledge.push({
-subject:subject,
+subject:subject.toLowerCase(),
 fact:fact
 })
 
 saveKnowledge()
 
-return "Okay, I learned that "+subject+" is "+fact
+return "I learned that "+subject+" is "+fact
 }
 
-// answering
+/* answer questions */
 
-if(text.startsWith("what is ")){
+if(lower.startsWith("what is ")){
 
-let question=text.replace("what is ","").trim()
+let question=lower.replace("what is ","").trim()
 
-for(let k of knowledge){
+for(let item of knowledge){
 
-if(k.subject===question)
-return k.subject+" is "+k.fact
+if(item.subject===question)
+return item.subject+" is "+item.fact
 
-if(k.fact.includes(question))
-return k.subject+" is "+k.fact
+if(item.fact.toLowerCase().includes(question))
+return item.subject+" is "+item.fact
 
 }
 
@@ -170,100 +159,10 @@ if(text.startsWith("sqrt")){
 
 let n=parseFloat(text.split(" ")[1])
 
+if(!isNaN(n))
 return "√"+n+" = "+Math.sqrt(n)
 
 }
-
-return null
-
-}
-
-/* TRIG */
-
-function trigCommand(text){
-
-let p=text.split(" ")
-
-let cmd=p[0]
-let v=parseFloat(p[1])
-
-let rad=v*Math.PI/180
-
-if(cmd==="sin") return "sin("+v+"°) = "+Math.sin(rad)
-if(cmd==="cos") return "cos("+v+"°) = "+Math.cos(rad)
-if(cmd==="tan") return "tan("+v+"°) = "+Math.tan(rad)
-
-return null
-
-}
-
-/* EQUATION */
-
-function solveEquation(text){
-
-let m=text.match(/([0-9]*)x([+-][0-9]+)?=([0-9]+)/)
-
-if(!m) return null
-
-let a=parseFloat(m[1]||1)
-let b=parseFloat(m[2]||0)
-let c=parseFloat(m[3])
-
-let x=(c-b)/a
-
-return "x = "+x
-
-}
-
-/* DERIVATIVE */
-
-function derivative(text){
-
-if(text==="d/dx x^2")
-return "Derivative = 2x"
-
-return null
-
-}
-
-/* INTEGRAL */
-
-function integral(text){
-
-if(text==="integral x^2")
-return "∫x² dx = x³/3 + C"
-
-return null
-
-}
-
-/* PHYSICS */
-
-function physicsCommand(text){
-
-let p=text.split(" ")
-
-if(p[0]==="force")
-return p[1]*p[2]+" N"
-
-if(p[0]==="velocity")
-return p[1]/p[2]+" m/s"
-
-return null
-
-}
-
-/* COMPUTER SCIENCE */
-
-function csCommand(text){
-
-let p=text.split(" ")
-
-if(p[0]==="binary")
-return parseInt(p[1]).toString(2)
-
-if(p[0]==="hex")
-return parseInt(p[1]).toString(16)
 
 return null
 
@@ -273,49 +172,18 @@ return null
 
 function chatCommand(text){
 
-if(text.includes("hello")||text.includes("hi"))
-return "Hello! I'm your STEM AI tutor."
+let t=text.toLowerCase()
 
-if(text.includes("how are you"))
-return "I'm doing great."
+if(t.includes("hello")||t.includes("hi"))
+return "Hello! I'm your STEM AI."
 
-if(text.includes("help"))
-return "You can ask math, physics, programming, or teach me facts."
+if(t.includes("how are you"))
+return "I'm doing great!"
+
+if(t.includes("help"))
+return "You can ask math questions or teach me facts like 'Paris is the capital of France'."
 
 return null
-
-}
-
-/* GRAPH */
-
-function plotGraph(expr){
-
-let canvas=document.getElementById("graph")
-let ctx=canvas.getContext("2d")
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-ctx.beginPath()
-
-for(let x=-10;x<=10;x+=0.1){
-
-let y
-
-try{
-y=Function("x","return "+expr)(x)
-}catch{
-return
-}
-
-let px=(x+10)*30
-let py=110-y*10
-
-if(x===-10) ctx.moveTo(px,py)
-else ctx.lineTo(px,py)
-
-}
-
-ctx.stroke()
 
 }
 
@@ -323,30 +191,17 @@ ctx.stroke()
 
 function aiReply(text){
 
-text=text.toLowerCase()
-
 let r
 
 r=learningSystem(text); if(r) return r
+
 r=chatCommand(text); if(r) return r
-r=trigCommand(text); if(r) return r
+
 r=sqrtCommand(text); if(r) return r
-r=solveEquation(text); if(r) return r
-r=derivative(text); if(r) return r
-r=integral(text); if(r) return r
-r=physicsCommand(text); if(r) return r
-r=csCommand(text); if(r) return r
 
-if(text.startsWith("graph")){
-let expr=text.replace("graph","").trim()
-plotGraph(expr)
-return "Graph plotted."
-}
+r=solveMath(text); if(r) return r
 
-r=solveMath(text)
-if(r) return r
-
-return "Tell me something new or ask a STEM question."
+return "I don't know that yet. You can teach me!"
 
 }
 
@@ -356,7 +211,7 @@ function send(){
 
 let input=document.getElementById("input")
 
-let text=input.value
+let text=input.value.trim()
 
 if(!text) return
 
@@ -364,9 +219,7 @@ addMessage("user",text)
 
 let reply=aiReply(text)
 
-setTimeout(()=>{
-addMessage("ai",reply)
-},200)
+setTimeout(()=>addMessage("ai",reply),200)
 
 input.value=""
 
