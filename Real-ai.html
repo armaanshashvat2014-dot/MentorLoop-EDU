@@ -2,9 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Smart STEM AI</title>
+<title>STEM AI Chatbot</title>
 
 <style>
+
 body{
 font-family:Arial;
 background:#0f172a;
@@ -17,14 +18,14 @@ margin:0;
 }
 
 .container{
-width:750px;
+width:720px;
 background:#1e293b;
 padding:20px;
 border-radius:12px;
 }
 
 #chat{
-height:360px;
+height:350px;
 overflow-y:auto;
 background:#020617;
 padding:15px;
@@ -38,8 +39,8 @@ margin-bottom:10px;
 input{
 width:80%;
 padding:10px;
-border-radius:6px;
 border:none;
+border-radius:6px;
 }
 
 button{
@@ -49,6 +50,13 @@ border-radius:6px;
 background:#38bdf8;
 cursor:pointer;
 }
+
+canvas{
+margin-top:10px;
+background:white;
+border-radius:6px;
+}
+
 </style>
 </head>
 
@@ -56,26 +64,20 @@ cursor:pointer;
 
 <div class="container">
 
-<h2>Smart STEM AI</h2>
+<h2>STEM AI Chatbot</h2>
 
 <div id="chat"></div>
 
-<input id="input" placeholder="Ask something...">
+<input id="input" placeholder="Ask math, physics, stats, or chat...">
 <button onclick="send()">Send</button>
+
+<canvas id="graph" width="650" height="220"></canvas>
 
 </div>
 
 <script>
 
-/* MEMORY */
-
-let knowledge = JSON.parse(localStorage.getItem("knowledge")) || []
-
-function saveKnowledge(){
-localStorage.setItem("knowledge",JSON.stringify(knowledge))
-}
-
-/* CHAT UI */
+/* CHAT DISPLAY */
 
 function addMessage(role,text){
 
@@ -88,53 +90,6 @@ div.innerHTML="<b class='"+role+"'>"+role+":</b> "+text
 chat.appendChild(div)
 
 chat.scrollTop=chat.scrollHeight
-
-}
-
-/* LEARNING SYSTEM */
-
-function learningSystem(text){
-
-let lower=text.toLowerCase()
-
-/* learn facts */
-
-if(lower.includes(" is ")){
-
-let parts=text.split(/ is /i)
-
-let subject=parts[0].trim()
-let fact=parts.slice(1).join(" is ").trim()
-
-knowledge.push({
-subject:subject.toLowerCase(),
-fact:fact
-})
-
-saveKnowledge()
-
-return "I learned that "+subject+" is "+fact
-}
-
-/* answer questions */
-
-if(lower.startsWith("what is ")){
-
-let question=lower.replace("what is ","").trim()
-
-for(let item of knowledge){
-
-if(item.subject===question)
-return item.subject+" is "+item.fact
-
-if(item.fact.toLowerCase().includes(question))
-return item.subject+" is "+item.fact
-
-}
-
-}
-
-return null
 
 }
 
@@ -168,20 +123,208 @@ return null
 
 }
 
-/* CHAT */
+/* TRIGONOMETRY */
+
+function trigCommand(text){
+
+let p=text.split(" ")
+
+let cmd=p[0]
+
+let v=parseFloat(p[1])
+
+if(isNaN(v)) return null
+
+let rad=v*Math.PI/180
+
+if(cmd==="sin") return "sin("+v+"°) = "+Math.sin(rad)
+
+if(cmd==="cos") return "cos("+v+"°) = "+Math.cos(rad)
+
+if(cmd==="tan") return "tan("+v+"°) = "+Math.tan(rad)
+
+return null
+
+}
+
+/* STATISTICS */
+
+function statsCommand(text){
+
+let p=text.split(" ")
+
+if(!p[1]) return null
+
+let nums=p[1].split(",").map(Number)
+
+if(p[0]==="mean"){
+
+return nums.reduce((a,b)=>a+b)/nums.length
+
+}
+
+if(p[0]==="median"){
+
+nums.sort((a,b)=>a-b)
+
+return nums[Math.floor(nums.length/2)]
+
+}
+
+if(p[0]==="std"){
+
+let mean=nums.reduce((a,b)=>a+b)/nums.length
+
+let v=nums.reduce((a,b)=>a+(b-mean)**2,0)/nums.length
+
+return Math.sqrt(v)
+
+}
+
+return null
+
+}
+
+/* PROBABILITY */
+
+function factorial(n){
+
+let r=1
+
+for(let i=1;i<=n;i++) r*=i
+
+return r
+
+}
+
+function probabilityCommand(text){
+
+let p=text.split(" ")
+
+if(p[0]==="factorial"){
+
+return factorial(parseInt(p[1]))
+
+}
+
+if(p[0]==="ncr"){
+
+let n=parseInt(p[1])
+
+let r=parseInt(p[2])
+
+return factorial(n)/(factorial(r)*factorial(n-r))
+
+}
+
+if(p[0]==="npr"){
+
+let n=parseInt(p[1])
+
+let r=parseInt(p[2])
+
+return factorial(n)/factorial(n-r)
+
+}
+
+return null
+
+}
+
+/* PHYSICS */
+
+function physicsCommand(text){
+
+let p=text.split(" ")
+
+if(p[0]==="force"){
+
+let m=parseFloat(p[1])
+
+let a=parseFloat(p[2])
+
+return "Force = "+(m*a)+" N"
+
+}
+
+if(p[0]==="velocity"){
+
+let d=parseFloat(p[1])
+
+let t=parseFloat(p[2])
+
+return "Velocity = "+(d/t)+" m/s"
+
+}
+
+if(p[0]==="kinetic"){
+
+let m=parseFloat(p[1])
+
+let v=parseFloat(p[2])
+
+return "Kinetic Energy = "+(0.5*m*v*v)+" J"
+
+}
+
+return null
+
+}
+
+/* GRAPH */
+
+function plotGraph(expr){
+
+let canvas=document.getElementById("graph")
+
+let ctx=canvas.getContext("2d")
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+ctx.beginPath()
+
+for(let x=-10;x<=10;x+=0.1){
+
+let y
+
+try{
+
+y=Function("x","return "+expr)(x)
+
+}catch{
+
+return
+
+}
+
+let px=(x+10)*30
+
+let py=110-y*10
+
+if(x===-10) ctx.moveTo(px,py)
+
+else ctx.lineTo(px,py)
+
+}
+
+ctx.stroke()
+
+}
+
+/* CHATBOT */
 
 function chatCommand(text){
 
 let t=text.toLowerCase()
 
 if(t.includes("hello")||t.includes("hi"))
-return "Hello! I'm your STEM AI."
+return "Hello! I'm your STEM AI assistant."
 
 if(t.includes("how are you"))
-return "I'm doing great!"
+return "I'm running perfectly."
 
 if(t.includes("help"))
-return "You can ask math questions or teach me facts like 'Paris is the capital of France'."
+return "Try: sqrt 81, sin 30, mean 2,4,6, factorial 5, force 10 2, graph x*x"
 
 return null
 
@@ -193,15 +336,28 @@ function aiReply(text){
 
 let r
 
-r=learningSystem(text); if(r) return r
-
 r=chatCommand(text); if(r) return r
-
 r=sqrtCommand(text); if(r) return r
+r=trigCommand(text); if(r) return r
+r=statsCommand(text); if(r) return r
+r=probabilityCommand(text); if(r) return r
+r=physicsCommand(text); if(r) return r
 
-r=solveMath(text); if(r) return r
+if(text.startsWith("graph")){
 
-return "I don't know that yet. You can teach me!"
+let expr=text.replace("graph","").trim()
+
+plotGraph(expr)
+
+return "Graph plotted."
+
+}
+
+r=solveMath(text)
+
+if(r) return r
+
+return "I don't understand yet. Try 'help'."
 
 }
 
@@ -219,7 +375,9 @@ addMessage("user",text)
 
 let reply=aiReply(text)
 
-setTimeout(()=>addMessage("ai",reply),200)
+setTimeout(()=>{
+addMessage("ai",reply)
+},200)
 
 input.value=""
 
