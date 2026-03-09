@@ -78,7 +78,7 @@ border-radius:6px;
 
 <script>
 
-/* MEMORY SYSTEM */
+/* MEMORY STORAGE */
 
 let knowledge = JSON.parse(localStorage.getItem("aiKnowledge")) || {}
 
@@ -86,7 +86,7 @@ function saveKnowledge(){
 localStorage.setItem("aiKnowledge",JSON.stringify(knowledge))
 }
 
-/* CHAT */
+/* CHAT DISPLAY */
 
 function addMessage(role,text){
 
@@ -104,9 +104,11 @@ chat.scrollTop=chat.scrollHeight
 
 }
 
-/* LEARNING SYSTEM */
+/* SMART LEARNING SYSTEM */
 
 function learningSystem(text){
+
+// learning
 
 if(text.includes(" is ")){
 
@@ -122,12 +124,26 @@ saveKnowledge()
 return "Got it. I learned that "+key+" is "+value
 }
 
+// asking
+
 if(text.startsWith("what is ")){
 
-let key=text.replace("what is ","").trim()
+let question=text.replace("what is ","").trim()
 
-if(knowledge[key])
-return key+" is "+knowledge[key]
+// direct key match
+
+if(knowledge[question])
+return question+" is "+knowledge[question]
+
+// search stored facts
+
+for(let k in knowledge){
+
+if(knowledge[k].includes(question))
+return k+" is "+knowledge[k]
+
+}
+
 }
 
 return null
@@ -139,15 +155,10 @@ return null
 function solveMath(expr){
 
 try{
-
 let result=Function('"use strict";return ('+expr+')')()
-
 return "Answer: "+result
-
 }catch{
-
 return null
-
 }
 
 }
@@ -168,29 +179,28 @@ return null
 
 }
 
-/* TRIG */
+/* TRIGONOMETRY */
 
 function trigCommand(text){
 
 let p=text.split(" ")
 
 let cmd=p[0]
-
 let v=parseFloat(p[1])
+
+if(isNaN(v)) return null
 
 let rad=v*Math.PI/180
 
 if(cmd==="sin") return "sin("+v+"°) = "+Math.sin(rad)
-
 if(cmd==="cos") return "cos("+v+"°) = "+Math.cos(rad)
-
 if(cmd==="tan") return "tan("+v+"°) = "+Math.tan(rad)
 
 return null
 
 }
 
-/* EQUATIONS */
+/* EQUATION SOLVER */
 
 function solveEquation(text){
 
@@ -199,9 +209,7 @@ let m=text.match(/([0-9]*)x([+-][0-9]+)?=([0-9]+)/)
 if(!m) return null
 
 let a=parseFloat(m[1]||1)
-
 let b=parseFloat(m[2]||0)
-
 let c=parseFloat(m[3])
 
 let x=(c-b)/a
@@ -215,7 +223,6 @@ return "x = "+x
 function derivative(text){
 
 if(text==="d/dx x^2")
-
 return "Derivative of x² = 2x"
 
 return null
@@ -227,7 +234,6 @@ return null
 function integral(text){
 
 if(text==="integral x^2")
-
 return "∫x² dx = x³/3 + C"
 
 return null
@@ -251,7 +257,6 @@ function probabilityCommand(text){
 let p=text.split(" ")
 
 if(p[0]==="factorial")
-
 return factorial(parseInt(p[1]))
 
 return null
@@ -283,11 +288,9 @@ function physicsCommand(text){
 let p=text.split(" ")
 
 if(p[0]==="force")
-
 return p[1]*p[2]+" N"
 
 if(p[0]==="velocity")
-
 return p[1]/p[2]+" m/s"
 
 return null
@@ -301,43 +304,37 @@ function csCommand(text){
 let p=text.split(" ")
 
 if(p[0]==="binary")
-
 return parseInt(p[1]).toString(2)
 
 if(p[0]==="hex")
-
 return parseInt(p[1]).toString(16)
 
 return null
 
 }
 
-/* CHAT */
+/* CHAT RESPONSES */
 
 function chatCommand(text){
 
-if(text.includes("hello"))
-
-return "Hello! I'm a smart STEM tutor."
+if(text.includes("hello")||text.includes("hi"))
+return "Hello! I'm your STEM AI tutor."
 
 if(text.includes("how are you"))
-
-return "I'm doing great."
+return "I'm doing great and ready to help."
 
 if(text.includes("help"))
-
 return "You can ask math, science, programming, or teach me new facts."
 
 return null
 
 }
 
-/* GRAPH */
+/* GRAPHING */
 
 function plotGraph(expr){
 
 let canvas=document.getElementById("graph")
-
 let ctx=canvas.getContext("2d")
 
 ctx.clearRect(0,0,canvas.width,canvas.height)
@@ -349,21 +346,15 @@ for(let x=-10;x<=10;x+=0.1){
 let y
 
 try{
-
 y=Function("x","return "+expr)(x)
-
 }catch{
-
 return
-
 }
 
 let px=(x+10)*30
-
 let py=110-y*10
 
 if(x===-10) ctx.moveTo(px,py)
-
 else ctx.lineTo(px,py)
 
 }
@@ -410,7 +401,7 @@ return "Tell me something new or ask a STEM question."
 
 }
 
-/* SEND */
+/* SEND MESSAGE */
 
 function send(){
 
@@ -425,9 +416,7 @@ addMessage("user",text)
 let reply=aiReply(text)
 
 setTimeout(()=>{
-
 addMessage("ai",reply)
-
 },200)
 
 input.value=""
