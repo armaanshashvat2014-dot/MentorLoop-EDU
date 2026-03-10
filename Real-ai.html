@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>STEM Exam Helper AI</title>
+<title>STEM Tutor AI</title>
 
 <style>
 
@@ -18,7 +18,7 @@ margin:0;
 }
 
 .container{
-width:700px;
+width:720px;
 background:#1e293b;
 padding:20px;
 border-radius:12px;
@@ -51,26 +51,33 @@ background:#38bdf8;
 cursor:pointer;
 }
 
-</style>
+canvas{
+margin-top:10px;
+background:white;
+border-radius:6px;
+}
 
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-<h2>STEM Exam Helper AI</h2>
+<h2>STEM Tutor AI</h2>
 
 <div id="chat"></div>
 
-<input id="input" placeholder="Ask about exams or STEM topics...">
+<input id="input" placeholder="Ask math, physics, or exam tips...">
 <button onclick="send()">Send</button>
+
+<canvas id="graph" width="650" height="220"></canvas>
 
 </div>
 
 <script>
 
-/* CHAT */
+/* CHAT DISPLAY */
 
 function addMessage(role,text){
 
@@ -86,64 +93,266 @@ chat.scrollTop=chat.scrollHeight
 
 }
 
-/* AI LOGIC */
+/* BASIC MATH */
 
-function aiReply(text){
+function solveMath(expr){
+
+try{
+
+let result=Function('"use strict";return ('+expr+')')()
+
+if(isFinite(result))
+return "Answer: "+result
+
+}catch{}
+
+return null
+
+}
+
+/* SQRT */
+
+function sqrtCommand(text){
+
+if(text.startsWith("sqrt")){
+
+let n=parseFloat(text.split(" ")[1])
+
+if(!isNaN(n))
+return "√"+n+" = "+Math.sqrt(n)
+
+}
+
+return null
+
+}
+
+/* TRIG */
+
+function trigCommand(text){
+
+let p=text.split(" ")
+
+let cmd=p[0]
+
+let v=parseFloat(p[1])
+
+if(isNaN(v)) return null
+
+let rad=v*Math.PI/180
+
+if(cmd==="sin") return "sin("+v+"°) = "+Math.sin(rad)
+if(cmd==="cos") return "cos("+v+"°) = "+Math.cos(rad)
+if(cmd==="tan") return "tan("+v+"°) = "+Math.tan(rad)
+
+return null
+
+}
+
+/* STATISTICS */
+
+function statsCommand(text){
+
+let p=text.split(" ")
+
+if(!p[1]) return null
+
+let nums=p[1].split(",").map(Number)
+
+if(p[0]==="mean")
+return nums.reduce((a,b)=>a+b)/nums.length
+
+if(p[0]==="median"){
+
+nums.sort((a,b)=>a-b)
+
+return nums[Math.floor(nums.length/2)]
+
+}
+
+return null
+
+}
+
+/* PROBABILITY */
+
+function factorial(n){
+
+let r=1
+
+for(let i=1;i<=n;i++) r*=i
+
+return r
+
+}
+
+function probabilityCommand(text){
+
+let p=text.split(" ")
+
+if(p[0]==="factorial")
+return factorial(parseInt(p[1]))
+
+if(p[0]==="ncr"){
+
+let n=parseInt(p[1])
+let r=parseInt(p[2])
+
+return factorial(n)/(factorial(r)*factorial(n-r))
+
+}
+
+if(p[0]==="npr"){
+
+let n=parseInt(p[1])
+let r=parseInt(p[2])
+
+return factorial(n)/factorial(n-r)
+
+}
+
+return null
+
+}
+
+/* PHYSICS */
+
+function physicsCommand(text){
+
+let p=text.split(" ")
+
+if(p[0]==="force")
+return "Force = "+(p[1]*p[2])+" N"
+
+if(p[0]==="velocity")
+return "Velocity = "+(p[1]/p[2])+" m/s"
+
+if(p[0]==="kinetic")
+return "Kinetic Energy = "+(0.5*p[1]*p[2]*p[2])+" J"
+
+return null
+
+}
+
+/* GRAPH */
+
+function plotGraph(expr){
+
+let canvas=document.getElementById("graph")
+let ctx=canvas.getContext("2d")
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+ctx.beginPath()
+
+for(let x=-10;x<=10;x+=0.1){
+
+let y
+
+try{
+y=Function("x","return "+expr)(x)
+}catch{
+return
+}
+
+let px=(x+10)*30
+let py=110-y*10
+
+if(x===-10) ctx.moveTo(px,py)
+else ctx.lineTo(px,py)
+
+}
+
+ctx.stroke()
+
+}
+
+/* STEM KNOWLEDGE */
+
+function conceptCommand(text){
 
 let t=text.toLowerCase()
 
-/* greetings */
-
-if(t.includes("hello")||t.includes("hi"))
-return "Hello! I'm your STEM exam helper."
-
-/* exam tips */
-
-if(t.includes("exam")||t.includes("test"))
-return "Prepare by practicing questions, reviewing formulas, and getting enough sleep."
-
-if(t.includes("study"))
-return "Study in short focused sessions and practice solving problems."
-
-if(t.includes("revision"))
-return "Review key formulas, concepts, and past questions."
-
-/* math */
-
-if(t.includes("algebra"))
-return "Algebra involves solving equations using variables like x and y."
-
-if(t.includes("geometry"))
-return "Geometry studies shapes, angles, and spatial relationships."
-
-/* physics */
-
 if(t.includes("gravity"))
-return "Gravity is a force that attracts objects with mass toward each other."
-
-if(t.includes("force"))
-return "Force is a push or pull on an object. It equals mass times acceleration."
-
-if(t.includes("energy"))
-return "Energy is the ability to do work. Common types include kinetic and potential energy."
-
-/* chemistry */
+return "Gravity is the force that pulls objects with mass toward each other."
 
 if(t.includes("atom"))
 return "An atom is the smallest unit of an element."
 
-if(t.includes("molecule"))
-return "A molecule is made of two or more atoms bonded together."
+if(t.includes("energy"))
+return "Energy is the ability to do work."
 
-/* general advice */
+if(t.includes("algebra"))
+return "Algebra uses variables like x to represent numbers."
+
+return null
+
+}
+
+/* EXAM TIPS */
+
+function examTips(text){
+
+let t=text.toLowerCase()
+
+if(t.includes("exam")||t.includes("test"))
+return "Review key formulas, practice problems, and sleep well before the exam."
+
+if(t.includes("study"))
+return "Study in 25-minute focused sessions and practice questions."
 
 if(t.includes("nervous"))
-return "It's normal to feel nervous before exams. Take deep breaths and stay confident."
+return "Take deep breaths and remember preparation builds confidence."
 
-if(t.includes("motivate"))
-return "Keep going. Every problem you solve makes you stronger."
+return null
 
-return "That's an interesting STEM question. Try asking about math, physics, chemistry, or exams."
+}
+
+/* CHAT */
+
+function chatCommand(text){
+
+let t=text.toLowerCase()
+
+if(t.includes("hello")||t.includes("hi"))
+return "Hello! I'm your STEM tutor."
+
+if(t.includes("help"))
+return "Try: 1+1, sqrt 81, sin 30, mean 2,4,6, factorial 5, force 10 2, graph x*x"
+
+return null
+
+}
+
+/* AI CORE */
+
+function aiReply(text){
+
+let r
+
+r=chatCommand(text); if(r) return r
+r=examTips(text); if(r) return r
+r=conceptCommand(text); if(r) return r
+r=sqrtCommand(text); if(r) return r
+r=trigCommand(text); if(r) return r
+r=statsCommand(text); if(r) return r
+r=probabilityCommand(text); if(r) return r
+r=physicsCommand(text); if(r) return r
+
+if(text.startsWith("graph")){
+
+let expr=text.replace("graph","").trim()
+
+plotGraph(expr)
+
+return "Graph plotted."
+
+}
+
+r=solveMath(text)
+if(r) return r
+
+return "I'm not sure yet. Ask about math, physics, or exam tips."
 
 }
 
