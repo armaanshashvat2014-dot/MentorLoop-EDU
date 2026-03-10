@@ -26,9 +26,8 @@ border-radius:10px;
 .topbar{
 display:flex;
 justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
 color:white;
+margin-bottom:10px;
 }
 
 .back{
@@ -101,13 +100,13 @@ border-radius:6px;
 
 <div class="topbar">
 <h3>STEM Tutor AI</h3>
-<button class="back" onclick="location.href='dashboard-v2.html'">Back to Dashboard</button>
+<button class="back" onclick="location.href='dashboard-v2.html'">Back</button>
 </div>
 
 <div id="chat"></div>
 
 <div class="inputArea">
-<input id="input" placeholder="Ask math, science, or exam tips...">
+<input id="input" placeholder="Ask a STEM question...">
 <button onclick="send()">Send</button>
 </div>
 
@@ -117,7 +116,7 @@ border-radius:6px;
 
 <script>
 
-/* CHAT DISPLAY */
+/* CHAT */
 
 function addMessage(role,text){
 
@@ -135,7 +134,7 @@ chat.scrollTop=chat.scrollHeight
 
 }
 
-/* BASIC MATH */
+/* CALCULATOR */
 
 function solveMath(expr){
 
@@ -152,30 +151,11 @@ return null
 
 }
 
-/* SQRT */
+/* TRIGONOMETRY */
 
-function sqrtCommand(text){
-
-if(text.startsWith("sqrt")){
-
-let n=parseFloat(text.split(" ")[1])
-
-if(!isNaN(n))
-return "√"+n+" = "+Math.sqrt(n)
-
-}
-
-return null
-
-}
-
-/* TRIG */
-
-function trigCommand(text){
+function trig(text){
 
 let p=text.split(" ")
-
-let cmd=p[0]
 
 let v=parseFloat(p[1])
 
@@ -183,9 +163,9 @@ if(isNaN(v)) return null
 
 let rad=v*Math.PI/180
 
-if(cmd==="sin") return "sin("+v+"°) = "+Math.sin(rad)
-if(cmd==="cos") return "cos("+v+"°) = "+Math.cos(rad)
-if(cmd==="tan") return "tan("+v+"°) = "+Math.tan(rad)
+if(p[0]=="sin") return Math.sin(rad)
+if(p[0]=="cos") return Math.cos(rad)
+if(p[0]=="tan") return Math.tan(rad)
 
 return null
 
@@ -193,7 +173,7 @@ return null
 
 /* STATISTICS */
 
-function statsCommand(text){
+function stats(text){
 
 let p=text.split(" ")
 
@@ -201,16 +181,8 @@ if(!p[1]) return null
 
 let nums=p[1].split(",").map(Number)
 
-if(p[0]==="mean")
+if(p[0]=="mean")
 return nums.reduce((a,b)=>a+b)/nums.length
-
-if(p[0]==="median"){
-
-nums.sort((a,b)=>a-b)
-
-return nums[Math.floor(nums.length/2)]
-
-}
 
 return null
 
@@ -228,21 +200,12 @@ return r
 
 }
 
-function probabilityCommand(text){
+function probability(text){
 
 let p=text.split(" ")
 
-if(p[0]==="factorial")
+if(p[0]=="factorial")
 return factorial(parseInt(p[1]))
-
-if(p[0]==="ncr"){
-
-let n=parseInt(p[1])
-let r=parseInt(p[2])
-
-return factorial(n)/(factorial(r)*factorial(n-r))
-
-}
 
 return null
 
@@ -250,17 +213,17 @@ return null
 
 /* PHYSICS */
 
-function physicsCommand(text){
+function physics(text){
 
 let p=text.split(" ")
 
-if(p[0]==="force")
+if(p[0]=="force")
 return "Force = "+(p[1]*p[2])+" N"
 
-if(p[0]==="velocity")
+if(p[0]=="velocity")
 return "Velocity = "+(p[1]/p[2])+" m/s"
 
-if(p[0]==="kinetic")
+if(p[0]=="kinetic")
 return "Kinetic Energy = "+(0.5*p[1]*p[2]*p[2])+" J"
 
 return null
@@ -300,74 +263,66 @@ ctx.stroke()
 
 }
 
-/* STEM KNOWLEDGE */
+/* STEM KNOWLEDGE BASE */
 
-function conceptCommand(text){
+const knowledge=[
 
-let t=text.toLowerCase()
+{keywords:["gravity"],answer:"Gravity is the force that pulls objects with mass toward each other."},
+{keywords:["atom"],answer:"An atom is the smallest unit of an element."},
+{keywords:["energy"],answer:"Energy is the ability to do work."},
+{keywords:["photosynthesis"],answer:"Photosynthesis is the process plants use to convert sunlight into energy."},
+{keywords:["cell"],answer:"A cell is the basic structural unit of life."},
+{keywords:["algorithm"],answer:"An algorithm is a step-by-step procedure for solving a problem."},
+{keywords:["binary"],answer:"Binary is a base-2 number system used by computers."},
+{keywords:["computer"],answer:"A computer is a machine that processes data according to instructions."},
+{keywords:["planet"],answer:"A planet is a celestial body that orbits a star."},
+{keywords:["sun"],answer:"The Sun is the star at the center of our solar system."},
+{keywords:["exam"],answer:"Review formulas, practice problems, and get enough sleep before exams."},
+{keywords:["study"],answer:"Study in focused sessions and practice solving problems."}
 
-if(t.includes("gravity"))
-return "Gravity is the force that pulls objects toward each other."
+]
 
-if(t.includes("atom"))
-return "An atom is the smallest unit of an element."
+/* SEARCH AI */
 
-if(t.includes("energy"))
-return "Energy is the ability to do work."
+function searchAI(text){
 
-if(t.includes("algebra"))
-return "Algebra studies equations using variables."
+text=text.toLowerCase()
+
+for(let item of knowledge){
+
+for(let k of item.keywords){
+
+if(text.includes(k))
+return item.answer
+
+}
+
+}
 
 return null
 
 }
 
-/* EXAM TIPS */
-
-function examTips(text){
-
-let t=text.toLowerCase()
-
-if(t.includes("exam")||t.includes("test"))
-return "Review formulas, practice problems, and get good sleep before the exam."
-
-if(t.includes("study"))
-return "Study in focused sessions and practice solving questions."
-
-return null
-
-}
-
-/* CHAT */
-
-function chatCommand(text){
-
-let t=text.toLowerCase()
-
-if(t.includes("hello")||t.includes("hi"))
-return "Hello! I'm your STEM tutor."
-
-if(t.includes("help"))
-return "Try: 1+1, sqrt 81, sin 30, mean 2,4,6, factorial 5, force 10 2, graph x*x"
-
-return null
-
-}
-
-/* AI CORE */
+/* MAIN AI */
 
 function aiReply(text){
 
 let r
 
-r=chatCommand(text); if(r) return r
-r=examTips(text); if(r) return r
-r=conceptCommand(text); if(r) return r
-r=sqrtCommand(text); if(r) return r
-r=trigCommand(text); if(r) return r
-r=statsCommand(text); if(r) return r
-r=probabilityCommand(text); if(r) return r
-r=physicsCommand(text); if(r) return r
+r=solveMath(text)
+if(r) return r
+
+r=trig(text)
+if(r) return r
+
+r=stats(text)
+if(r) return r
+
+r=probability(text)
+if(r) return r
+
+r=physics(text)
+if(r) return r
 
 if(text.startsWith("graph")){
 
@@ -379,10 +334,10 @@ return "Graph plotted."
 
 }
 
-r=solveMath(text)
+r=searchAI(text)
 if(r) return r
 
-return "Ask me about STEM topics or exam tips."
+return "I couldn't find that in my STEM knowledge yet."
 
 }
 
@@ -400,9 +355,7 @@ addMessage("user",text)
 
 let reply=aiReply(text)
 
-setTimeout(()=>{
-addMessage("ai",reply)
-},200)
+setTimeout(()=>addMessage("ai",reply),200)
 
 input.value=""
 
