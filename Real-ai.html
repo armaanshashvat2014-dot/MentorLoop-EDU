@@ -8,8 +8,7 @@
 
 body{
 font-family:Arial;
-background:#0f172a;
-color:white;
+background:#0b141a;
 display:flex;
 justify-content:center;
 align-items:center;
@@ -19,25 +18,61 @@ margin:0;
 
 .container{
 width:720px;
-background:#1e293b;
-padding:20px;
-border-radius:12px;
+background:#111b21;
+padding:15px;
+border-radius:10px;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+color:white;
+}
+
+.back{
+background:#25D366;
+border:none;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
 }
 
 #chat{
 height:350px;
 overflow-y:auto;
-background:#020617;
+background:#0b141a;
 padding:15px;
 border-radius:8px;
 margin-bottom:10px;
 }
 
-.user{color:#38bdf8}
-.ai{color:#22c55e}
+.bubble{
+padding:8px 12px;
+margin:6px 0;
+border-radius:10px;
+max-width:70%;
+}
+
+.user{
+background:#005c4b;
+color:white;
+margin-left:auto;
+}
+
+.ai{
+background:#202c33;
+color:white;
+}
+
+.inputArea{
+display:flex;
+gap:10px;
+}
 
 input{
-width:80%;
+flex:1;
 padding:10px;
 border:none;
 border-radius:6px;
@@ -47,7 +82,7 @@ button{
 padding:10px;
 border:none;
 border-radius:6px;
-background:#38bdf8;
+background:#25D366;
 cursor:pointer;
 }
 
@@ -64,12 +99,17 @@ border-radius:6px;
 
 <div class="container">
 
-<h2>STEM Tutor AI</h2>
+<div class="topbar">
+<h3>STEM Tutor AI</h3>
+<button class="back" onclick="location.href='dashboard-v2.html'">Back to Dashboard</button>
+</div>
 
 <div id="chat"></div>
 
-<input id="input" placeholder="Ask math, physics, or exam tips...">
+<div class="inputArea">
+<input id="input" placeholder="Ask math, science, or exam tips...">
 <button onclick="send()">Send</button>
+</div>
 
 <canvas id="graph" width="650" height="220"></canvas>
 
@@ -85,7 +125,9 @@ let chat=document.getElementById("chat")
 
 let div=document.createElement("div")
 
-div.innerHTML="<b class='"+role+"'>"+role+":</b> "+text
+div.className="bubble "+role
+
+div.innerText=text
 
 chat.appendChild(div)
 
@@ -202,15 +244,6 @@ return factorial(n)/(factorial(r)*factorial(n-r))
 
 }
 
-if(p[0]==="npr"){
-
-let n=parseInt(p[1])
-let r=parseInt(p[2])
-
-return factorial(n)/factorial(n-r)
-
-}
-
 return null
 
 }
@@ -274,7 +307,7 @@ function conceptCommand(text){
 let t=text.toLowerCase()
 
 if(t.includes("gravity"))
-return "Gravity is the force that pulls objects with mass toward each other."
+return "Gravity is the force that pulls objects toward each other."
 
 if(t.includes("atom"))
 return "An atom is the smallest unit of an element."
@@ -283,7 +316,7 @@ if(t.includes("energy"))
 return "Energy is the ability to do work."
 
 if(t.includes("algebra"))
-return "Algebra uses variables like x to represent numbers."
+return "Algebra studies equations using variables."
 
 return null
 
@@ -296,13 +329,10 @@ function examTips(text){
 let t=text.toLowerCase()
 
 if(t.includes("exam")||t.includes("test"))
-return "Review key formulas, practice problems, and sleep well before the exam."
+return "Review formulas, practice problems, and get good sleep before the exam."
 
 if(t.includes("study"))
-return "Study in 25-minute focused sessions and practice questions."
-
-if(t.includes("nervous"))
-return "Take deep breaths and remember preparation builds confidence."
+return "Study in focused sessions and practice solving questions."
 
 return null
 
@@ -352,7 +382,7 @@ return "Graph plotted."
 r=solveMath(text)
 if(r) return r
 
-return "I'm not sure yet. Ask about math, physics, or exam tips."
+return "Ask me about STEM topics or exam tips."
 
 }
 
