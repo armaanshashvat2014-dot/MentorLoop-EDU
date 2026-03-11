@@ -217,7 +217,7 @@ line-height:1.4;
       <p><strong>Role:</strong> Student</p>
       <p><strong>Points:</strong> <span id="points">0</span></p>
 <p><strong>🔥 Streak:</strong> <span id="streak">0</span> days</p>
-    <p><strong>🔥 Did you know we can score points by answering questions</strong></p>
+    <p><strong>🔥 Did you know we can score points by answering questions, and doing daily missions!</strong></p>
       <a href="profile.html" class="btn" style="background:#22c55e;">
          See your profile
       </a>
@@ -296,12 +296,8 @@ line-height:1.4;
  <a href="higher-college-quiz.html" class="btn">
         📘 Higher secondary & College quizzes
       </a>
-      <a href="ai.html" class="btn" style="background:#10b981;">
-        🤖 Meet EDUBots
-      </a>
-
-     
-      <a href="blog.html" class="btn" style="background:#22c55e;">
+    
+<a href="blog.html" class="btn" style="background:#22c55e;">
         Know About Us
       </a>
 
@@ -315,14 +311,6 @@ line-height:1.4;
 
 <!-- KEEPING ALL YOUR SCRIPTS BELOW EXACTLY AS IS -->
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const supabase = window.supabase.createClient(
-  "https://usgsmkpqxdgvtepmnugh.supabase.co",
-  "usgsmkpqxdgvtepmnugh"
-);
-</script>
-
 <script>
 document.getElementById("userName").innerText =
   localStorage.getItem("ml_user_name") || "Learner";
@@ -334,12 +322,13 @@ function renderBadges() {
   const points = parseInt(localStorage.getItem("ml_points") || "0");
 
   const badgeList = [
+    { name: " Starter", min: 110 },
     { name: "🤔 Curious Starter", min: 110 },
     { name: "💡 Active Learner", min: 299 },
     { name: "🧠 Knowledge Helper", min: 590 },
     { name: "👑 Mentor Champ", min: 1000},
-    {name: "👑 The winner", min: 11000},
-    {name: "👑 The best", min: 14000}
+    {name: "👑👑 The winner", min: 11000},
+    {name: "👑👑👑 The best", min: 14000}
   ];
 
   const box = document.getElementById("badges");
@@ -530,6 +519,7 @@ loadMissions();
 </script>
 </body>
 </html>
+
 
 
 
