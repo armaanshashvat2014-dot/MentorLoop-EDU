@@ -21,7 +21,7 @@ color:white;
 background:#1e293b;
 padding:30px;
 border-radius:20px;
-width:350px;
+width:360px;
 text-align:center;
 box-shadow:0 20px 40px rgba(0,0,0,0.6);
 }
@@ -29,13 +29,14 @@ box-shadow:0 20px 40px rgba(0,0,0,0.6);
 .title{
 font-size:22px;
 color:#22d3ee;
-margin-bottom:15px;
+margin-bottom:10px;
 }
 
 .rank{
-font-size:26px;
-margin:10px 0;
+font-size:28px;
 font-weight:bold;
+margin:10px 0;
+color:#10b981;
 }
 
 .stat{
@@ -43,9 +44,15 @@ margin:6px 0;
 font-size:16px;
 }
 
+.subtitle{
+margin-top:10px;
+font-size:14px;
+color:#94a3b8;
+}
+
 button{
-margin-top:15px;
-padding:10px;
+margin-top:18px;
+padding:12px;
 width:100%;
 border:none;
 border-radius:10px;
@@ -59,12 +66,6 @@ button:hover{
 opacity:0.9;
 }
 
-.small{
-margin-top:10px;
-font-size:13px;
-color:#94a3b8;
-}
-
 </style>
 </head>
 
@@ -72,7 +73,7 @@ color:#94a3b8;
 
 <div class="card" id="leaderboardCard">
 
-<div class="title">🏆 MentorLoop Leaderboard</div>
+<div class="title">🏆 MentorLoop EDU</div>
 
 <div class="rank" id="rank"></div>
 
@@ -80,7 +81,9 @@ color:#94a3b8;
 <div class="stat"><strong>Points:</strong> <span id="points"></span></div>
 <div class="stat"><strong>Streak:</strong> <span id="streak"></span> days</div>
 
-<div class="small">Keep learning every day!</div>
+<div class="subtitle">
+Earn your own rank on MentorLoop EDU 🚀
+</div>
 
 <button onclick="downloadCard()">Download Screenshot</button>
 
@@ -90,28 +93,28 @@ color:#94a3b8;
 
 <script>
 
-// load real user data
+// LOAD USER DATA
 let name = localStorage.getItem("ml_user_name") || "Learner";
 let points = parseInt(localStorage.getItem("ml_points") || 0);
-let streak = localStorage.getItem("ml_streak") || 0;
+let streak = parseInt(localStorage.getItem("ml_streak") || 0);
 
 document.getElementById("userName").innerText = name;
 document.getElementById("points").innerText = points;
 document.getElementById("streak").innerText = streak;
 
 
-// rank based on real points (no fake users)
+// DETERMINE RANK (REAL POINTS)
 let rank = "Beginner";
 
-if(points >= 300) rank = "Learner";
-if(points >= 1000) rank = "Scholar";
-if(points >= 5000) rank = "Master";
-if(points >= 10000) rank = "Legend";
+if(points >= 200) rank = "Learner";
+if(points >= 500) rank = "Scholar";
+if(points >= 1000) rank = "Master";
+if(points >= 5000) rank = "Legend";
 
 document.getElementById("rank").innerText = "Rank: " + rank;
 
 
-// download screenshot
+// DOWNLOAD SCREENSHOT
 function downloadCard(){
 
 html2canvas(document.getElementById("leaderboardCard")).then(canvas=>{
@@ -126,6 +129,30 @@ link.click();
 });
 
 }
+
+
+// MILESTONE SHARE TRIGGER
+function milestoneCheck(){
+
+let milestones=[100,500,1000,5000];
+
+milestones.forEach(m=>{
+
+if(points>=m && !localStorage.getItem("ml_shared_"+m)){
+
+setTimeout(()=>{
+alert("🎉 You reached "+m+" points! Share your achievement with friends.");
+},500);
+
+localStorage.setItem("ml_shared_"+m,"true");
+
+}
+
+});
+
+}
+
+milestoneCheck();
 
 </script>
 
