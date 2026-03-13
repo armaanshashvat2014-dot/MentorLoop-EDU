@@ -519,8 +519,71 @@ box.appendChild(li);
 loadMissions();
 
 </script>
+  <script>
+
+function progressFeedback(){
+
+let todayPoints = parseInt(localStorage.getItem("ml_my_points") || 0);
+let yesterdayPoints = parseInt(localStorage.getItem("ml_yesterday_points") || 0);
+
+let todayQuestions = parseInt(localStorage.getItem("ml_all_questions") || 0);
+let yesterdayQuestions = parseInt(localStorage.getItem("ml_yesterday_questions") || 0);
+
+let streak = parseInt(localStorage.getItem("ml_streak") || 0);
+let bestStreak = parseInt(localStorage.getItem("ml_best_streak") || 0);
+
+let message = "Keep learning! Every step improves your knowledge.";
+
+
+// points improvement
+if(todayPoints > yesterdayPoints){
+
+let diff = todayPoints - yesterdayPoints;
+
+message = "📈 You earned " + diff + " more points since yesterday!";
+}
+
+
+// questions improvement
+if(todayQuestions > yesterdayQuestions){
+
+let diff = todayQuestions - yesterdayQuestions;
+
+message = "🧠 You solved " + diff + " more questions today. Great progress!";
+}
+
+
+// new streak record
+if(streak > bestStreak){
+
+localStorage.setItem("ml_best_streak", streak);
+
+message = "🔥 New personal best streak: " + streak + " days!";
+}
+
+
+// update yesterday values for next visit
+localStorage.setItem("ml_yesterday_points", todayPoints);
+localStorage.setItem("ml_yesterday_questions", todayQuestions);
+
+
+// display message
+let box = document.createElement("div");
+
+box.className = "study-helper";
+
+box.innerHTML = "<h3>📊 Progress Insight</h3><p>"+message+"</p>";
+
+document.querySelector(".container").prepend(box);
+
+}
+
+progressFeedback();
+
+</script>
 </body>
 </html>
+
 
 
 
