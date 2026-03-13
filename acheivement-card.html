@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Achievement Card | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+color:white;
+}
+
+.card{
+background:#1e293b;
+padding:30px;
+border-radius:20px;
+width:320px;
+text-align:center;
+box-shadow:0 20px 40px rgba(0,0,0,0.6);
+}
+
+.title{
+font-size:22px;
+color:#22d3ee;
+margin-bottom:15px;
+}
+
+.stat{
+margin:8px 0;
+font-size:16px;
+}
+
+.badge{
+margin-top:12px;
+padding:10px;
+background:#334155;
+border-radius:10px;
+font-weight:bold;
+}
+
+button{
+margin-top:15px;
+padding:10px;
+width:100%;
+border:none;
+border-radius:10px;
+background:#22d3ee;
+color:#020617;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+.small{
+margin-top:10px;
+font-size:13px;
+color:#94a3b8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card" id="shareCard">
+
+<div class="title">🎓 MentorLoop EDU</div>
+
+<div class="stat"><strong>Name:</strong> <span id="userName"></span></div>
+<div class="stat"><strong>Points:</strong> <span id="points"></span></div>
+<div class="stat"><strong>Streak:</strong> <span id="streak"></span> days</div>
+
+<div class="badge" id="badge">🏅 Active Learner</div>
+
+<div class="small">Keep learning every day!</div>
+
+<button onclick="downloadCard()">Download Card</button>
+
+</div>
+
+<script>
+
+// load data from your app
+document.getElementById("userName").innerText =
+localStorage.getItem("ml_user_name") || "Learner";
+
+document.getElementById("points").innerText =
+localStorage.getItem("ml_points") || 0;
+
+document.getElementById("streak").innerText =
+localStorage.getItem("ml_streak") || 0;
+
+
+// simple badge logic
+let points = parseInt(localStorage.getItem("ml_points") || 0);
+
+let badge="🏅 Curious Starter";
+
+if(points>=290) badge="💡 Active Learner";
+if(points>=599) badge="🧠 Knowledge Helper";
+if(points>=1000) badge="👑 Mentor Champ";
+ if(points>=11000) badge="👑 Best";
+if(points>=14000) badge="👑 Winner";
+
+
+document.getElementById("badge").innerText = badge;
+
+
+// download card as image
+function downloadCard(){
+
+html2canvas(document.getElementById("shareCard")).then(canvas=>{
+
+const link=document.createElement("a");
+
+link.download="mentorloop-achievement.png";
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
+
+}
+
+</script>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+</body>
+</html>
