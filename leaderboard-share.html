@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Leaderboard Share | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+color:white;
+}
+
+.card{
+background:#1e293b;
+padding:30px;
+border-radius:20px;
+width:350px;
+text-align:center;
+box-shadow:0 20px 40px rgba(0,0,0,0.6);
+}
+
+.title{
+font-size:22px;
+color:#22d3ee;
+margin-bottom:15px;
+}
+
+.rank{
+font-size:26px;
+margin:10px 0;
+font-weight:bold;
+}
+
+.stat{
+margin:6px 0;
+font-size:16px;
+}
+
+button{
+margin-top:15px;
+padding:10px;
+width:100%;
+border:none;
+border-radius:10px;
+background:#22d3ee;
+color:#020617;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+.small{
+margin-top:10px;
+font-size:13px;
+color:#94a3b8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card" id="leaderboardCard">
+
+<div class="title">🏆 MentorLoop Leaderboard</div>
+
+<div class="rank" id="rank"></div>
+
+<div class="stat"><strong>Name:</strong> <span id="userName"></span></div>
+<div class="stat"><strong>Points:</strong> <span id="points"></span></div>
+<div class="stat"><strong>Streak:</strong> <span id="streak"></span> days</div>
+
+<div class="small">Keep learning every day!</div>
+
+<button onclick="downloadCard()">Download Screenshot</button>
+
+</div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script>
+
+// load real user data
+let name = localStorage.getItem("ml_user_name") || "Learner";
+let points = parseInt(localStorage.getItem("ml_points") || 0);
+let streak = localStorage.getItem("ml_streak") || 0;
+
+document.getElementById("userName").innerText = name;
+document.getElementById("points").innerText = points;
+document.getElementById("streak").innerText = streak;
+
+
+// rank based on real points (no fake users)
+let rank = "Beginner";
+
+if(points >= 300) rank = "Learner";
+if(points >= 1000) rank = "Scholar";
+if(points >= 5000) rank = "Master";
+if(points >= 10000) rank = "Legend";
+
+document.getElementById("rank").innerText = "Rank: " + rank;
+
+
+// download screenshot
+function downloadCard(){
+
+html2canvas(document.getElementById("leaderboardCard")).then(canvas=>{
+
+const link=document.createElement("a");
+
+link.download="mentorloop-rank.png";
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
