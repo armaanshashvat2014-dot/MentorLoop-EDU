@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop EDU Store</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.card{
+background:#1e293b;
+padding:30px;
+border-radius:18px;
+width:95%;
+max-width:500px;
+box-shadow:0 20px 40px rgba(0,0,0,0.6);
+}
+
+h1{
+color:#22d3ee;
+text-align:center;
+margin-bottom:20px;
+}
+
+.item{
+background:#334155;
+padding:15px;
+border-radius:10px;
+margin-top:15px;
+}
+
+button{
+margin-top:10px;
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+background:#22d3ee;
+color:black;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+.stats{
+margin-bottom:15px;
+}
+
+.back{
+margin-top:20px;
+background:#10b981;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>🛒 MentorLoop Store</h1>
+
+<div class="stats">
+<p><strong>Points:</strong> <span id="points"></span></p>
+<p><strong>Streak:</strong> <span id="streak"></span></p>
+<p><strong>Streak Shields:</strong> <span id="shields"></span></p>
+</div>
+
+<div class="item">
+<h3>🔥 Buy Streak Shield</h3>
+<p>Cost: 100 points</p>
+<button onclick="buyShield()">Buy Shield</button>
+</div>
+
+<div class="item">
+<h3>⭐ Trade Streak for Points</h3>
+<p>Trade 10 streak days → 100 points</p>
+<button onclick="tradeStreak()">Trade Streak</button>
+</div>
+
+<button class="back" onclick="location.href='dashboard.html'">
+⬅ Back to Dashboard
+</button>
+
+</div>
+
+<script>
+
+function updateDisplay(){
+
+let points=parseInt(localStorage.getItem("ml_points")||0)
+let streak=parseInt(localStorage.getItem("ml_streak")||0)
+let shields=parseInt(localStorage.getItem("ml_streak_shields")||0)
+
+document.getElementById("points").innerText=points
+document.getElementById("streak").innerText=streak
+document.getElementById("shields").innerText=shields
+
+}
+
+function buyShield(){
+
+let points=parseInt(localStorage.getItem("ml_points")||0)
+let shields=parseInt(localStorage.getItem("ml_streak_shields")||0)
+
+if(points<100){
+alert("Not enough points!")
+return
+}
+
+points-=100
+shields+=1
+
+localStorage.setItem("ml_points",points)
+localStorage.setItem("ml_streak_shields",shields)
+
+updateDisplay()
+
+}
+
+function tradeStreak(){
+
+let points=parseInt(localStorage.getItem("ml_points")||0)
+let streak=parseInt(localStorage.getItem("ml_streak")||0)
+
+if(streak<10){
+alert("You need at least 10 streak days!")
+return
+}
+
+streak-=10
+points+=100
+
+localStorage.setItem("ml_points",points)
+localStorage.setItem("ml_streak",streak)
+
+updateDisplay()
+
+}
+
+updateDisplay()
+
+</script>
+
+</body>
+</html>
