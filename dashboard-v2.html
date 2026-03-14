@@ -234,6 +234,11 @@ line-height:1.4;
        <a href="fact.html" class="btn" style="background:#22c55e;">
         ✍️ Know fun facts
       </a>
+      <p>Your Invite Code: <b id="refCode"></b></p>
+      <h3>Invite Code</h3>
+<input id="inviteCode" placeholder="Enter friend's code">
+
+<button onclick="applyInvite()">Apply</button>
       <h2 style="margin-top:20px;">🏅 Your Badges</h2>
       <div id="badges"></div>
     </div>
@@ -326,11 +331,10 @@ function renderBadges() {
 
   const badgeList = [
     { name: " Starter", min: 110 },
-    { name: "🤔 Curious Starter", min: 110 },
-    { name: "💡 Active Learner", min: 299 },
-    { name: "🧠 Knowledge Helper", min: 590 },
+    { name: "🤔 Starter", min: 110 },
+    { name: "💡 Learner", min: 299 },
+    { name: "🧠 Helper", min: 590 },
     { name: "👑 Mentor Champ", min: 1000},
-    {name: "👑👑 The winner", min: 11000},
     {name: "👑👑👑 The best", min: 14000}
   ];
 
@@ -620,7 +624,24 @@ document.querySelector(".container").prepend(box);
 progressFeedback();
 
 </script>
-  
+  <script>
+
+function generateReferralCode(){
+
+let code = localStorage.getItem("ml_ref_code");
+
+if(!code){
+code = "ML"+Math.floor(Math.random()*90000+10000);
+localStorage.setItem("ml_ref_code",code);
+}
+
+document.getElementById("refCode").innerText = code;
+
+}
+
+generateReferralCode();
+
+</script>
 </body>
 </html>
 
