@@ -388,6 +388,44 @@ function updateStreak() {
 updateStreak();
 </script>
   <script>
+
+function protectStreak(){
+
+const today = new Date().toDateString();
+const lastVisit = localStorage.getItem("ml_last_visit");
+
+let shields = parseInt(localStorage.getItem("ml_streak_shields") || "0");
+
+if(!lastVisit) return;
+
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+
+/* If a day was missed */
+
+if(lastVisit !== today && lastVisit !== yesterday.toDateString()){
+
+if(shields > 0){
+
+shields -= 1;
+
+localStorage.setItem("ml_streak_shields", shields);
+
+/* Pretend user visited yesterday so streak continues */
+localStorage.setItem("ml_last_visit", yesterday.toDateString());
+
+alert("🛡️ Streak protected using a shield!");
+
+}
+
+}
+
+}
+
+protectStreak();
+
+</script>
+  <script>
 // Academic Summary Logic
 let testsTaken=parseInt(localStorage.getItem("ml_tests_taken")||"0");
 let totalScore=parseInt(localStorage.getItem("ml_total_score")||"0");
@@ -581,6 +619,7 @@ document.querySelector(".container").prepend(box);
 progressFeedback();
 
 </script>
+  
 </body>
 </html>
 
