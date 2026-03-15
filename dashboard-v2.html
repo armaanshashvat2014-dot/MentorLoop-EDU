@@ -195,16 +195,41 @@ color:#22d3ee;
 font-size:15px;
 line-height:1.4;
 }
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 25px;
+background:#020617;
+border-bottom:1px solid #334155;
+}
 
+.nav-links a{
+margin-left:15px;
+color:#94a3b8;
+text-decoration:none;
+font-weight:600;
+}
+
+.nav-links a:hover{
+color:#22d3ee;
+}
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>MentorLoop EDU Dashboard</h1>
-  <a href="index.html">Logout</a>
+<header class="navbar">
+<h2>MentorLoop EDU</h2>
+
+<div class="nav-links">
+<a href="dashboard-v2.html">Dashboard</a>
+<a href="https://armaanshashvat2014-dot.github.io/XAI/">AI Tutor</a>
+<a href="games.html">Quizzes</a>
+  <a href="hard-challenge.html">Harder quizzes</a>
+<a href="profile.html">Profile</a>
+</div>
 </header>
 
 <div class="container">
