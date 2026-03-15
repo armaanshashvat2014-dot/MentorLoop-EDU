@@ -99,7 +99,6 @@ color:white;
 
 <script>
 
-// ---------- QUESTION BANK ----------
 const HARD_QUESTIONS={
 
 math:[
@@ -115,16 +114,18 @@ science:[
 {q:"Gas used in photosynthesis?",a:["CO₂","O₂","N₂"],c:0},
 {q:"Largest human organ?",a:["Skin","Heart","Liver"],c:0},
 {q:"Speed of light?",a:["3×10⁸ m/s","3×10⁶ m/s","3×10⁵ m/s"],c:0},
-  {q:"Speed of sound?",a:["343 m/s","3×10⁶ m/s","3×10⁵ m/s"],c:0},
+{q:"Speed of sound?",a:["343 m/s","3×10⁶ m/s","3×10⁵ m/s"],c:0},
 {q:"Planet with strongest gravity?",a:["Jupiter","Earth","Mars"],c:0}
 ],
+
 english:[
-{q: "What is a synecdoche? ,a:[ a part representing the whole , an extreme exaggeration , human traits given to objects ],c:0},
-{q: "Which ancient institution is considered the world's oldest continually operating university? ,a:[ University of Karueein , University of Bologna , Nalanda University ],c:0},
-{q: "The United Nations Charter was signed in which city? ,a:[ San Francisco , Geneva , New York City ],c:0},
-{q: "Excluding continental landmasses, what is the largest island by land area? ,a:[ Greenland , New Guinea , Borneo ],c:0},
-{q: "The Challenger Deep is located within which oceanic feature? ,a:[ Mariana Trench , Philippine Trench , Tonga Trench ],c:0}
+{q:"What is a synecdoche?",a:["A part representing the whole","An extreme exaggeration","Human traits given to objects"],c:0},
+{q:"Which ancient institution is considered the world's oldest continually operating university?",a:["University of Karueein","University of Bologna","Nalanda University"],c:0},
+{q:"The United Nations Charter was signed in which city?",a:["San Francisco","Geneva","New York City"],c:0},
+{q:"Excluding continental landmasses, what is the largest island by land area?",a:["Greenland","New Guinea","Borneo"],c:0},
+{q:"The Challenger Deep is located within which oceanic feature?",a:["Mariana Trench","Philippine Trench","Tonga Trench"],c:0}
 ],
+
 gk:[
 {q:"Largest democracy?",a:["India","USA","Brazil"],c:0},
 {q:"Oldest university?",a:["University of Bologna","Oxford","Harvard"],c:0},
@@ -138,18 +139,17 @@ gk:[
 let subject="math";
 let challengeTarget=0;
 
-// ---------- START RANDOM ----------
+// RANDOM MODE
 function startRandom(){
 
 const subjects=["math","science","gk","english"];
-
 subject=subjects[Math.floor(Math.random()*subjects.length)];
 
 startGame();
 
 }
 
-// ---------- START CHALLENGE ----------
+// FRIEND CHALLENGE
 function startChallenge(){
 
 let code=document.getElementById("challengeInput").value.trim();
@@ -170,7 +170,7 @@ startGame();
 
 }
 
-// ---------- START GAME ----------
+// GAME ENGINE
 function startGame(){
 
 let questions=[...HARD_QUESTIONS[subject]];
@@ -256,7 +256,7 @@ loadQuestion();
 
 }
 
-// ---------- CREATE CHALLENGE ----------
+// CREATE CHALLENGE CODE
 function createChallenge(score,total,subject){
 
 let code="ML-"+score+"-"+total+"-"+subject;
