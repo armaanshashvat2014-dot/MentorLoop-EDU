@@ -33,11 +33,6 @@ color:#22d3ee;
 margin-bottom:20px;
 }
 
-#question{
-font-size:18px;
-margin-bottom:15px;
-}
-
 button{
 width:100%;
 padding:12px;
@@ -84,26 +79,25 @@ color:white;
 
 <body>
 
-<div class="card">
+<div class="card" id="mainCard">
 
-<h1 id="title">Hard Challenge</h1>
+<h1>🔥 Hard Challenge</h1>
 
-<p id="challengeGoal"></p>
+<div class="challenge">
 
-<p id="question"></p>
-<div id="options"></div>
+<p><b>Do you have a friend's challenge code?</b></p>
 
-<div class="score">
-Score: <span id="score">0</span>
+<input id="challengeInput" placeholder="Enter challenge code">
+
+<button onclick="startChallenge()">Start Friend Challenge</button>
+
+<button onclick="startRandom()">No Code — Play Random Challenge</button>
+
 </div>
 
 </div>
 
 <script>
-
-// ---------- SUBJECT FROM URL ----------
-const params=new URLSearchParams(window.location.search);
-const subject=params.get("subject") || "math";
 
 // ---------- QUESTION BANK ----------
 const HARD_QUESTIONS={
@@ -121,6 +115,7 @@ science:[
 {q:"Gas used in photosynthesis?",a:["CO₂","O₂","N₂"],c:0},
 {q:"Largest human organ?",a:["Skin","Heart","Liver"],c:0},
 {q:"Speed of light?",a:["3×10⁸ m/s","3×10⁶ m/s","3×10⁵ m/s"],c:0},
+  {q:"Speed of sound?",a:["343 m/s","3×10⁶ m/s","3×10⁵ m/s"],c:0},
 {q:"Planet with strongest gravity?",a:["Jupiter","Earth","Mars"],c:0}
 ],
 
@@ -134,23 +129,61 @@ gk:[
 
 };
 
-// ---------- SELECT QUESTIONS ----------
+let subject="math";
+let challengeTarget=0;
+
+// ---------- START RANDOM ----------
+function startRandom(){
+
+const subjects=["math","science","gk"];
+
+subject=subjects[Math.floor(Math.random()*subjects.length)];
+
+startGame();
+
+}
+
+// ---------- START CHALLENGE ----------
+function startChallenge(){
+
+let code=document.getElementById("challengeInput").value.trim();
+
+if(!code.startsWith("ML-")){
+alert("Invalid challenge code");
+return;
+}
+
+let parts=code.split("-");
+
+challengeTarget=parseInt(parts[1]);
+subject=parts[3];
+
+localStorage.setItem("ml_challenge_target",challengeTarget);
+
+startGame();
+
+}
+
+// ---------- START GAME ----------
+function startGame(){
+
 let questions=[...HARD_QUESTIONS[subject]];
 
-document.getElementById("title").innerText=
-"🔥 Hard "+subject.toUpperCase()+" Challenge";
+let index=0;
+let score=0;
 
-// ---------- CHALLENGE TARGET ----------
-let challengeTarget=parseInt(localStorage.getItem("ml_challenge_target")||0);
+document.getElementById("mainCard").innerHTML=`
+<h1>🔥 Hard ${subject.toUpperCase()} Challenge</h1>
+<p id="challengeGoal"></p>
+<p id="question"></p>
+<div id="options"></div>
+<div class="score">Score: <span id="score">0</span></div>
+`;
 
 if(challengeTarget){
 document.getElementById("challengeGoal").innerText=
-"⚔️ Challenge Goal: Beat "+challengeTarget+" points!";
+"⚔️ Beat "+challengeTarget+" points!";
 }
-
-// ---------- GAME ----------
-let index=0;
-let score=0;
 
 function loadQuestion(){
 
@@ -163,23 +196,22 @@ localStorage.setItem("hard_"+subject+"_high",score);
 high=score;
 }
 
-document.querySelector(".card").innerHTML=
-`<h1>🏆 Challenge Complete</h1>
+document.getElementById("mainCard").innerHTML=`
+<h1>🏆 Challenge Complete</h1>
 <p>Your Score: ${score}/${questions.length}</p>
 <p>Highest Score: ${high}</p>
 
 <div class="challenge">
 <h3>⚔️ Beat My Score</h3>
-<button onclick="createChallenge()">Generate Challenge Code</button>
-
-<input id="challengeInput" placeholder="Enter challenge code">
-<button onclick="startChallenge()">Start Challenge</button>
+<button onclick="createChallenge(${score},${questions.length},'${subject}')">
+Generate Challenge Code
+</button>
 </div>
 
-<button onclick="location.reload()">Retry</button>`;
+<button onclick="location.reload()">Retry</button>
+`;
 
 return;
-
 }
 
 const q=questions[index];
@@ -216,35 +248,16 @@ options.appendChild(btn);
 
 loadQuestion();
 
+}
+
 // ---------- CREATE CHALLENGE ----------
-function createChallenge(){
+function createChallenge(score,total,subject){
 
-let code="ML-"+score+"-"+questions.length+"-"+subject;
+let code="ML-"+score+"-"+total+"-"+subject;
 
-prompt("Share this challenge code with your friend:",code);
+navigator.clipboard.writeText(code);
 
-}
-
-// ---------- START CHALLENGE ----------
-function startChallenge(){
-
-let code=document.getElementById("challengeInput").value.trim();
-
-if(!code.startsWith("ML-")){
-alert("Invalid challenge code");
-return;
-}
-
-let parts=code.split("-");
-
-let target=parseInt(parts[1]);
-let subjectCode=parts[3];
-
-localStorage.setItem("ml_challenge_target",target);
-
-alert("Challenge started! Beat "+target+" points.");
-
-window.location.href="hard-challenge.html?subject="+subjectCode;
+alert("Challenge code copied!\n\n"+code);
 
 }
 
