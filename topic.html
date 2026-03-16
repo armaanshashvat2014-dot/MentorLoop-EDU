@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Topic Course | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:#e2e8f0;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.container{
+width:95%;
+max-width:900px;
+background:#0f172a;
+padding:30px;
+border-radius:18px;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+border:1px solid rgba(34,211,238,.2);
+}
+
+h1{
+text-align:center;
+color:#22d3ee;
+}
+
+.search{
+margin-top:20px;
+display:flex;
+gap:10px;
+}
+
+.search input{
+flex:1;
+padding:12px;
+border-radius:8px;
+border:none;
+background:#020617;
+color:white;
+}
+
+.search button{
+padding:12px 18px;
+border:none;
+border-radius:8px;
+background:#22d3ee;
+color:#020617;
+cursor:pointer;
+}
+
+.course{
+margin-top:25px;
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+}
+
+.section{
+margin-top:15px;
+}
+
+.quiz button{
+display:block;
+width:100%;
+margin-top:8px;
+padding:10px;
+border:none;
+border-radius:8px;
+background:#334155;
+color:white;
+cursor:pointer;
+}
+
+.quiz button:hover{
+background:#22d3ee;
+color:#020617;
+}
+
+.result{
+margin-top:10px;
+color:#22d3ee;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📚 Learn Any Topic</h1>
+
+<div class="search">
+<input id="topicInput" placeholder="Type a topic (gravity, fractions, planets)">
+<button onclick="generateCourse()">Search</button>
+</div>
+
+<div id="courseArea"></div>
+
+</div>
+
+<script>
+
+function generateCourse(){
+
+let topic=document.getElementById("topicInput").value.toLowerCase();
+
+let courseArea=document.getElementById("courseArea");
+
+if(!topic){
+courseArea.innerHTML="<p>Please enter a topic.</p>";
+return;
+}
+
+/* simple course generator */
+
+let explanation="This topic explains the basic idea of "+topic+".";
+let example="Example: Understanding "+topic+" helps us learn how things work in science and maths.";
+
+let quizQuestion="Which statement best relates to "+topic+"?";
+let quizOptions=[
+topic+" is an important concept in learning.",
+topic+" is a type of animal.",
+topic+" only exists in space."
+];
+
+let correct=0;
+
+courseArea.innerHTML=`
+<div class="course">
+
+<h2>Course: ${topic.charAt(0).toUpperCase()+topic.slice(1)}</h2>
+
+<div class="section">
+<b>Lesson</b>
+<p>${explanation}</p>
+</div>
+
+<div class="section">
+<b>Example</b>
+<p>${example}</p>
+</div>
+
+<div class="section quiz">
+<b>Quick Quiz</b>
+<p>${quizQuestion}</p>
+
+<button onclick="checkAnswer(true)">`+quizOptions[0]+`</button>
+<button onclick="checkAnswer(false)">`+quizOptions[1]+`</button>
+<button onclick="checkAnswer(false)">`+quizOptions[2]+`</button>
+
+<div class="result" id="quizResult"></div>
+
+</div>
+
+</div>
+`;
+
+}
+
+function checkAnswer(correct){
+
+let result=document.getElementById("quizResult");
+
+if(correct){
+
+result.innerText="✅ Correct! +2 points";
+
+let pts=parseInt(localStorage.getItem("ml_points")||0);
+pts+=2;
+localStorage.setItem("ml_points",pts);
+
+}else{
+
+result.innerText="❌ Try again!";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
