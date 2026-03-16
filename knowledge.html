@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Knowledge Vault | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:#e2e8f0;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.container{
+width:95%;
+max-width:900px;
+background:#0f172a;
+padding:30px;
+border-radius:18px;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+border:1px solid rgba(34,211,238,.2);
+}
+
+h1{
+text-align:center;
+color:#22d3ee;
+margin-bottom:20px;
+}
+
+.topic{
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+margin-top:10px;
+cursor:pointer;
+}
+
+.topic:hover{
+background:#22d3ee;
+color:#020617;
+}
+
+.content{
+display:none;
+margin-top:15px;
+padding:15px;
+background:#1e293b;
+border-radius:10px;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:8px;
+border:none;
+border-radius:8px;
+background:#334155;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#22d3ee;
+color:#020617;
+}
+
+.quiz{
+margin-top:10px;
+}
+
+.result{
+margin-top:10px;
+font-weight:bold;
+color:#22d3ee;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📚 Knowledge Vault</h1>
+
+<div class="topic" onclick="toggle('astro')">🌌 Astronomy</div>
+<div id="astro" class="content">
+<p><b>Explanation:</b> Astronomy is the study of space, stars, planets, galaxies, and the universe.</p>
+
+<div class="quiz">
+<p>Which planet is known as the Red Planet?</p>
+<button onclick="check(this,true)">Mars</button>
+<button onclick="check(this,false)">Earth</button>
+<button onclick="check(this,false)">Venus</button>
+</div>
+
+<div class="result"></div>
+</div>
+
+
+<div class="topic" onclick="toggle('math')">➗ Maths</div>
+<div id="math" class="content">
+<p><b>Explanation:</b> Mathematics studies numbers, patterns, shapes, and logical reasoning.</p>
+
+<div class="quiz">
+<p>What is 12 × 8?</p>
+<button onclick="check(this,true)">96</button>
+<button onclick="check(this,false)">88</button>
+<button onclick="check(this,false)">104</button>
+</div>
+
+<div class="result"></div>
+</div>
+
+
+<div class="topic" onclick="toggle('physics')">⚡ Physics</div>
+<div id="physics" class="content">
+<p><b>Explanation:</b> Physics studies energy, motion, forces, and how the universe behaves.</p>
+
+<div class="quiz">
+<p>What force pulls objects toward Earth?</p>
+<button onclick="check(this,true)">Gravity</button>
+<button onclick="check(this,false)">Magnetism</button>
+<button onclick="check(this,false)">Electricity</button>
+</div>
+
+<div class="result"></div>
+</div>
+
+
+<div class="topic" onclick="toggle('chem')">🧪 Chemistry</div>
+<div id="chem" class="content">
+<p><b>Explanation:</b> Chemistry studies substances, atoms, molecules, and chemical reactions.</p>
+
+<div class="quiz">
+<p>What is H₂O?</p>
+<button onclick="check(this,true)">Water</button>
+<button onclick="check(this,false)">Oxygen</button>
+<button onclick="check(this,false)">Salt</button>
+</div>
+
+<div class="result"></div>
+</div>
+
+
+<div class="topic" onclick="toggle('bio')">🌱 Biology</div>
+<div id="bio" class="content">
+<p><b>Explanation:</b> Biology studies living things like plants, animals, and humans.</p>
+
+<div class="quiz">
+<p>Which part of a plant makes food?</p>
+<button onclick="check(this,true)">Leaves</button>
+<button onclick="check(this,false)">Roots</button>
+<button onclick="check(this,false)">Stem</button>
+</div>
+
+<div class="result"></div>
+</div>
+
+
+<div class="topic" onclick="toggle('geo')">🌍 Geography</div>
+<div id="geo" class="content">
+<p><b>Explanation:</b> Geography studies Earth’s landscapes, climates, and countries.</p>
+
+<div class="quiz">
+<p>What is the largest continent?</p>
+<button onclick="check(this,true)">Asia</button>
+<button onclick="check(this,false)">Europe</button>
+<button onclick="check(this,false)">Australia</button>
+</div>
+
+<div class="result"></div>
+</div>
+
+</div>
+
+<script>
+
+function toggle(id){
+
+let section=document.getElementById(id);
+
+section.style.display=
+section.style.display==="block" ? "none" : "block";
+
+}
+
+function check(btn,correct){
+
+let result=btn.parentElement.nextElementSibling;
+
+if(correct){
+
+result.innerText="✅ Correct!";
+addPoints();
+
+}else{
+
+result.innerText="❌ Try again!";
+
+}
+
+}
+
+function addPoints(){
+
+let pts=parseInt(localStorage.getItem("ml_points")||0);
+
+pts+=2;
+
+localStorage.setItem("ml_points",pts);
+
+}
+
+</script>
+
+</body>
+</html>
