@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Notifications | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:#e2e8f0;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.container{
+width:95%;
+max-width:700px;
+background:#0f172a;
+padding:25px;
+border-radius:18px;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+border:1px solid rgba(34,211,238,.2);
+}
+
+h1{
+text-align:center;
+color:#22d3ee;
+margin-bottom:20px;
+}
+
+.note{
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+margin-top:10px;
+border-left:4px solid #22d3ee;
+}
+
+.empty{
+text-align:center;
+color:#94a3b8;
+margin-top:20px;
+}
+
+button{
+margin-top:20px;
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+background:#22d3ee;
+color:#020617;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🔔 Notifications</h1>
+
+<div id="notes"></div>
+
+<button onclick="location.href='dashboard-v2.html'">⬅ Back to Dashboard</button>
+
+</div>
+
+<script>
+
+function loadNotifications(){
+
+let notes=[];
+
+let points=parseInt(localStorage.getItem("ml_points")||0);
+let streak=parseInt(localStorage.getItem("ml_streak")||0);
+let lastVisit=localStorage.getItem("ml_last_visit");
+let today=new Date().toDateString();
+
+// ---------- WELCOME ----------
+if(!lastVisit){
+notes.push("👋 Welcome to MentorLoop! Start learning and earn points.");
+}else{
+notes.push("👋 Welcome back! Ready to learn something new?");
+}
+
+// ---------- STREAK WARNING ----------
+const yesterday=new Date();
+yesterday.setDate(yesterday.getDate()-1);
+
+if(lastVisit!==today && lastVisit!==yesterday.toDateString()){
+notes.push("⚠️ Your streak is at risk! Complete a quiz today.");
+}
+
+// ---------- STREAK PRAISE ----------
+if(streak>=5){
+notes.push("🔥 Great job! You have a "+streak+" day streak.");
+}
+
+// ---------- POINTS ----------
+if(points>=50){
+notes.push("⭐ You have "+points+" points! Keep going.");
+}
+
+// ---------- LAST QUIZ ----------
+let lastScore=parseInt(localStorage.getItem("ml_last_quiz_score")||0);
+
+if(lastScore>=80){
+notes.push("🎉 Excellent! Your last quiz score was "+lastScore+"%.");
+}else if(lastScore>0 && lastScore<50){
+notes.push("📘 Your last quiz score was low. Try practicing more.");
+}
+
+// ---------- RANDOM MOTIVATION ----------
+let tips=[
+"💡 Tip: Practice daily to improve faster.",
+"📚 Learning a little every day is better than a lot once.",
+"🚀 Try a new topic today!",
+"🧠 Keep your brain active with quizzes!"
+];
+
+notes.push(tips[Math.floor(Math.random()*tips.length)]);
+
+// ---------- DISPLAY ----------
+const box=document.getElementById("notes");
+
+if(notes.length===0){
+box.innerHTML="<div class='empty'>No notifications</div>";
+return;
+}
+
+notes.forEach(text=>{
+const div=document.createElement("div");
+div.className="note";
+div.innerText=text;
+box.appendChild(div);
+});
+
+}
+
+loadNotifications();
+
+</script>
+
+</body>
+</html>
