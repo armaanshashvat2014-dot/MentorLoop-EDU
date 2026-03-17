@@ -98,18 +98,18 @@ padding:10px;
 <button onclick="setPart('head','😇')">😇</button>
 </div>
 
-<!-- BODY -->
+<!-- SHIRT (EMOJI) -->
 <div class="part">
-<b>Body</b><br>
-<button onclick="setPart('body','🧍')">🧍</button>
-<button onclick="setPart('body','🧑')">🧑</button>
-<button onclick="setPart('body','🕺')">🕺</button>
-<button onclick="setPart('body','🧘')">🧘</button>
-<button onclick="setPart('body','🏃')">🏃</button>
-<button onclick="setPart('body','🚶')">🚶</button>
-<button onclick="setPart('body','🧎')">🧎</button>
-<button onclick="setPart('body','🤸')">🤸</button>
-<button onclick="setPart('body','🧗')">🧗</button>
+<b>Shirt</b><br>
+<button onclick="setPart('shirt','👕')">👕</button>
+<button onclick="setPart('shirt','👚')">👚</button>
+<button onclick="setPart('shirt','👔')">👔</button>
+<button onclick="setPart('shirt','🧥')">🧥</button>
+<button onclick="setPart('shirt','🥼')">🥼</button>
+<button onclick="setPart('shirt','👘')">👘</button>
+<button onclick="setPart('shirt','🦺')">🦺</button>
+<button onclick="setPart('shirt','👖')">👖</button>
+<button onclick="setPart('shirt','🧢')">🧢</button>
 </div>
 
 <!-- SHIRT COLOR -->
@@ -147,7 +147,7 @@ padding:10px;
 
 let avatar={
 head:"😀",
-body:"🧍",
+shirt:"👕",
 legs:"👖",
 color:"white"
 };
@@ -169,7 +169,7 @@ render();
 function render(){
 document.getElementById("avatarPreview").innerHTML=
 `<div>${avatar.head}</div>
-<div style="color:${avatar.color}">${avatar.body}</div>
+<div style="color:${avatar.color}">${avatar.shirt}</div>
 <div>${avatar.legs}</div>`;
 }
 
