@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Avatar Builder | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.container{
+background:#0f172a;
+padding:25px;
+border-radius:18px;
+width:95%;
+max-width:520px;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+text-align:center;
+}
+
+h1{color:#22d3ee;}
+
+.avatar{
+font-size:50px;
+margin:20px 0;
+line-height:1.2;
+}
+
+.part{margin-top:15px;}
+
+button{
+margin:4px;
+padding:8px 10px;
+border:none;
+border-radius:8px;
+background:#1e293b;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#22d3ee;
+color:#020617;
+}
+
+.color-box{
+display:inline-block;
+width:25px;
+height:25px;
+margin:5px;
+border-radius:6px;
+cursor:pointer;
+border:2px solid transparent;
+}
+
+.color-box:hover{
+border:2px solid #22d3ee;
+}
+
+.save{
+margin-top:20px;
+background:#22d3ee;
+color:black;
+width:100%;
+padding:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🧑 Avatar Builder</h1>
+
+<div class="avatar" id="avatarPreview"></div>
+
+<!-- HEAD -->
+<div class="part">
+<b>Head</b><br>
+<button onclick="setPart('head','😀')">😀</button>
+<button onclick="setPart('head','😎')">😎</button>
+<button onclick="setPart('head','🤓')">🤓</button>
+<button onclick="setPart('head','😄')">😄</button>
+<button onclick="setPart('head','😃')">😃</button>
+<button onclick="setPart('head','🙂')">🙂</button>
+<button onclick="setPart('head','😆')">😆</button>
+<button onclick="setPart('head','😜')">😜</button>
+<button onclick="setPart('head','😇')">😇</button>
+</div>
+
+<!-- BODY -->
+<div class="part">
+<b>Body</b><br>
+<button onclick="setPart('body','🧍')">🧍</button>
+<button onclick="setPart('body','🧑')">🧑</button>
+<button onclick="setPart('body','🕺')">🕺</button>
+<button onclick="setPart('body','🧘')">🧘</button>
+<button onclick="setPart('body','🏃')">🏃</button>
+<button onclick="setPart('body','🚶')">🚶</button>
+<button onclick="setPart('body','🧎')">🧎</button>
+<button onclick="setPart('body','🤸')">🤸</button>
+<button onclick="setPart('body','🧗')">🧗</button>
+</div>
+
+<!-- SHIRT COLOR -->
+<div class="part">
+<b>Shirt Color</b><br>
+<div class="color-box" style="background:red" onclick="setColor('red')"></div>
+<div class="color-box" style="background:blue" onclick="setColor('blue')"></div>
+<div class="color-box" style="background:green" onclick="setColor('green')"></div>
+<div class="color-box" style="background:yellow" onclick="setColor('yellow')"></div>
+<div class="color-box" style="background:orange" onclick="setColor('orange')"></div>
+<div class="color-box" style="background:purple" onclick="setColor('purple')"></div>
+<div class="color-box" style="background:white" onclick="setColor('white')"></div>
+<div class="color-box" style="background:pink" onclick="setColor('pink')"></div>
+</div>
+
+<!-- LEGS -->
+<div class="part">
+<b>Legs</b><br>
+<button onclick="setPart('legs','👖')">👖</button>
+<button onclick="setPart('legs','🩳')">🩳</button>
+<button onclick="setPart('legs','👟')">👟</button>
+<button onclick="setPart('legs','🥾')">🥾</button>
+<button onclick="setPart('legs','🥿')">🥿</button>
+<button onclick="setPart('legs','👢')">👢</button>
+<button onclick="setPart('legs','🩰')">🩰</button>
+<button onclick="setPart('legs','🧦')">🧦</button>
+<button onclick="setPart('legs','👠')">👠</button>
+</div>
+
+<button class="save" onclick="saveAvatar()">Save Avatar</button>
+
+</div>
+
+<script>
+
+let avatar={
+head:"😀",
+body:"🧍",
+legs:"👖",
+color:"white"
+};
+
+if(localStorage.getItem("ml_avatar")){
+avatar=JSON.parse(localStorage.getItem("ml_avatar"));
+}
+
+function setPart(part,value){
+avatar[part]=value;
+render();
+}
+
+function setColor(color){
+avatar.color=color;
+render();
+}
+
+function render(){
+document.getElementById("avatarPreview").innerHTML=
+`<div>${avatar.head}</div>
+<div style="color:${avatar.color}">${avatar.body}</div>
+<div>${avatar.legs}</div>`;
+}
+
+function saveAvatar(){
+localStorage.setItem("ml_avatar",JSON.stringify(avatar));
+alert("Avatar saved!");
+}
+
+render();
+
+</script>
+
+</body>
+</html>
