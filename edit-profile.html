@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+
 body{
 margin:0;
 font-family:'Segoe UI',sans-serif;
@@ -17,25 +18,50 @@ align-items:center;
 min-height:100vh;
 }
 
+/* CONTAINER */
 .container{
 background:#0f172a;
 padding:25px;
 border-radius:18px;
 width:95%;
 max-width:520px;
-box-shadow:0 0 40px rgba(34,211,238,.2);
+box-shadow:0 0 50px rgba(34,211,238,.3);
 text-align:center;
 }
 
-h1{color:#22d3ee;}
-
-.avatar{
-font-size:50px;
-margin:20px 0;
-line-height:1.2;
+/* TITLE */
+h1{
+color:#22d3ee;
 }
 
-.part{margin-top:15px;}
+/* AVATAR CARD */
+.avatar-card{
+background:#020617;
+padding:20px;
+border-radius:16px;
+margin:20px 0;
+box-shadow:0 0 30px rgba(34,211,238,.2);
+}
+
+/* AVATAR */
+.avatar{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+line-height:1;
+}
+
+/* PARTS */
+.avatar div{
+margin:0;
+padding:0;
+}
+
+/* CONTROLS */
+.part{
+margin-top:15px;
+}
 
 button{
 margin:4px;
@@ -52,6 +78,7 @@ background:#22d3ee;
 color:#020617;
 }
 
+/* COLORS */
 .color-box{
 display:inline-block;
 width:25px;
@@ -66,13 +93,16 @@ border:2px solid transparent;
 border:2px solid #22d3ee;
 }
 
+/* SAVE */
 .save{
 margin-top:20px;
 background:#22d3ee;
 color:black;
 width:100%;
-padding:10px;
+padding:12px;
+font-weight:bold;
 }
+
 </style>
 </head>
 
@@ -82,7 +112,9 @@ padding:10px;
 
 <h1>🧑 Avatar Builder</h1>
 
-<div class="avatar" id="avatarPreview"></div>
+<div class="avatar-card">
+  <div class="avatar" id="avatarPreview"></div>
+</div>
 
 <!-- HEAD -->
 <div class="part">
@@ -98,7 +130,7 @@ padding:10px;
 <button onclick="setPart('head','😇')">😇</button>
 </div>
 
-<!-- SHIRT (EMOJI) -->
+<!-- SHIRT -->
 <div class="part">
 <b>Shirt</b><br>
 <button onclick="setPart('shirt','👕')">👕</button>
@@ -108,21 +140,8 @@ padding:10px;
 <button onclick="setPart('shirt','🥼')">🥼</button>
 <button onclick="setPart('shirt','👘')">👘</button>
 <button onclick="setPart('shirt','🦺')">🦺</button>
-<button onclick="setPart('shirt','👖')">👖</button>
 <button onclick="setPart('shirt','🧢')">🧢</button>
-</div>
-
-<!-- SHIRT COLOR -->
-<div class="part">
-<b>Shirt Color</b><br>
-<div class="color-box" style="background:red" onclick="setColor('red')"></div>
-<div class="color-box" style="background:blue" onclick="setColor('blue')"></div>
-<div class="color-box" style="background:green" onclick="setColor('green')"></div>
-<div class="color-box" style="background:yellow" onclick="setColor('yellow')"></div>
-<div class="color-box" style="background:orange" onclick="setColor('orange')"></div>
-<div class="color-box" style="background:purple" onclick="setColor('purple')"></div>
-<div class="color-box" style="background:white" onclick="setColor('white')"></div>
-<div class="color-box" style="background:pink" onclick="setColor('pink')"></div>
+<button onclick="setPart('shirt','🎽')">🎽</button>
 </div>
 
 <!-- LEGS -->
@@ -168,9 +187,9 @@ render();
 
 function render(){
 document.getElementById("avatarPreview").innerHTML=
-`<div>${avatar.head}</div>
-<div style="color:${avatar.color}">${avatar.shirt}</div>
-<div>${avatar.legs}</div>`;
+`<div style="font-size:38px">${avatar.head}</div>
+<div style="font-size:52px; margin-top:-8px; color:${avatar.color}">${avatar.shirt}</div>
+<div style="font-size:38px; margin-top:-8px">${avatar.legs}</div>`;
 }
 
 function saveAvatar(){
