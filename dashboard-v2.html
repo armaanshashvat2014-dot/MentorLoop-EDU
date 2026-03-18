@@ -213,6 +213,59 @@ font-weight:600;
 
 .nav-links a:hover{
 color:#22d3ee;
+
+.mystery-card{
+background:#1e293b;
+padding:20px;
+border-radius:16px;
+margin-top:20px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+
+.mystery-card h2{
+color:#22d3ee;
+}
+
+.sub{
+color:#94a3b8;
+font-size:14px;
+margin-bottom:15px;
+}
+
+#openRewardBtn{
+padding:12px;
+width:100%;
+border:none;
+border-radius:10px;
+background:linear-gradient(90deg,#facc15,#f97316);
+color:black;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+#openRewardBtn:hover{
+transform:scale(1.05);
+}
+
+.reward-box{
+margin-top:15px;
+padding:15px;
+border-radius:12px;
+background:#0f172a;
+font-size:18px;
+font-weight:bold;
+animation:pop 0.4s ease;
+}
+
+.hidden{
+display:none;
+}
+
+@keyframes pop{
+0%{transform:scale(0.7);opacity:0;}
+100%{transform:scale(1);opacity:1;}
 }
 }
 </style>
@@ -674,6 +727,58 @@ document.getElementById("refCode").innerText = code;
 generateReferralCode();
 
 </script>
+  <script>
+function openReward(){
+
+let rewards = [
+{type:"points", value:5, text:"🎁 +5 Points!"},
+{type:"points", value:10, text:"🎉 +10 Points!"},
+{type:"double", value:2, text:"⚡ DOUBLE POINTS!"},
+{type:"nothing", value:0, text:"😅 Nothing this time"},
+{type:"jackpot", value:50, text:"💎 JACKPOT +50!"}
+];
+
+// 🎲 pick random
+let reward = rewards[Math.floor(Math.random()*rewards.length)];
+
+let base = 5; // default reward base
+
+let final = base;
+
+// logic
+if(reward.type==="points"){
+final += reward.value;
+}
+
+if(reward.type==="double"){
+final *= 2;
+}
+
+if(reward.type==="jackpot"){
+final += reward.value;
+}
+
+if(reward.type==="nothing"){
+final = 0;
+}
+
+// 💾 update points
+let pts = parseInt(localStorage.getItem("ml_points") || 0);
+pts += final;
+localStorage.setItem("ml_points", pts);
+
+// 🎯 show result
+let box = document.getElementById("rewardBox");
+let text = document.getElementById("rewardText");
+
+box.classList.remove("hidden");
+
+text.innerText = reward.text + " (+"+final+" total)";
+
+// optional: disable spam
+document.getElementById("openRewardBtn").disabled = true;
+
+}</script>
 </body>
 </html>
 
