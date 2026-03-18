@@ -74,6 +74,26 @@ font-size:18px;
 color:#22d3ee;
 }
 
+.question-box{
+margin-top:20px;
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+}
+
+.option{
+margin-top:8px;
+padding:10px;
+background:#334155;
+border-radius:8px;
+cursor:pointer;
+}
+
+.option:hover{
+background:#22d3ee;
+color:black;
+}
+
 </style>
 </head>
 
@@ -89,7 +109,9 @@ color:#22d3ee;
 
 <div class="leaderboard" id="leaderboard"></div>
 
-<button onclick="play()">⚔️ Play & Earn Points</button>
+<button onclick="startBattle()">⚔️ Start Battle</button>
+
+<div id="quizBox"></div>
 
 </div>
 
@@ -98,73 +120,145 @@ color:#22d3ee;
 // ---------- SEASON ----------
 function getSeason(){
 const m=new Date().getMonth()+1;
-
 if(m>=2 && m<=4) return "spring";
 if(m>=5 && m<=8) return "summer";
 return "winter";
 }
 
-// ---------- LOAD SEASON ----------
 const season=getSeason();
 let key="ml_"+season+"_points";
 
+// ---------- RENDER LEAGUE ----------
 function renderLeague(){
-
 const box=document.getElementById("leagueBox");
 
 if(season==="spring"){
 box.className="league spring";
 box.innerText="🌸 Spring Battles";
 }
-
 if(season==="summer"){
 box.className="league summer";
 box.innerText="☀️ Summer League Tournament";
 }
-
 if(season==="winter"){
 box.className="league winter";
 box.innerText="❄️ Winter Winners";
 }
-
 }
 
-// ---------- PLAYER ----------
+// ---------- POINTS ----------
 function getMyPoints(){
 return parseInt(localStorage.getItem(key)||0);
 }
 
-// ---------- PLAY BUTTON ----------
-function play(){
 
-let pts=getMyPoints();
+// ---------- SHUFFLE ----------
+function shuffle(array){
+for(let i=array.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[array[i],array[j]]=[array[j],array[i]];
+}
+return array;
+}
 
-// random reward (game feel)
-let earn=Math.floor(Math.random()*5)+3;
+// ---------- SEASON QUESTIONS ----------
+const SEASON_QUESTIONS={
 
-pts+=earn;
+spring:[
+{q:"5+3=?",a:["8","7","9"],c:0},
+{q:"Sun rises in?",a:["East","West","North"],c:0},
+{q:"Plant makes food by?",a:["Photosynthesis","Digestion","Respiration"],c:0}
+],
 
+summer:[
+{q:"9x4=?",a:["36","32","40"],c:0},
+{q:"Largest planet?",a:["Jupiter","Earth","Mars"],c:0},
+{q:"Water freezes at?",a:["0°C","10°C","-5°C"],c:0}
+],
+
+winter:[
+{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata"],c:0},
+{q:"H2O is?",a:["Water","Oxygen","Salt"],c:0},
+{q:"7+6=?",a:["13","12","14"],c:0}
+]
+
+};
+
+// ---------- SELECT QUESTIONS ----------
+let currentQuestions=[];
+
+// ---------- BATTLE ----------
+let index=0;
+let score=0;
+
+function startBattle(){
+
+// anti spam
+let last=localStorage.getItem("ml_last_play");
+let now=Date.now();
+
+if(last && now-last<5000){
+alert("⏳ Wait a few seconds!");
+return;
+}
+
+localStorage.setItem("ml_last_play",now);
+
+// 🔥 pick season questions
+currentQuestions = shuffle([...SEASON_QUESTIONS[season]]).slice(0,2);
+
+index=0;
+score=0;
+
+document.getElementById("quizBox").innerHTML="";
+loadQuestion();
+}
+
+function loadQuestion(){
+
+if(index>=currentQuestions.length){
+
+let earn=score*5;
+
+if(earn>0){
+let pts=getMyPoints()+earn;
 localStorage.setItem(key,pts);
-
 alert("🔥 You earned "+earn+" points!");
+}else{
+alert("❌ No points earned");
+}
 
 renderAll();
+document.getElementById("quizBox").innerHTML="";
+return;
+}
+
+let q=currentQuestions[index];
+
+let box=document.getElementById("quizBox");
+
+box.innerHTML=
+`<div class="question-box">
+<p>${q.q}</p>
+${q.a.map((opt,i)=>`<div class="option" onclick="answer(${i},${q.c})">${opt}</div>`).join("")}
+</div>`;
 
 }
 
-// ---------- FAKE LEADERBOARD ----------
+function answer(i,c){
+if(i===c) score++;
+index++;
+loadQuestion();
+}
+// ---------- LEADERBOARD ----------
 function getLeaderboard(){
-
 let myScore=getMyPoints();
-
 return [
 {name:"You",score:myScore},
 {name:"Arjun",score:80},
 {name:"Riya",score:65},
-{name:"Kabir",score:50},
-{name:"Anaya",score:30}
+{name:"Kabir",score:50}
 ].sort((a,b)=>b.score-a.score);
-
 }
 
 // ---------- RENDER ----------
@@ -187,39 +281,22 @@ div.innerHTML=
 board.appendChild(div);
 
 if(p.name==="You"){
-document.getElementById("rankText").innerText=
-"Your Rank: #"+(i+1);
+document.getElementById("rankText").innerText="Your Rank: #"+(i+1);
 }
 
 });
 
-// ---------- REWARD SYSTEM ----------
-let myRank=data.findIndex(p=>p.name==="You")+1;
-
-if(myRank===1){
-alert("🏆 You are #1! Champion!");
-}
-else if(myRank<=3){
-alert("🔥 Top 3! Keep pushing!");
 }
 
-}
-
-// ---------- SEASON RESET ----------
+// ---------- RESET ----------
 function checkReset(){
-
 let lastSeason=localStorage.getItem("ml_last_season");
 
 if(lastSeason!==season){
-
-// reset old season data
 localStorage.setItem(key,0);
-
 localStorage.setItem("ml_last_season",season);
-
 alert("🌍 New Season Started!");
 }
-
 }
 
 // ---------- INIT ----------
