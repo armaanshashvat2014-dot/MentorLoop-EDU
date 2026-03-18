@@ -1,163 +1,203 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>MentorLoop EDU | Ask a Doubt</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    .card {
-      background: white;
-      padding: 28px;
-      border-radius: 14px;
-      max-width: 480px;
-      width: 100%;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
+<title>MentorLoop EDU | Student Doubt Solving Platform-By Armaan</title>
 
-    h1 {
-      margin-top: 0;
-      color: #1e40af;
-    }
+<meta name="description" content="MentorLoop EDU is a safe, school-approved learning platform where students ask doubts, answer questions, and learn together.">
+<meta name="keywords" content="student doubts, ask questions, student help platform, peer learning, education platform, mentorloop edu">
+<meta name="author" content="MentorLoop EDU">
 
-    label {
-      font-weight: bold;
-      margin-top: 14px;
-      display: block;
-    }
+<meta name="robots" content="index, follow">
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-      font-family: inherit;
-    }
+<link rel="canonical" href="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/">
 
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
+<!-- Google verification -->
+<meta name="google-site-verification" content="qfjqR2RYhk7rjGE7ZwNvjVhto_B1e_Ak9P8wsVbt9oQ">
 
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+<!-- Open Graph (Social Preview) -->
+<meta property="og:title" content="MentorLoop EDU">
+<meta property="og:description" content="A platform where students solve doubts and help peers learn together.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/">
+<meta property="og:image" content="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/logo.png">
 
-    .back {
-      display: block;
-      margin-top: 14px;
-      text-align: center;
-      text-decoration: none;
-      color: #2563eb;
-      font-weight: bold;
-    }
-  </style>
+<!-- Twitter Preview -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MentorLoop EDU">
+<meta name="twitter:description" content="Ask doubts, help others, and learn together.">
+<meta name="twitter:image" content="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/logo.png">
+
+<meta name="theme-color" content="#2563eb">
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: white;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.center-box {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.portal-box {
+  background: rgba(255,255,255,0.08);
+  padding: 50px;
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 40px rgba(0,0,0,0.3);
+  animation: floatBox 4s ease-in-out infinite;
+}
+
+@keyframes floatBox {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+h1 {
+  margin-bottom: 30px;
+  font-size: 2rem;
+}
+
+.portal {
+  display: block;
+  margin: 15px 0;
+  padding: 15px 25px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 12px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.portal:hover {
+  transform: scale(1.08);
+  background: rgba(255,255,255,0.35);
+}
+</style>
+
+<!-- Structured Data for Google -->
+<script> 
+{
+ "@context": "https://schema.org",
+ "@type": "EducationalOrganization",
+ "name": "MentorLoop EDU",
+ "url": "https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/",
+ "description": "A student doubt solving and peer learning platform.",
+ "sameAs": []
+}
+</script>
+
 </head>
 
 <body>
 
-<div class="card">
-  <h1>Ask a Doubt</h1>
+<canvas id="bg"></canvas>
 
-  <form
-  action="https://docs.google.com/forms/d/e/1FAIpQLSfVr6j3RJoURigCLHi3zhpt0kLVCSTpoVIaHRZ1nvg72NAJKA/formResponse"
-  method="POST"
-  onsubmit="return checkBanBeforeSubmit(event)">
+<div class="center-box">
+  <div class="portal-box">
+    <h1>🎓 Welcome to MentorLoop EDU</h1>
+    <h2 id="welcomeText"></h2>
 
-    <label>Your Name</label>
-    <input type="text" name="entry.2076629337" required>
-
-    <label>Your Question</label>
-    <textarea name="entry.1963235764" required></textarea>
-
-    <label>Extra Field</label>
-    <input type="text" name="entry.727582675" required>
-
-    <label>Board</label>
-    <input type="text" name="entry.1157368420" required>
-
-    <button type="submit">Submit Doubt</button>
-  </form>
-
-  <a href="dashboard-v2.html" class="back">← Back to Dashboard</a>
+    <a href="dashboard-v2.html" class="portal">📚 Enter Dashboard</a>
+    <a href="ask-question.html" class="portal">❓ Ask a Doubt</a>
+    <a href="questions.html" class="portal">🧠 Explore Questions</a>
+    <a href="fair-play.html" class="portal">🛡 Fair Play Zone</a>
+    <a href="games.html" class="portal">🎲 Fun Quizzes</a>
+    <a href="table.html" class="portal">📚 Why MentorLoop EDU</a>
+    <a href="https://stud-ace-arena.lovable.app/" class="portal">📚 Enjoyed MentorLoop EDU?Use Armaan's 2nd app QuizQuest-For You</a>
+  </div>
 </div>
-</script>
-  <script>
-    function checkBanBeforeSubmit(e) {
-  const username = document.getElementById("studentName").value.trim();
 
-  if (isUserBanned(username)) {
-    e.preventDefault();
-    alert(
-      "🚫 You have been temporarily restricted from posting.\n\n" +
-      "Reason: Multiple Fair Play violations.\n" +
-      "Please contact a teacher or moderator."
-    );
-    return false;
-  }
-  return true;
-}
-function awardAskPoints() {
-  let pts = parseInt(localStorage.getItem("ml_points") || "0");
-  pts += 10;
-  localStorage.setItem("ml_points", pts);
-}
-</script>
 <script>
-function submitDoubt(e) {
-  e.preventDefault();
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
 
-  const name = document.getElementById("name").value;
-  const subject = document.getElementById("subject").value;
-  const question = document.getElementById("question").value;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-  const existing = JSON.parse(localStorage.getItem("ml_questions") || "[]");
+let particles = [];
 
-  existing.push({
-    name,
-    subject,
-    question,
-    time: new Date().toISOString()
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    radius: Math.random() * 3 + 1,
+    dx: (Math.random() - 0.5) * 0.5,
+    dy: (Math.random() - 0.5) * 0.5
+  });
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    p.x += p.dx;
+    p.y += p.dy;
+
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fill();
   });
 
-  localStorage.setItem("ml_questions", JSON.stringify(existing));
+  requestAnimationFrame(animate);
+}
 
-  alert("Doubt submitted!");
-  window.location.href = "dashboard.html";
-}let questions = JSON.parse(localStorage.getItem("ml_questions") || "[]");
+animate();
 
-questions.push({
-  name: name.value,
-  subject: subject.value,
-  question: question.value
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 });
+</script>
 
-localStorage.setItem("ml_questions", JSON.stringify(questions));
+<script>
+function setupUser() {
+  let name = localStorage.getItem("ml_user_name");
+  let role = localStorage.getItem("ml_user_role");
 
-// Add points
-let pts = parseInt(localStorage.getItem("ml_points") || "0");
-pts += 10;
-localStorage.setItem("ml_points", pts);
+  if (!name || !role) {
+    name = prompt("Enter your name:");
+    role = prompt("Enter your role (Student/Mentor):");
 
+    if (!name) name = "Learner";
+    if (!role) role = "Student";
+
+    localStorage.setItem("ml_user_name", name);
+    localStorage.setItem("ml_user_role", role);
+  }
+
+  document.getElementById("welcomeText").innerText =
+    "Welcome back, " + name + " (" + role + ")";
+}
+
+setupUser();
 </script>
 
 </body>
