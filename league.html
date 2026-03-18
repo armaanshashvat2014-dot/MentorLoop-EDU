@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Season League | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.container{
+background:#0f172a;
+padding:30px;
+border-radius:18px;
+width:95%;
+max-width:700px;
+text-align:center;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+}
+
+h1{color:#22d3ee;}
+
+.league{
+margin-top:15px;
+padding:18px;
+border-radius:14px;
+font-size:20px;
+font-weight:bold;
+}
+
+.spring{background:linear-gradient(90deg,#22c55e,#4ade80);color:black;}
+.summer{background:linear-gradient(90deg,#facc15,#f97316);color:black;}
+.winter{background:linear-gradient(90deg,#38bdf8,#0ea5e9);color:black;}
+
+.leaderboard{
+margin-top:20px;
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+}
+
+.player{
+display:flex;
+justify-content:space-between;
+padding:8px;
+border-bottom:1px solid #334155;
+}
+
+button{
+margin-top:15px;
+padding:12px;
+width:100%;
+border:none;
+border-radius:10px;
+background:#22d3ee;
+color:black;
+cursor:pointer;
+font-weight:bold;
+}
+
+.rank{
+margin-top:10px;
+font-size:18px;
+color:#22d3ee;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🏆 Seasonal League</h1>
+
+<div id="leagueBox" class="league"></div>
+
+<div class="rank" id="rankText"></div>
+
+<div class="leaderboard" id="leaderboard"></div>
+
+<button onclick="play()">⚔️ Play & Earn Points</button>
+
+</div>
+
+<script>
+
+// ---------- SEASON ----------
+function getSeason(){
+const m=new Date().getMonth()+1;
+
+if(m>=2 && m<=4) return "spring";
+if(m>=5 && m<=8) return "summer";
+return "winter";
+}
+
+// ---------- LOAD SEASON ----------
+const season=getSeason();
+let key="ml_"+season+"_points";
+
+function renderLeague(){
+
+const box=document.getElementById("leagueBox");
+
+if(season==="spring"){
+box.className="league spring";
+box.innerText="🌸 Spring Battles";
+}
+
+if(season==="summer"){
+box.className="league summer";
+box.innerText="☀️ Summer League Tournament";
+}
+
+if(season==="winter"){
+box.className="league winter";
+box.innerText="❄️ Winter Winners";
+}
+
+}
+
+// ---------- PLAYER ----------
+function getMyPoints(){
+return parseInt(localStorage.getItem(key)||0);
+}
+
+// ---------- PLAY BUTTON ----------
+function play(){
+
+let pts=getMyPoints();
+
+// random reward (game feel)
+let earn=Math.floor(Math.random()*5)+3;
+
+pts+=earn;
+
+localStorage.setItem(key,pts);
+
+alert("🔥 You earned "+earn+" points!");
+
+renderAll();
+
+}
+
+// ---------- FAKE LEADERBOARD ----------
+function getLeaderboard(){
+
+let myScore=getMyPoints();
+
+return [
+{name:"You",score:myScore},
+{name:"Arjun",score:80},
+{name:"Riya",score:65},
+{name:"Kabir",score:50},
+{name:"Anaya",score:30}
+].sort((a,b)=>b.score-a.score);
+
+}
+
+// ---------- RENDER ----------
+function renderAll(){
+
+const board=document.getElementById("leaderboard");
+board.innerHTML="<h3>Leaderboard</h3>";
+
+let data=getLeaderboard();
+
+data.forEach((p,i)=>{
+
+let div=document.createElement("div");
+div.className="player";
+
+div.innerHTML=
+"<span>"+(i+1)+". "+p.name+"</span>"+
+"<span>"+p.score+" pts</span>";
+
+board.appendChild(div);
+
+if(p.name==="You"){
+document.getElementById("rankText").innerText=
+"Your Rank: #"+(i+1);
+}
+
+});
+
+// ---------- REWARD SYSTEM ----------
+let myRank=data.findIndex(p=>p.name==="You")+1;
+
+if(myRank===1){
+alert("🏆 You are #1! Champion!");
+}
+else if(myRank<=3){
+alert("🔥 Top 3! Keep pushing!");
+}
+
+}
+
+// ---------- SEASON RESET ----------
+function checkReset(){
+
+let lastSeason=localStorage.getItem("ml_last_season");
+
+if(lastSeason!==season){
+
+// reset old season data
+localStorage.setItem(key,0);
+
+localStorage.setItem("ml_last_season",season);
+
+alert("🌍 New Season Started!");
+}
+
+}
+
+// ---------- INIT ----------
+renderLeague();
+checkReset();
+renderAll();
+
+</script>
+
+</body>
+</html>
