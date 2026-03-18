@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Friend Activity | MentorLoop</title>
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI';
+background:#020617;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.box{
+background:#0f172a;
+padding:25px;
+border-radius:16px;
+width:90%;
+max-width:500px;
+text-align:center;
+box-shadow:0 0 30px rgba(34,211,238,.2);
+}
+
+input{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:none;
+margin-top:10px;
+background:#1e293b;
+color:white;
+}
+
+button{
+margin-top:10px;
+padding:12px;
+width:100%;
+border:none;
+border-radius:8px;
+background:#22d3ee;
+color:black;
+cursor:pointer;
+}
+
+.feed{
+margin-top:20px;
+text-align:left;
+}
+
+.item{
+background:#1e293b;
+padding:10px;
+border-radius:8px;
+margin-top:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>👥 Who are you playing with?</h2>
+
+<input id="friendName" placeholder="Enter friend's name">
+  <button onclick="start()">Start</button>
+
+<div class="feed" id="feed"></div>
+
+</div>
+
+<script>
+
+const activities=[
+"just won a battle 🏆",
+"is on a 5 day streak 🔥",
+"completed 3 quizzes ⚔️",
+"is climbing the leaderboard 📈",
+"is challenging players ⚡",
+"just entered Top 5 👑"
+];
+
+function start(){
+
+let name=document.getElementById("friendName").value;
+
+if(!name) return alert("Enter a name!");
+
+localStorage.setItem("ml_friend",name);
+
+generateFeed(name);
+
+}
+
+function generateFeed(name){
+
+let feed=document.getElementById("feed");
+
+feed.innerHTML="";
+
+// initial message
+addItem("👀 Checking if "+name+" is here...");
+
+setTimeout(()=>{
+addItem("✅ "+name+" is active!");
+},1000);
+
+// random activity loop
+setInterval(()=>{
+
+let random=activities[Math.floor(Math.random()*activities.length)];
+
+addItem("🔥 "+name+" "+random);
+
+},3000);
+
+}
+
+function addItem(text){
+
+let div=document.createElement("div");
+div.className="item";
+div.innerText=text;
+
+document.getElementById("feed").prepend(div);
+
+}
+
+</script>
+
+</body>
+</html>
