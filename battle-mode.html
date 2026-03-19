@@ -63,12 +63,20 @@ button:hover{
   height:10px;
   width:0%;
   background:#22c55e;
+  transition:0.3s;
 }
 
 .scoreboard{
   display:flex;
   justify-content:space-between;
   margin-bottom:10px;
+}
+
+.turn{
+  text-align:center;
+  margin-bottom:10px;
+  font-weight:bold;
+  color:#38bdf8;
 }
 
 .hidden{
@@ -84,9 +92,11 @@ button:hover{
 <h1>⚔️ Battle Arena</h1>
 
 <div id="modeSelect">
-  <button onclick="startGame('ai')">Battle Slow AI</button>
-  <button onclick="startGame('pvp')">Battle Player (Same Device)</button>
-  <button onclick="https:/mentorloop-edu-battle-online.lovable.app">Battle Online Player</button>
+  <button onclick="startGame('ai')">Battle AI</button>
+  <button onclick="startGame('pvp')">Battle Player</button>
+  <button onclick="window.location.href='https://mentorloop-edu-battle-online.lovable.app'">
+    Battle Online
+  </button>
 </div>
 
 <div id="gameArea" class="hidden">
@@ -96,12 +106,13 @@ button:hover{
   <div id="score2Label">AI: <span id="score2">0</span></div>
 </div>
 
+<div class="turn" id="turnText"></div>
+
 <div class="progress">
   <div class="progress-bar" id="progressBar"></div>
 </div>
 
 <h3 id="question"></h3>
-
 <div id="options"></div>
 
 </div>
@@ -109,7 +120,7 @@ button:hover{
 <div id="result" class="hidden">
   <h2 id="winnerText"></h2>
   <button onclick="location.reload()">Play Again</button>
-   <button onclick="location.reload()">Want REVENGE?</button>
+  <button onclick="location.reload()">Want REVENGE? 😈</button>
 </div>
 
 </div>
@@ -130,29 +141,28 @@ let score2=0;
 let mode="ai";
 let turn=1;
 let timer;
-let timeLeft=4;
+let timeLeft=5;
 
 function startGame(selectedMode){
   mode=selectedMode;
+
   document.getElementById("modeSelect").classList.add("hidden");
   document.getElementById("gameArea").classList.remove("hidden");
 
   if(mode==="pvp"){
-    document.getElementById("score2Label").innerHTML="Player 2: <span id='score2'>0</span>";
+    document.getElementById("score2Label").innerHTML = "Player 2: <span id='score2'>0</span>";
   }
 
   loadQuestion();
 }
 
 function startTimer(){
-  timeLeft=4;
-  document.getElementById("question").innerText =
-    questions[current].q + "  ⏳ " + timeLeft;
+  timeLeft=5;
+  updateQuestionText();
 
   timer=setInterval(()=>{
     timeLeft--;
-    document.getElementById("question").innerText =
-      questions[current].q + "  ⏳ " + timeLeft;
+    updateQuestionText();
 
     if(timeLeft<=0){
       clearInterval(timer);
@@ -161,22 +171,24 @@ function startTimer(){
   },1000);
 }
 
+function updateQuestionText(){
+  document.getElementById("question").innerText =
+    questions[current].q + "  ⏳ " + timeLeft;
+}
+
 function handleTimeout(){
   if(mode==="pvp"){
     if(turn===1){
       turn=2;
-      alert("Player 2 Turn!");
-      loadQuestion();
     }else{
       turn=1;
       current++;
-      loadQuestion();
     }
   }else{
-    // AI mode – just move to next
     current++;
-    loadQuestion();
   }
+
+  loadQuestion();
 }
 
 function loadQuestion(){
@@ -187,6 +199,18 @@ function loadQuestion(){
 
   let q=questions[current];
 
+  // Set question instantly
+  document.getElementById("question").innerText = q.q;
+
+  // Turn display
+  if(mode==="pvp"){
+    document.getElementById("turnText").innerText =
+      (turn===1) ? "Player 1 Turn" : "Player 2 Turn";
+  }else{
+    document.getElementById("turnText").innerText = "Your Turn";
+  }
+
+  // Options
   let optionsHTML="";
   q.a.forEach((opt,i)=>{
     optionsHTML+=`<button class="option" onclick="checkAnswer(${i})">${opt}</button>`;
@@ -194,8 +218,9 @@ function loadQuestion(){
 
   document.getElementById("options").innerHTML=optionsHTML;
 
-  document.getElementById("progressBar").style.width=
-  ((current/questions.length)*100)+"%";
+  // Progress
+  document.getElementById("progressBar").style.width =
+    ((current+1)/questions.length)*100 + "%";
 
   startTimer();
 }
@@ -209,35 +234,33 @@ function checkAnswer(selected){
     if(turn===1){
       if(selected===correct) score1++;
       turn=2;
-      alert("Player 2 Turn!");
-      loadQuestion();
-      updateScores();
-      return;
     }else{
       if(selected===correct) score2++;
       turn=1;
       current++;
     }
+
+    updateScores();
+    loadQuestion();
+    return;
   }
 
   if(mode==="ai"){
     if(selected===correct) score1++;
 
+    // AI thinking delay
     setTimeout(()=>{
-      if(Math.random()>0.4){
+      if(Math.random()>0.6){ // balanced AI
         score2++;
       }
       current++;
       updateScores();
       loadQuestion();
-    },1000);
+    },800);
 
     updateScores();
     return;
   }
-
-  updateScores();
-  loadQuestion();
 }
 
 function updateScores(){
@@ -250,6 +273,7 @@ function endGame(){
   document.getElementById("result").classList.remove("hidden");
 
   let text="Draw!";
+
   if(score1>score2) text="Player 1 Wins! 🏆";
   if(score2>score1) text=(mode==="ai")?"AI Wins! 🤖":"Player 2 Wins! 🏆";
 
