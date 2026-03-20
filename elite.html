@@ -28,9 +28,12 @@ body {
 
 h1 { color:#38bdf8; }
 
-.section {
-  margin-top:20px;
-  font-size:14px;
+input {
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  width:80%;
+  margin-top:10px;
 }
 
 button {
@@ -44,7 +47,14 @@ button {
   cursor:pointer;
 }
 
-.highlight { color:#38bdf8; font-weight:bold; }
+.section {
+  margin-top:15px;
+}
+
+.highlight {
+  color:#38bdf8;
+  font-weight:bold;
+}
 
 </style>
 </head>
@@ -56,88 +66,125 @@ button {
 
   <div id="status"></div>
 
-  <div class="section" id="eliteQuestion"></div>
+  <div id="eliteArea" style="display:none">
 
-  <div class="section" id="best"></div>
+    <div class="section" id="question"></div>
 
-  <button onclick="challenge()">⚔️ Challenge a Friend</button>
+    <input id="answer" placeholder="Your answer">
+    <button onclick="submitElite()">Submit</button>
 
-  <div class="section" id="leaderboard"></div>
+    <div class="section" id="result"></div>
 
-  <div class="section" id="insight"></div>
+    <div class="section" id="leaderboard"></div>
 
-  <div class="section" id="bonus"></div>
+  </div>
+
 </div>
 
 <script>
 
-// ACCESS
+// REQUIREMENTS
 let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
+let points = parseInt(localStorage.getItem("ml_points")) || 0;
 
-if (streak < 1) {
+let unlocked = (streak >= 15 && points >= 900);
+
+// ACCESS
+if (!unlocked) {
   document.getElementById("status").innerHTML =
-    "🔒 Start a streak to unlock Elite";
+    `🔒 Locked<br>
+     🔥 Streak: ${streak}/15<br>
+     💠 Points: ${points}/900`;
 } else {
   document.getElementById("status").innerHTML =
-    "✅ Welcome Elite User 😈";
+    "✅ Welcome to Elite 😈";
+
+  document.getElementById("eliteArea").style.display = "block";
 }
 
-// ELITE QUESTION
-let eliteQ = [
-  "27 × 3 + 19 = ?",
-  "√256 + 12 = ?",
-  "12² - 20 = ?"
+// ELITE QUESTIONS
+const eliteQ = [
+  {q:"27 × 3 + 19 = ?", a:"100"},
+  {q:"√256 + 12 = ?", a:"28"},
+  {q:"12² - 20 = ?", a:"124"},
+  {q:"15 × 12 - 30 = ?", a:"150"},
+  {q:"7³ - 10 = ?", a:"333"}
 ];
 
-let q = eliteQ[new Date().getDate() % eliteQ.length];
+// DAILY LOCK
+let day = new Date().toDateString();
+let index = new Date().getDate() % eliteQ.length;
 
-document.getElementById("eliteQuestion").innerHTML =
-  `🧠 Elite Question:<br><b>${q}</b>`;
+let currentQ = eliteQ[index];
 
-// BEST TIME
-let best = parseFloat(localStorage.getItem("ml_best_time"));
+document.getElementById("question").innerHTML =
+  `🧠 Elite Question:<br><b>${currentQ.q}</b>`;
 
-if (best) {
-  document.getElementById("best").innerHTML =
-    `🏆 Your Best Time: <span class="highlight">${best.toFixed(2)}s</span>`;
+// TIMER LOCK
+let start = localStorage.getItem("elite_start");
+
+if (!start || localStorage.getItem("elite_day") !== day) {
+  start = Date.now();
+  localStorage.setItem("elite_start", start);
+  localStorage.setItem("elite_day", day);
 }
 
-// FAKE ELITE LEADERBOARD
-let names = ["Aryan","Neha","Ravi","Isha","Kabir"];
-let html = "<b>🌍 Elite Top Players:</b><br>";
+let solved = localStorage.getItem("elite_solved") === "true";
 
-names.forEach((n,i)=>{
-  html += `${i+1}. ${n} - ${(5 + i*0.6).toFixed(1)}s<br>`;
-});
+// SUBMIT
+function submitElite() {
 
-document.getElementById("leaderboard").innerHTML = html;
+  if (solved) return;
 
-// INSIGHT
-document.getElementById("insight").innerHTML =
-  "🧠 Insight: You perform best under speed pressure ⚡";
+  let ans = document.getElementById("answer").value.toLowerCase().trim();
+  let time = (Date.now() - start)/1000;
 
-// BONUS RANDOM
-if (Math.random() < 0.5) {
-  let bonus = Math.floor(Math.random()*30)+10;
-  let pts = parseInt(localStorage.getItem("ml_points")) || 0;
-  pts += bonus;
-  localStorage.setItem("ml_points", pts);
+  if (ans === currentQ.a) {
 
-  document.getElementById("bonus").innerHTML =
-    `🎁 Bonus unlocked: +${bonus} points`;
-}
+    solved = true;
+    localStorage.setItem("elite_solved", "true");
 
-// SHARE / CHALLENGE
-function challenge() {
-  let text = "I’m in Elite Zone on MentorLoop 😈 Try beating me!";
-  
-  if (navigator.share) {
-    navigator.share({text});
+    // SAVE TIME
+    let scores = JSON.parse(localStorage.getItem("elite_scores")) || [];
+    scores.push(time);
+    scores.sort((a,b)=>a-b);
+    scores = scores.slice(0,5);
+    localStorage.setItem("elite_scores", JSON.stringify(scores));
+
+    // MESSAGE (your logic)
+    let msg = "";
+
+    if (time > 12) {
+      msg = "🔥 WOAH! YOU are really FAST!";
+    } else {
+      msg = "😏 Awww...Try faster tomorrow";
+    }
+
+    document.getElementById("result").innerHTML =
+      `${msg}<br>⏱ ${time.toFixed(2)}s`;
+
+    showLeaderboard();
+
   } else {
-    navigator.clipboard.writeText(text);
-    alert("Copied 😎");
+    document.getElementById("result").innerText = "❌ Try again!";
   }
 }
+
+// LEADERBOARD
+function showLeaderboard() {
+  let scores = JSON.parse(localStorage.getItem("elite_scores")) || [];
+
+  let html = "<b>🏆 Elite Leaderboard:</b><br>";
+
+  scores.forEach((t,i)=>{
+    html += `${i+1}. ${t.toFixed(2)}s<br>`;
+  });
+
+  document.getElementById("leaderboard").innerHTML = html;
+}
+
+// LOAD LEADERBOARD
+showLeaderboard();
 
 </script>
 
