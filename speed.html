@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop | Speed Challenge</title>
+<title>MentorLoop | Elite Speed Challenge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -26,6 +26,14 @@ body {
   box-shadow:0 0 40px rgba(0,0,0,0.6);
 }
 
+input {
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  width:80%;
+  margin-top:10px;
+}
+
 button {
   padding:10px 15px;
   margin-top:10px;
@@ -37,16 +45,13 @@ button {
   cursor:pointer;
 }
 
-button:hover { background:#0ea5e9; }
+.result { margin-top:15px; font-weight:bold; }
+.small { font-size:12px; color:#94a3b8; margin-top:5px; }
 
-.question {
-  margin:20px 0;
-  font-size:18px;
-}
-
-.result {
+.leaderboard {
   margin-top:15px;
-  font-weight:bold;
+  font-size:13px;
+  text-align:left;
 }
 </style>
 </head>
@@ -54,74 +59,197 @@ button:hover { background:#0ea5e9; }
 <body>
 
 <div class="card">
-  <h1>⚡ Daily Speed Challenge</h1>
-  <div class="question" id="question"></div>
-  <input type="text" id="answer" placeholder="Your answer">
-  <br>
+  <h1>⚡ Elite Speed Challenge</h1>
+
+  <div id="question"></div>
+
+  <input id="answer" placeholder="Your answer">
   <button onclick="submitAnswer()">Submit</button>
 
   <div class="result" id="result"></div>
+  <div class="small" id="extra"></div>
+
+  <div class="leaderboard" id="leaderboard"></div>
+
+  <button onclick="share()">📢 Share</button>
 </div>
 
 <script>
 
-// 15 complex questions
+// QUESTIONS
 const questions = [
   {q:"15 × 3 + 12 = ?", a:"57"},
-  {q:"Square root of 144?", a:"12"},
-  {q:"9² + 1 = ?", a:"82"},
-  {q:"Capital of Japan?", a:"tokyo"},
-  {q:"12 × 12 = ?", a:"144"},
-  {q:"Binary of 2?", a:"10"},
-  {q:"7³ = ?", a:"343"},
-  {q:"5! (factorial)?", a:"120"},
-  {q:"Speed of light approx (km/s)?", a:"300000"},
-  {q:"Pi approx (2 decimals)?", a:"3.14"},
-  {q:"15% of 200?", a:"30"},
-  {q:"Opposite of 'hot'?", a:"cold"},
-  {q:"3² × 4 = ?", a:"36"},
-  {q:"First prime number?", a:"2"},
-  {q:"10 + 20 × 2 = ?", a:"50"}
+  {q:"√169 = ?", a:"13"},
+  {q:"9² + 16 = ?", a:"97"},
+  {q:"Capital of Australia?", a:"canberra"},
+  {q:"14 × 11 = ?", a:"154"},
+  {q:"Binary of 5?", a:"101"},
+  {q:"6³ = ?", a:"216"},
+  {q:"6! = ?", a:"720"},
+  {q:"Speed of sound (m/s)?", a:"343"},
+  {q:"Pi (3 decimals)?", a:"3.142"},
+  {q:"25% of 240?", a:"60"},
+  {q:"Opposite of 'ancient'?", a:"modern"},
+  {q:"8² × 2 = ?", a:"128"},
+  {q:"Second prime number?", a:"3"},
+  {q:"50 + 5 × 6 = ?", a:"80"}
 ];
 
-// Get today's index
-function getTodayIndex() {
+// DAILY LOCK SYSTEM
+function getDailyIndex() {
   let today = new Date().toDateString();
-  let last = localStorage.getItem("ml_last_q");
 
-  let index = Math.floor(new Date().getTime() / (1000*60*60*24)) % questions.length;
+  let savedDay = localStorage.getItem("ml_today");
+  let savedIndex = localStorage.getItem("ml_today_q");
 
-  // prevent repeat from yesterday
-  if (last == index) {
+  if (savedDay === today && savedIndex !== null) {
+    return parseInt(savedIndex);
+  }
+
+  let lastIndex = parseInt(localStorage.getItem("ml_last_q"));
+  let index = Math.floor(Math.random() * questions.length);
+
+  if (index === lastIndex) {
     index = (index + 1) % questions.length;
   }
 
+  localStorage.setItem("ml_today", today);
+  localStorage.setItem("ml_today_q", index);
   localStorage.setItem("ml_last_q", index);
+
   return index;
 }
 
-let qIndex = getTodayIndex();
+let qIndex = getDailyIndex();
 let currentQ = questions[qIndex];
 
 document.getElementById("question").innerText = currentQ.q;
 
-let startTime = Date.now();
+// LOCKED SESSION DATA
+let todayKey = new Date().toDateString();
 
+// start time
+let startTime = localStorage.getItem("ml_start_time");
+if (!startTime || localStorage.getItem("ml_start_day") !== todayKey) {
+  startTime = Date.now();
+  localStorage.setItem("ml_start_time", startTime);
+  localStorage.setItem("ml_start_day", todayKey);
+}
+
+// attempts
+let attempts = parseInt(localStorage.getItem("ml_attempts")) || 0;
+
+// solved
+let solved = localStorage.getItem("ml_solved") === "true";
+
+// restore result if already solved
+if (solved) {
+  document.getElementById("result").innerText =
+    localStorage.getItem("ml_result_text") || "Already completed today ✅";
+  document.getElementById("extra").innerText =
+    localStorage.getItem("ml_extra_text") || "";
+  showLeaderboard();
+}
+
+// RESET DAILY STATE
+if (localStorage.getItem("ml_state_day") !== todayKey) {
+  localStorage.setItem("ml_state_day", todayKey);
+  localStorage.removeItem("ml_attempts");
+  localStorage.removeItem("ml_solved");
+  localStorage.removeItem("ml_result_text");
+  localStorage.removeItem("ml_extra_text");
+}
+
+// STREAK SYSTEM
+function updateStreak() {
+  let today = new Date().toDateString();
+  let last = localStorage.getItem("ml_last_play");
+  let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
+
+  if (last === today) return streak;
+
+  let yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (last === yesterday.toDateString()) {
+    streak++;
+  } else {
+    streak = 1;
+  }
+
+  localStorage.setItem("ml_streak", streak);
+  localStorage.setItem("ml_last_play", today);
+
+  return streak;
+}
+
+// SUBMIT
 function submitAnswer() {
+  if (solved) return;
+
+  attempts++;
+  localStorage.setItem("ml_attempts", attempts);
+
   let userAns = document.getElementById("answer").value.toLowerCase().trim();
-  let timeTaken = (Date.now() - startTime) / 1000;
+  let time = (Date.now() - startTime) / 1000;
 
   if (userAns === currentQ.a) {
-    if (timeTaken < 10) {
-      document.getElementById("result").innerText =
-        "🔥 WOAH! You did that faster than 70% users!";
+    solved = true;
+    localStorage.setItem("ml_solved", "true");
+
+    let streak = updateStreak();
+
+    // leaderboard
+    let scores = JSON.parse(localStorage.getItem("ml_times")) || [];
+    scores.push(time);
+    scores.sort((a,b)=>a-b);
+    scores = scores.slice(0,5);
+    localStorage.setItem("ml_times", JSON.stringify(scores));
+
+    let msg = "";
+    if (time < 10) {
+      msg = "🔥 WOAH! Faster than 70% users!";
+    } else if (time < 15) {
+      msg = "😏 So close! Just missed elite speed.";
     } else {
-      document.getElementById("result").innerText =
-        "✅ Correct! Try to be faster next time 😏";
+      msg = "✅ Correct! But you can be faster.";
     }
+
+    let extra = `⏱ ${time.toFixed(1)}s | Attempts: ${attempts} | 🔥 Streak: ${streak}`;
+
+    document.getElementById("result").innerText = msg;
+    document.getElementById("extra").innerText = extra;
+
+    localStorage.setItem("ml_result_text", msg);
+    localStorage.setItem("ml_extra_text", extra);
+
+    showLeaderboard();
   } else {
-    document.getElementById("result").innerText =
-      "❌ Wrong answer. Try again!";
+    document.getElementById("result").innerText = "❌ Try again!";
+  }
+}
+
+// LEADERBOARD
+function showLeaderboard() {
+  let scores = JSON.parse(localStorage.getItem("ml_times")) || [];
+
+  let html = "<b>🏆 Top Times:</b><br>";
+  scores.forEach((t,i)=>{
+    html += `${i+1}. ${t.toFixed(1)}s<br>`;
+  });
+
+  document.getElementById("leaderboard").innerHTML = html;
+}
+
+// SHARE
+function share() {
+  let text = document.getElementById("result").innerText + " ⚡ MentorLoop Challenge";
+
+  if (navigator.share) {
+    navigator.share({text});
+  } else {
+    navigator.clipboard.writeText(text);
+    alert("Copied 😎");
   }
 }
 
