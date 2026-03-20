@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Compare</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card {
+  background:#0f172a;
+  padding:25px;
+  border-radius:20px;
+  width:400px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,0,0,0.6);
+}
+
+h2 { margin-top:20px; }
+
+.leaderboard {
+  text-align:left;
+  margin-top:10px;
+  font-size:14px;
+}
+
+.stat {
+  margin-top:10px;
+  font-size:14px;
+}
+
+.highlight {
+  color:#38bdf8;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>📊 Compare Your Performance</h1>
+
+  <div id="yourTime" class="stat"></div>
+
+  <h2>🌍 Global Leaderboard</h2>
+  <div id="leaderboard" class="leaderboard"></div>
+
+  <h2>👤 Your Progress</h2>
+  <div id="selfStats" class="stat"></div>
+</div>
+
+<script>
+
+// GET USER TIME
+let userTime = parseFloat(localStorage.getItem("ml_latest_time"));
+
+if (!userTime) {
+  document.getElementById("yourTime").innerText =
+    "⚠️ No recent attempt found.";
+} else {
+  document.getElementById("yourTime").innerHTML =
+    `⏱ Your Time: <span class="highlight">${userTime.toFixed(2)}s</span>`;
+}
+
+// 🌍 GLOBAL LEADERBOARD (FAKE BUT CONSISTENT)
+function generateGlobalLeaderboard() {
+  let todaySeed = new Date().toDateString();
+  let seed = 0;
+
+  for (let i = 0; i < todaySeed.length; i++) {
+    seed += todaySeed.charCodeAt(i);
+  }
+
+  let list = [];
+
+  for (let i = 0; i < 10; i++) {
+    seed = (seed * 9301 + 49297) % 233280;
+    let time = 5 + (seed % 100) / 10;
+    list.push(time);
+  }
+
+  list.sort((a,b)=>a-b);
+  return list;
+}
+
+function showGlobalLeaderboard() {
+  let global = generateGlobalLeaderboard();
+
+  let html = "";
+
+  global.forEach((t,i)=>{
+    html += `${i+1}. ${t.toFixed(1)}s<br>`;
+  });
+
+  if (userTime) {
+    let rank = global.filter(t => t < userTime).length + 1;
+    html += `<br>🔥 Your Rank: <span class="highlight">#${rank}</span>`;
+  }
+
+  document.getElementById("leaderboard").innerHTML = html;
+}
+
+// 👤 SELF STATS
+function showSelfStats() {
+  if (!userTime) return;
+
+  let best = parseFloat(localStorage.getItem("ml_best_time"));
+
+  if (!best || userTime < best) {
+    localStorage.setItem("ml_best_time", userTime);
+    best = userTime;
+  }
+
+  let yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  let yesterdayKey = "ml_time_" + yesterday.toDateString();
+  let yesterdayTime = parseFloat(localStorage.getItem(yesterdayKey));
+
+  // save today
+  let todayKey = "ml_time_" + new Date().toDateString();
+  localStorage.setItem(todayKey, userTime);
+
+  let html = "";
+
+  html += `🏆 Best Time: <span class="highlight">${best.toFixed(2)}s</span><br>`;
+
+  if (yesterdayTime) {
+    let diff = (yesterdayTime - userTime).toFixed(2);
+
+    if (diff > 0) {
+      html += `📈 Faster than yesterday by ${diff}s<br>`;
+    } else {
+      html += `📉 Slower than yesterday by ${Math.abs(diff)}s<br>`;
+    }
+  } else {
+    html += "📊 No data from yesterday<br>";
+  }
+
+  document.getElementById("selfStats").innerHTML = html;
+}
+
+// INIT
+showGlobalLeaderboard();
+showSelfStats();
+
+</script>
+
+</body>
+</html>
