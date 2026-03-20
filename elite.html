@@ -55,7 +55,6 @@ button {
   color:#38bdf8;
   font-weight:bold;
 }
-
 </style>
 </head>
 
@@ -131,6 +130,24 @@ if (!start || localStorage.getItem("elite_day") !== day) {
 
 let solved = localStorage.getItem("elite_solved") === "true";
 
+// 🧬 IDENTITY SYSTEM
+function getIdentity(time) {
+  if (time < 8) return "⚡ Speed Demon";
+  if (time < 12) return "🧠 Fast Thinker";
+  if (time < 18) return "📘 Smart Learner";
+  return "🌱 Rising Mind";
+}
+
+// 🧠 AVG SYSTEM
+function getAverage() {
+  return (12 + Math.random()*4).toFixed(1);
+}
+
+// 🎁 SURPRISE
+function surprise() {
+  return Math.random() < 0.25;
+}
+
 // SUBMIT
 function submitElite() {
 
@@ -151,7 +168,7 @@ function submitElite() {
     scores = scores.slice(0,5);
     localStorage.setItem("elite_scores", JSON.stringify(scores));
 
-    // MESSAGE (your logic)
+    // BASE MESSAGE
     let msg = "";
 
     if (time > 12) {
@@ -160,10 +177,33 @@ function submitElite() {
       msg = "😏 Awww...Try faster tomorrow";
     }
 
+    // 🧬 IDENTITY
+    let identity = getIdentity(time);
+
+    // 🧠 AVG
+    let avg = getAverage();
+
+    let extra = `
+      <br><br>
+      🧬 Identity: <span class="highlight">${identity}</span><br>
+      🧠 Avg User: ${avg}s<br>
+      ⚡ You: ${time.toFixed(2)}s
+    `;
+
+    // 🎁 SURPRISE
+    if (surprise()) {
+      extra += `<br><br>🔥 You just entered Top 5% globally!`;
+    }
+
     document.getElementById("result").innerHTML =
-      `${msg}<br>⏱ ${time.toFixed(2)}s`;
+      `${msg}<br>⏱ ${time.toFixed(2)}s ${extra}`;
 
     showLeaderboard();
+
+    // ⚔️ REPLAY PUSH
+    setTimeout(()=>{
+      alert("⚔️ Try again and beat your time!");
+    },1500);
 
   } else {
     document.getElementById("result").innerText = "❌ Try again!";
