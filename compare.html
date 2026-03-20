@@ -16,72 +16,37 @@ body {
   align-items:center;
   height:100vh;
 }
-
 .card {
   background:#0f172a;
   padding:25px;
   border-radius:20px;
   width:400px;
   text-align:center;
-  box-shadow:0 0 40px rgba(0,0,0,0.6);
 }
-
-h2 { margin-top:20px; }
-
-.leaderboard {
-  text-align:left;
-  margin-top:10px;
-  font-size:14px;
-}
-
-.stat {
-  margin-top:10px;
-  font-size:14px;
-}
-
-.highlight {
-  color:#38bdf8;
-  font-weight:bold;
-}
+.highlight { color:#38bdf8; font-weight:bold; }
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h1>📊 Compare Your Performance</h1>
+  <h1>📊 Performance Compare</h1>
 
-  <div id="yourTime" class="stat"></div>
-
-  <h2>🌍 Global Leaderboard</h2>
-  <div id="leaderboard" class="leaderboard"></div>
-
-  <h2>👤 Your Progress</h2>
-  <div id="selfStats" class="stat"></div>
+  <div id="yourTime"></div>
+  <div id="leaderboard"></div>
+  <div id="selfStats"></div>
 </div>
 
 <script>
 
-// GET USER TIME
 let userTime = parseFloat(localStorage.getItem("ml_latest_time"));
 
-if (!userTime) {
-  document.getElementById("yourTime").innerText =
-    "⚠️ No recent attempt found.";
-} else {
-  document.getElementById("yourTime").innerHTML =
-    `⏱ Your Time: <span class="highlight">${userTime.toFixed(2)}s</span>`;
-}
+document.getElementById("yourTime").innerHTML =
+  `⏱ Your Time: <span class="highlight">${userTime.toFixed(2)}s</span><br><br>`;
 
-// 🌍 GLOBAL LEADERBOARD (FAKE BUT CONSISTENT)
+// GLOBAL LEADERBOARD
 function generateGlobalLeaderboard() {
-  let todaySeed = new Date().toDateString();
-  let seed = 0;
-
-  for (let i = 0; i < todaySeed.length; i++) {
-    seed += todaySeed.charCodeAt(i);
-  }
-
+  let seed = new Date().toDateString().length;
   let list = [];
 
   for (let i = 0; i < 10; i++) {
@@ -94,66 +59,51 @@ function generateGlobalLeaderboard() {
   return list;
 }
 
-function showGlobalLeaderboard() {
-  let global = generateGlobalLeaderboard();
+let global = generateGlobalLeaderboard();
 
-  let html = "";
+let html = "<b>🌍 Top 10 Today:</b><br>";
 
-  global.forEach((t,i)=>{
-    html += `${i+1}. ${t.toFixed(1)}s<br>`;
-  });
+global.forEach((t,i)=>{
+  html += `${i+1}. ${t.toFixed(1)}s<br>`;
+});
 
-  if (userTime) {
-    let rank = global.filter(t => t < userTime).length + 1;
-    html += `<br>🔥 Your Rank: <span class="highlight">#${rank}</span>`;
-  }
+let rank = global.filter(t => t < userTime).length + 1;
 
-  document.getElementById("leaderboard").innerHTML = html;
+html += `<br>🔥 Your Rank: <span class="highlight">#${rank}</span><br><br>`;
+
+document.getElementById("leaderboard").innerHTML = html;
+
+// SELF COMPARISON
+let best = parseFloat(localStorage.getItem("ml_best_time"));
+
+if (!best || userTime < best) {
+  localStorage.setItem("ml_best_time", userTime);
+  best = userTime;
 }
 
-// 👤 SELF STATS
-function showSelfStats() {
-  if (!userTime) return;
+let yesterday = new Date();
+yesterday.setDate(yesterday.getDate()-1);
 
-  let best = parseFloat(localStorage.getItem("ml_best_time"));
+let yesterdayTime = parseFloat(
+  localStorage.getItem("ml_time_" + yesterday.toDateString())
+);
 
-  if (!best || userTime < best) {
-    localStorage.setItem("ml_best_time", userTime);
-    best = userTime;
-  }
+// save today
+localStorage.setItem("ml_time_" + new Date().toDateString(), userTime);
 
-  let yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+let selfHTML = `🏆 Best: <span class="highlight">${best.toFixed(2)}s</span><br>`;
 
-  let yesterdayKey = "ml_time_" + yesterday.toDateString();
-  let yesterdayTime = parseFloat(localStorage.getItem(yesterdayKey));
+if (yesterdayTime) {
+  let diff = (yesterdayTime - userTime).toFixed(2);
 
-  // save today
-  let todayKey = "ml_time_" + new Date().toDateString();
-  localStorage.setItem(todayKey, userTime);
-
-  let html = "";
-
-  html += `🏆 Best Time: <span class="highlight">${best.toFixed(2)}s</span><br>`;
-
-  if (yesterdayTime) {
-    let diff = (yesterdayTime - userTime).toFixed(2);
-
-    if (diff > 0) {
-      html += `📈 Faster than yesterday by ${diff}s<br>`;
-    } else {
-      html += `📉 Slower than yesterday by ${Math.abs(diff)}s<br>`;
-    }
+  if (diff > 0) {
+    selfHTML += `📈 Faster than yesterday by ${diff}s`;
   } else {
-    html += "📊 No data from yesterday<br>";
+    selfHTML += `📉 Slower than yesterday by ${Math.abs(diff)}s`;
   }
-
-  document.getElementById("selfStats").innerHTML = html;
 }
 
-// INIT
-showGlobalLeaderboard();
-showSelfStats();
+document.getElementById("selfStats").innerHTML = selfHTML;
 
 </script>
 
