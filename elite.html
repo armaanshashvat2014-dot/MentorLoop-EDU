@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Elite Zone</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card {
+  background:#020617;
+  padding:25px;
+  border-radius:20px;
+  width:420px;
+  text-align:center;
+  box-shadow:0 0 50px rgba(56,189,248,0.2);
+}
+
+h1 { color:#38bdf8; }
+
+.section {
+  margin-top:20px;
+  font-size:14px;
+}
+
+button {
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.highlight { color:#38bdf8; font-weight:bold; }
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🔥 Elite Zone</h1>
+
+  <div id="status"></div>
+
+  <div class="section" id="eliteQuestion"></div>
+
+  <div class="section" id="best"></div>
+
+  <button onclick="challenge()">⚔️ Challenge a Friend</button>
+
+  <div class="section" id="leaderboard"></div>
+
+  <div class="section" id="insight"></div>
+
+  <div class="section" id="bonus"></div>
+</div>
+
+<script>
+
+// ACCESS
+let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
+
+if (streak < 1) {
+  document.getElementById("status").innerHTML =
+    "🔒 Start a streak to unlock Elite";
+} else {
+  document.getElementById("status").innerHTML =
+    "✅ Welcome Elite User 😈";
+}
+
+// ELITE QUESTION
+let eliteQ = [
+  "27 × 3 + 19 = ?",
+  "√256 + 12 = ?",
+  "12² - 20 = ?"
+];
+
+let q = eliteQ[new Date().getDate() % eliteQ.length];
+
+document.getElementById("eliteQuestion").innerHTML =
+  `🧠 Elite Question:<br><b>${q}</b>`;
+
+// BEST TIME
+let best = parseFloat(localStorage.getItem("ml_best_time"));
+
+if (best) {
+  document.getElementById("best").innerHTML =
+    `🏆 Your Best Time: <span class="highlight">${best.toFixed(2)}s</span>`;
+}
+
+// FAKE ELITE LEADERBOARD
+let names = ["Aryan","Neha","Ravi","Isha","Kabir"];
+let html = "<b>🌍 Elite Top Players:</b><br>";
+
+names.forEach((n,i)=>{
+  html += `${i+1}. ${n} - ${(5 + i*0.6).toFixed(1)}s<br>`;
+});
+
+document.getElementById("leaderboard").innerHTML = html;
+
+// INSIGHT
+document.getElementById("insight").innerHTML =
+  "🧠 Insight: You perform best under speed pressure ⚡";
+
+// BONUS RANDOM
+if (Math.random() < 0.5) {
+  let bonus = Math.floor(Math.random()*30)+10;
+  let pts = parseInt(localStorage.getItem("ml_points")) || 0;
+  pts += bonus;
+  localStorage.setItem("ml_points", pts);
+
+  document.getElementById("bonus").innerHTML =
+    `🎁 Bonus unlocked: +${bonus} points`;
+}
+
+// SHARE / CHALLENGE
+function challenge() {
+  let text = "I’m in Elite Zone on MentorLoop 😈 Try beating me!";
+  
+  if (navigator.share) {
+    navigator.share({text});
+  } else {
+    navigator.clipboard.writeText(text);
+    alert("Copied 😎");
+  }
+}
+
+</script>
+
+</body>
+</html>
