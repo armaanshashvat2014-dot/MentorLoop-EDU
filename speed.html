@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop | Elite Speed Challenge</title>
+<title>MentorLoop | Speed Challenge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -16,27 +16,22 @@ body {
   align-items:center;
   height:100vh;
 }
-
 .card {
   background:#0f172a;
   padding:25px;
   border-radius:20px;
-  width:380px;
+  width:360px;
   text-align:center;
-  box-shadow:0 0 40px rgba(0,0,0,0.6);
 }
-
 input {
   padding:10px;
   border-radius:10px;
   border:none;
   width:80%;
-  margin-top:10px;
 }
-
 button {
-  padding:10px 15px;
   margin-top:10px;
+  padding:10px;
   border:none;
   border-radius:10px;
   background:#38bdf8;
@@ -44,34 +39,20 @@ button {
   font-weight:bold;
   cursor:pointer;
 }
-
 .result { margin-top:15px; font-weight:bold; }
-.small { font-size:12px; color:#94a3b8; margin-top:5px; }
-
-.leaderboard {
-  margin-top:15px;
-  font-size:13px;
-  text-align:left;
-}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h1>⚡ Elite Speed Challenge</h1>
-
+  <h1>⚡ Daily Speed Challenge</h1>
   <div id="question"></div>
 
   <input id="answer" placeholder="Your answer">
   <button onclick="submitAnswer()">Submit</button>
 
   <div class="result" id="result"></div>
-  <div class="small" id="extra"></div>
-
-  <div class="leaderboard" id="leaderboard"></div>
-
-  <button onclick="share()">📢 Share</button>
 </div>
 
 <script>
@@ -95,7 +76,7 @@ const questions = [
   {q:"50 + 5 × 6 = ?", a:"80"}
 ];
 
-// DAILY LOCK SYSTEM
+// DAILY LOCK
 function getDailyIndex() {
   let today = new Date().toDateString();
 
@@ -125,70 +106,21 @@ let currentQ = questions[qIndex];
 
 document.getElementById("question").innerText = currentQ.q;
 
-// LOCKED SESSION DATA
-let todayKey = new Date().toDateString();
+// LOCK START TIME
+let today = new Date().toDateString();
 
-// start time
 let startTime = localStorage.getItem("ml_start_time");
-if (!startTime || localStorage.getItem("ml_start_day") !== todayKey) {
+if (!startTime || localStorage.getItem("ml_start_day") !== today) {
   startTime = Date.now();
   localStorage.setItem("ml_start_time", startTime);
-  localStorage.setItem("ml_start_day", todayKey);
+  localStorage.setItem("ml_start_day", today);
 }
 
-// attempts
-let attempts = parseInt(localStorage.getItem("ml_attempts")) || 0;
-
-// solved
+// SOLVED LOCK
 let solved = localStorage.getItem("ml_solved") === "true";
 
-// restore result if already solved
-if (solved) {
-  document.getElementById("result").innerText =
-    localStorage.getItem("ml_result_text") || "Already completed today ✅";
-  document.getElementById("extra").innerText =
-    localStorage.getItem("ml_extra_text") || "";
-  showLeaderboard();
-}
-
-// RESET DAILY STATE
-if (localStorage.getItem("ml_state_day") !== todayKey) {
-  localStorage.setItem("ml_state_day", todayKey);
-  localStorage.removeItem("ml_attempts");
-  localStorage.removeItem("ml_solved");
-  localStorage.removeItem("ml_result_text");
-  localStorage.removeItem("ml_extra_text");
-}
-
-// STREAK SYSTEM
-function updateStreak() {
-  let today = new Date().toDateString();
-  let last = localStorage.getItem("ml_last_play");
-  let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
-
-  if (last === today) return streak;
-
-  let yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (last === yesterday.toDateString()) {
-    streak++;
-  } else {
-    streak = 1;
-  }
-
-  localStorage.setItem("ml_streak", streak);
-  localStorage.setItem("ml_last_play", today);
-
-  return streak;
-}
-
-// SUBMIT
 function submitAnswer() {
   if (solved) return;
-
-  attempts++;
-  localStorage.setItem("ml_attempts", attempts);
 
   let userAns = document.getElementById("answer").value.toLowerCase().trim();
   let time = (Date.now() - startTime) / 1000;
@@ -197,59 +129,25 @@ function submitAnswer() {
     solved = true;
     localStorage.setItem("ml_solved", "true");
 
-    let streak = updateStreak();
-
-    // leaderboard
-    let scores = JSON.parse(localStorage.getItem("ml_times")) || [];
-    scores.push(time);
-    scores.sort((a,b)=>a-b);
-    scores = scores.slice(0,5);
-    localStorage.setItem("ml_times", JSON.stringify(scores));
+    localStorage.setItem("ml_latest_time", time);
 
     let msg = "";
+
     if (time < 10) {
       msg = "🔥 WOAH! Faster than 70% users!";
-    } else if (time < 15) {
-      msg = "😏 So close! Just missed elite speed.";
     } else {
-      msg = "✅ Correct! But you can be faster.";
+      msg = "✅ Correct!";
     }
 
-    let extra = `⏱ ${time.toFixed(1)}s | Attempts: ${attempts} | 🔥 Streak: ${streak}`;
-
     document.getElementById("result").innerText = msg;
-    document.getElementById("extra").innerText = extra;
 
-    localStorage.setItem("ml_result_text", msg);
-    localStorage.setItem("ml_extra_text", extra);
+    // go to compare page
+    setTimeout(()=>{
+      window.location.href = "compare.html";
+    }, 1500);
 
-    showLeaderboard();
   } else {
     document.getElementById("result").innerText = "❌ Try again!";
-  }
-}
-
-// LEADERBOARD
-function showLeaderboard() {
-  let scores = JSON.parse(localStorage.getItem("ml_times")) || [];
-
-  let html = "<b>🏆 Top Times:</b><br>";
-  scores.forEach((t,i)=>{
-    html += `${i+1}. ${t.toFixed(1)}s<br>`;
-  });
-
-  document.getElementById("leaderboard").innerHTML = html;
-}
-
-// SHARE
-function share() {
-  let text = document.getElementById("result").innerText + " ⚡ MentorLoop Challenge";
-
-  if (navigator.share) {
-    navigator.share({text});
-  } else {
-    navigator.clipboard.writeText(text);
-    alert("Copied 😎");
   }
 }
 
