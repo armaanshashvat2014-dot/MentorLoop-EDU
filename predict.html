@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Smart Predictor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card {
+  background:#0f172a;
+  padding:25px;
+  border-radius:20px;
+  width:360px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,0,0,0.6);
+}
+
+button {
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover { background:#0ea5e9; }
+
+.question {
+  margin:20px 0;
+}
+
+.result, .prediction {
+  margin-top:15px;
+  font-weight:bold;
+}
+
+.loader {
+  margin-top:15px;
+  font-size:14px;
+  color:#94a3b8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🧠 Smart Predictor</h1>
+
+  <div id="screen">
+    <button onclick="startPrediction()">Start</button>
+  </div>
+
+  <div class="prediction" id="prediction"></div>
+  <div class="question" id="question"></div>
+  <div id="answers"></div>
+
+  <div class="result" id="result"></div>
+
+  <button onclick="shareResult()">📢 Share</button>
+</div>
+
+<script>
+
+let questions = [
+  {q:"5 + 3 = ?", a:[6,7,8], c:2},
+  {q:"Capital of Italy?", a:["Rome","Paris","Madrid"], c:0},
+  {q:"9 x 2 = ?", a:[18,16,20], c:0},
+  {q:"H2O is?", a:["Oxygen","Water","Hydrogen"], c:1},
+  {q:"Sun is a?", a:["Planet","Star","Galaxy"], c:1}
+];
+
+let current = 0;
+let score = 0;
+let predictedScore = 0;
+
+// Start prediction
+function startPrediction() {
+  document.getElementById("screen").innerHTML =
+    "<div class='loader'>Analyzing your thinking style...</div>";
+
+  setTimeout(()=>{
+    predictedScore = generatePrediction();
+
+    document.getElementById("prediction").innerText =
+      `🤖 We predict you’ll score ${predictedScore}/5`;
+
+    startQuiz();
+  }, 1500);
+}
+
+// Smart prediction (based on past data)
+function generatePrediction() {
+  let history = JSON.parse(localStorage.getItem("ml_history")) || [];
+
+  if (history.length === 0) {
+    return Math.floor(Math.random() * 3) + 2; // 2–4
+  }
+
+  let avg = history.reduce((a,b)=>a+b,0) / history.length;
+  return Math.round(avg);
+}
+
+// Quiz
+function startQuiz() {
+  current = 0;
+  score = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  let q = questions[current];
+  document.getElementById("question").innerText = q.q;
+
+  let html = "";
+  q.a.forEach((ans,i)=>{
+    html += `<button onclick="checkAnswer(${i})">${ans}</button>`;
+  });
+
+  document.getElementById("answers").innerHTML = html;
+}
+
+function checkAnswer(i) {
+  if (i === questions[current].c) score++;
+  current++;
+
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+// Finish
+function finishQuiz() {
+
+  let history = JSON.parse(localStorage.getItem("ml_history")) || [];
+  history.push(score);
+  localStorage.setItem("ml_history", JSON.stringify(history));
+
+  let diff = score - predictedScore;
+
+  let message = "";
+
+  if (diff > 0) {
+    message = `🔥 You beat our prediction by +${diff}!`;
+  } else if (diff === 0) {
+    message = `😎 Right on target!`;
+  } else {
+    message = `👀 Slightly below prediction... try again!`;
+  }
+
+  document.getElementById("result").innerText =
+    `Score: ${score}/5\n${message}`;
+}
+
+// Share
+function shareResult() {
+  let text = document.getElementById("result").innerText;
+
+  if (!text) {
+    alert("Play first!");
+    return;
+  }
+
+  let shareText = text + " 🤖 This app predicted me!";
+
+  if (navigator.share) {
+    navigator.share({
+      title:"MentorLoop Predictor",
+      text:shareText,
+      url:window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText(shareText);
+    alert("Copied! Share it 😎");
+  }
+}
+
+</script>
+
+</body>
+</html>
