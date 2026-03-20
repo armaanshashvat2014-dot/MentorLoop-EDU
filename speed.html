@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Speed Challenge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card {
+  background:#0f172a;
+  padding:25px;
+  border-radius:20px;
+  width:380px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,0,0,0.6);
+}
+
+button {
+  padding:10px 15px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover { background:#0ea5e9; }
+
+.question {
+  margin:20px 0;
+  font-size:18px;
+}
+
+.result {
+  margin-top:15px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>⚡ Daily Speed Challenge</h1>
+  <div class="question" id="question"></div>
+  <input type="text" id="answer" placeholder="Your answer">
+  <br>
+  <button onclick="submitAnswer()">Submit</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+
+// 15 complex questions
+const questions = [
+  {q:"15 × 3 + 12 = ?", a:"57"},
+  {q:"Square root of 144?", a:"12"},
+  {q:"9² + 1 = ?", a:"82"},
+  {q:"Capital of Japan?", a:"tokyo"},
+  {q:"12 × 12 = ?", a:"144"},
+  {q:"Binary of 2?", a:"10"},
+  {q:"7³ = ?", a:"343"},
+  {q:"5! (factorial)?", a:"120"},
+  {q:"Speed of light approx (km/s)?", a:"300000"},
+  {q:"Pi approx (2 decimals)?", a:"3.14"},
+  {q:"15% of 200?", a:"30"},
+  {q:"Opposite of 'hot'?", a:"cold"},
+  {q:"3² × 4 = ?", a:"36"},
+  {q:"First prime number?", a:"2"},
+  {q:"10 + 20 × 2 = ?", a:"50"}
+];
+
+// Get today's index
+function getTodayIndex() {
+  let today = new Date().toDateString();
+  let last = localStorage.getItem("ml_last_q");
+
+  let index = Math.floor(new Date().getTime() / (1000*60*60*24)) % questions.length;
+
+  // prevent repeat from yesterday
+  if (last == index) {
+    index = (index + 1) % questions.length;
+  }
+
+  localStorage.setItem("ml_last_q", index);
+  return index;
+}
+
+let qIndex = getTodayIndex();
+let currentQ = questions[qIndex];
+
+document.getElementById("question").innerText = currentQ.q;
+
+let startTime = Date.now();
+
+function submitAnswer() {
+  let userAns = document.getElementById("answer").value.toLowerCase().trim();
+  let timeTaken = (Date.now() - startTime) / 1000;
+
+  if (userAns === currentQ.a) {
+    if (timeTaken < 10) {
+      document.getElementById("result").innerText =
+        "🔥 WOAH! You did that faster than 70% users!";
+    } else {
+      document.getElementById("result").innerText =
+        "✅ Correct! Try to be faster next time 😏";
+    }
+  } else {
+    document.getElementById("result").innerText =
+      "❌ Wrong answer. Try again!";
+  }
+}
+
+</script>
+
+</body>
+</html>
