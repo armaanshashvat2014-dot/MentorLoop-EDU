@@ -52,10 +52,20 @@ button {
   color:#000;
 }
 
-.section { margin-top:15px; }
-.highlight { color:#38bdf8; font-weight:bold; }
+.bar {
+  background:#1e293b;
+  height:10px;
+  border-radius:10px;
+  margin-top:10px;
+  overflow:hidden;
+}
 
-/* RESULT SCREEN */
+.fill {
+  background:#38bdf8;
+  height:100%;
+  width:0%;
+}
+
 .result-screen {
   position:fixed;
   top:0;
@@ -70,16 +80,8 @@ button {
   z-index:999;
 }
 
-.big {
-  font-size:48px;
-  color:#38bdf8;
-  font-weight:bold;
-}
-
-.sub {
-  margin-top:10px;
-  font-size:18px;
-}
+.big { font-size:48px; color:#38bdf8; }
+.sub { margin-top:10px; }
 </style>
 </head>
 
@@ -90,57 +92,58 @@ button {
 
   <div id="status"></div>
 
-  <!-- 🔥 APEX BUTTON -->
-  <button class="apex-btn" onclick="goApex()">⚡ Enter Apex Elite</button>
+  <!-- PROGRESS TO APEX -->
+  <div class="bar"><div id="fill" class="fill"></div></div>
+
+  <!-- APEX BUTTON -->
+  <button class="apex-btn" onclick="goApex()">⚡ Go Apex</button>
 
   <div id="eliteArea" style="display:none">
-    <div class="section" id="question"></div>
+    <div id="question"></div>
 
-    <input id="answer" placeholder="Your answer">
+    <input id="answer" placeholder="Answer">
     <button onclick="submitElite()">Submit</button>
 
-    <div class="section" id="result"></div>
-    <div class="section" id="leaderboard"></div>
+    <div id="result"></div>
+    <div id="leaderboard"></div>
   </div>
 </div>
 
 <script>
 
-// ACCESS ELITE
+// ACCESS
 let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
 let points = parseInt(localStorage.getItem("ml_points")) || 0;
 
+// PROGRESS BAR → APEX
+let progress = Math.min((streak/50 + points/100000)/2,1)*100;
+document.getElementById("fill").style.width = progress + "%";
+
 if (streak >= 15 && points >= 900) {
-  document.getElementById("status").innerHTML = "✅ Welcome Elite 😈";
+  document.getElementById("status").innerHTML = "✅ Elite Unlocked 😈";
   document.getElementById("eliteArea").style.display = "block";
 } else {
   document.getElementById("status").innerHTML =
     `🔒 Locked<br>🔥 ${streak}/15<br>💠 ${points}/900`;
 }
 
-// 🔥 APEX ACCESS CHECK
+// 👀 ALMOST APEX
+if(streak > 40 || points > 80000){
+  document.getElementById("status").innerHTML +=
+    "<br><br>⚡ You are CLOSE to Apex 👀";
+}
+
+// APEX NAVIGATION
 function goApex(){
-
-  let access = localStorage.getItem("ml_apex_access");
-  let start = localStorage.getItem("ml_apex_start");
-
-  if(access && start){
-
-    let days = (Date.now()-start)/(1000*60*60*24);
-
-    if(days < 365){
-      // ✅ valid
-      window.location.href = "apex.html";
-      return;
-    }
+  if(streak >= 50 && points >= 100000){
+    window.location.href="apex.html";
+  } else {
+    alert("⚡ Reach Apex requirements to enter 😈");
   }
-
-  // ❌ not paid / expired
-  window.location.href = "apex-payment.html";
 }
 
 // QUESTIONS
-const eliteQ = [
+const Q = [
   {q:"27 × 3 + 19 = ?", a:"100"},
   {q:"√256 + 12 = ?", a:"28"},
   {q:"12² - 20 = ?", a:"124"},
@@ -148,11 +151,8 @@ const eliteQ = [
   {q:"7³ - 10 = ?", a:"333"}
 ];
 
-let index = new Date().getDate() % eliteQ.length;
-let currentQ = eliteQ[index];
-
-document.getElementById("question").innerHTML =
-  `🧠 Elite Question:<br><b>${currentQ.q}</b>`;
+let q = Q[new Date().getDate()%Q.length];
+document.getElementById("question").innerHTML = `<b>${q.q}</b>`;
 
 // TIMER
 let start = Date.now();
@@ -165,12 +165,6 @@ function getIdentity(t){
   return "🌱 Rising Mind";
 }
 
-// DAILY STATS
-function getDailyStats(){
-  let total = 20 + (new Date().getDate()%30);
-  return Math.max(1, Math.floor(total*0.1));
-}
-
 // RANK
 function getRank(t){
   let percentile = Math.max(1, Math.round((10/t)*10));
@@ -181,76 +175,57 @@ function getRank(t){
 // RESULT SCREEN
 function showResultScreen(time,p,r){
 
-  let best = parseFloat(localStorage.getItem("best_time"));
-  let near = best && Math.abs(best-time)<1;
-
   let div = document.createElement("div");
   div.className="result-screen";
 
-  div.innerHTML = `
-    <div class="big">⚡ ${time.toFixed(2)}s</div>
-    <div class="sub">🔥 Top ${p}% Today</div>
+  div.innerHTML=`
+    <div class="big">${time.toFixed(2)}s</div>
+    <div class="sub">🔥 Top ${p}%</div>
     <div class="sub">🏆 Rank #${r}</div>
-    ${near ? `<div class="sub">👀 So close to your best!</div>`:""}
-    
-    <button onclick="location.reload()">⚔️ Beat Your Time</button>
-    <button onclick="share()">📢 Challenge</button>
+
+    <button onclick="location.reload()">⚔️ Again</button>
   `;
 
   document.body.appendChild(div);
 }
 
-// SHARE
-function share(){
-  let text="I just crushed today's Elite challenge 😈 Beat me!";
-  navigator.clipboard.writeText(text);
-  alert("Copied 😎");
-}
-
 // SUBMIT
 function submitElite(){
 
-  let ans=document.getElementById("answer").value.toLowerCase().trim();
-  let time=(Date.now()-start)/1000;
+  let ans=document.getElementById("answer").value.trim();
+  let t=(Date.now()-start)/1000;
 
-  if(ans===currentQ.a){
+  if(ans===q.a){
 
-    let best = parseFloat(localStorage.getItem("best_time"));
-    if(!best || time<best){
-      localStorage.setItem("best_time",time);
-    }
+    let identity=getIdentity(t);
+    let {percentile,rank}=getRank(t);
 
     let scores=JSON.parse(localStorage.getItem("elite_scores"))||[];
-    scores.push(time);
+    scores.push(t);
     scores.sort((a,b)=>a-b);
     scores=scores.slice(0,5);
     localStorage.setItem("elite_scores",JSON.stringify(scores));
 
-    document.getElementById("status").innerHTML =
-      `⚠️ Only ${getDailyStats()} users solved under 10s today`;
-
-    let identity=getIdentity(time);
-    let {percentile,rank}=getRank(time);
-
     document.getElementById("result").innerHTML =
-      `🧬 ${identity}<br>⏱ ${time.toFixed(2)}s`;
+      `${identity}<br>${t.toFixed(2)}s`;
 
     showLeaderboard();
 
     setTimeout(()=>{
-      showResultScreen(time,percentile,rank);
+      showResultScreen(t,percentile,rank);
     },1000);
 
   } else {
-    document.getElementById("result").innerText="❌ Try again!";
+    document.getElementById("result").innerText="❌ Try again";
   }
 }
 
 // LEADERBOARD
 function showLeaderboard(){
+
   let scores=JSON.parse(localStorage.getItem("elite_scores"))||[];
 
-  let html="<b>🏆 Elite Leaderboard:</b><br>";
+  let html="<b>🏆 Elite Board:</b><br>";
   scores.forEach((t,i)=>{
     html+=`${i+1}. ${t.toFixed(2)}s<br>`;
   });
