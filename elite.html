@@ -47,10 +47,15 @@ button {
   cursor:pointer;
 }
 
+.apex-btn {
+  background:#facc15;
+  color:#000;
+}
+
 .section { margin-top:15px; }
 .highlight { color:#38bdf8; font-weight:bold; }
 
-/* FULL SCREEN RESULT */
+/* RESULT SCREEN */
 .result-screen {
   position:fixed;
   top:0;
@@ -85,6 +90,9 @@ button {
 
   <div id="status"></div>
 
+  <!-- 🔥 APEX BUTTON -->
+  <button class="apex-btn" onclick="goApex()">⚡ Enter Apex Elite</button>
+
   <div id="eliteArea" style="display:none">
     <div class="section" id="question"></div>
 
@@ -98,7 +106,7 @@ button {
 
 <script>
 
-// ACCESS
+// ACCESS ELITE
 let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
 let points = parseInt(localStorage.getItem("ml_points")) || 0;
 
@@ -108,6 +116,27 @@ if (streak >= 15 && points >= 900) {
 } else {
   document.getElementById("status").innerHTML =
     `🔒 Locked<br>🔥 ${streak}/15<br>💠 ${points}/900`;
+}
+
+// 🔥 APEX ACCESS CHECK
+function goApex(){
+
+  let access = localStorage.getItem("ml_apex_access");
+  let start = localStorage.getItem("ml_apex_start");
+
+  if(access && start){
+
+    let days = (Date.now()-start)/(1000*60*60*24);
+
+    if(days < 365){
+      // ✅ valid
+      window.location.href = "apex.html";
+      return;
+    }
+  }
+
+  // ❌ not paid / expired
+  window.location.href = "apex-payment.html";
 }
 
 // QUESTIONS
@@ -128,7 +157,7 @@ document.getElementById("question").innerHTML =
 // TIMER
 let start = Date.now();
 
-// 🧬 IDENTITY
+// IDENTITY
 function getIdentity(t){
   if(t<8) return "⚡ Speed Demon";
   if(t<12) return "🧠 Fast Thinker";
@@ -136,13 +165,13 @@ function getIdentity(t){
   return "🌱 Rising Mind";
 }
 
-// 🔥 DAILY STATS
+// DAILY STATS
 function getDailyStats(){
   let total = 20 + (new Date().getDate()%30);
   return Math.max(1, Math.floor(total*0.1));
 }
 
-// 🏆 RANK SYSTEM
+// RANK
 function getRank(t){
   let percentile = Math.max(1, Math.round((10/t)*10));
   let rank = Math.max(1, 100-percentile);
@@ -162,7 +191,7 @@ function showResultScreen(time,p,r){
     <div class="big">⚡ ${time.toFixed(2)}s</div>
     <div class="sub">🔥 Top ${p}% Today</div>
     <div class="sub">🏆 Rank #${r}</div>
-    ${near ? `<div class="sub">👀 You were VERY close to your best!</div>`:""}
+    ${near ? `<div class="sub">👀 So close to your best!</div>`:""}
     
     <button onclick="location.reload()">⚔️ Beat Your Time</button>
     <button onclick="share()">📢 Challenge</button>
@@ -186,27 +215,21 @@ function submitElite(){
 
   if(ans===currentQ.a){
 
-    // SAVE BEST
     let best = parseFloat(localStorage.getItem("best_time"));
     if(!best || time<best){
       localStorage.setItem("best_time",time);
     }
 
-    // LEADERBOARD
     let scores=JSON.parse(localStorage.getItem("elite_scores"))||[];
     scores.push(time);
     scores.sort((a,b)=>a-b);
     scores=scores.slice(0,5);
     localStorage.setItem("elite_scores",JSON.stringify(scores));
 
-    // DAILY URGENCY
     document.getElementById("status").innerHTML =
       `⚠️ Only ${getDailyStats()} users solved under 10s today`;
 
-    // IDENTITY
     let identity=getIdentity(time);
-
-    // RANK
     let {percentile,rank}=getRank(time);
 
     document.getElementById("result").innerHTML =
