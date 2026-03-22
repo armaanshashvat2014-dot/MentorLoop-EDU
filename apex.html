@@ -46,6 +46,20 @@ button{
   cursor:pointer;
 }
 
+.bar{
+  background:#1e293b;
+  height:10px;
+  border-radius:10px;
+  margin-top:10px;
+  overflow:hidden;
+}
+
+.fill{
+  background:#38bdf8;
+  height:100%;
+  width:0%;
+}
+
 .result-screen{
   position:fixed;
   top:0;
@@ -60,14 +74,8 @@ button{
   z-index:999;
 }
 
-.big{
-  font-size:50px;
-  color:#38bdf8;
-}
-
-.sub{
-  margin-top:10px;
-}
+.big{font-size:50px;color:#38bdf8;}
+.sub{margin-top:10px;}
 </style>
 </head>
 
@@ -77,6 +85,8 @@ button{
 <h1>⚡ Apex Elite</h1>
 
 <div id="status"></div>
+
+<div class="bar"><div id="fill" class="fill"></div></div>
 
 <div id="area" style="display:none">
   <div id="question"></div>
@@ -91,62 +101,69 @@ button{
 
 <script>
 
-// ACCESS CONTROL
-let access = localStorage.getItem("ml_apex_access");
-let start = localStorage.getItem("ml_apex_start");
+// REQUIREMENTS
+let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
+let points = parseInt(localStorage.getItem("ml_points")) || 0;
 
-if(!access || !start){
+let progress = Math.min((streak/50 + points/100000)/2,1)*100;
+document.getElementById("fill").style.width = progress + "%";
+
+// UNLOCK
+if(streak >= 50 && points >= 100000){
+
   document.getElementById("status").innerHTML =
-    "🔒 Apex Elite Locked<br>Activate access to continue";
+    "🔥 APEX UNLOCKED — FINAL TIER 😈";
+
+  document.getElementById("area").style.display="block";
+
 } else {
 
-  let days = (Date.now()-start)/(1000*60*60*24);
+  document.getElementById("status").innerHTML =
+    `🔒 Apex Locked<br>
+     🔥 ${streak}/50<br>
+     💠 ${points}/100000`;
 
-  if(days > 365){
-    document.getElementById("status").innerHTML =
-      "⛔ Access expired";
-  } else {
-
-    let left = Math.floor(365-days);
-
-    document.getElementById("status").innerHTML =
-      `🔥 Apex Active (${left} days left)`;
-
-    document.getElementById("area").style.display="block";
+  if(streak>40 || points>80000){
+    document.getElementById("status").innerHTML +=
+      "<br><br>⚡ YOU ARE VERY CLOSE 👀";
   }
 }
 
 // HARD QUESTIONS
 const Q = [
-  {q:"(25×4)+36=?",a:"136"},
-  {q:"√625 + 15=?",a:"40"},
-  {q:"18×7 - 26=?",a:"100"},
-  {q:"(12²)/4=?",a:"36"},
-  {q:"9³ - 100=?",a:"629"}
+  {q:"(35×4)+28=?",a:"168"},
+  {q:"√1024 + 20=?",a:"52"},
+  {q:"(18×9)-62=?",a:"100"},
+  {q:"(15²)+25=?",a:"250"},
+  {q:"8³ + 64=?",a:"576"}
 ];
 
 let q = Q[new Date().getDate()%Q.length];
 document.getElementById("question").innerHTML = `<b>${q.q}</b>`;
 
+// TIMER
 let startTime = Date.now();
 
-// RANK SYSTEM
+// IDENTITY
+function getTier(t){
+  if(t<6) return "⚡ ULTRA INSTINCT";
+  if(t<9) return "🔥 Apex Predator";
+  if(t<13) return "🧠 Apex Mind";
+  return "📘 Apex Learner";
+}
+
+// RANK
 function getRank(t){
-  let percentile = Math.max(1, Math.round((8/t)*10));
+  let percentile = Math.max(1, Math.round((7/t)*10));
   let rank = Math.max(1, 100-percentile);
   return {percentile, rank};
 }
 
-// SPEED TIERS
-function getTier(t){
-  if(t<6) return "⚡ ULTRA INSTINCT";
-  if(t<10) return "🔥 Apex Speed";
-  if(t<15) return "🧠 Elite";
-  return "📘 Advanced";
-}
-
 // RESULT SCREEN
 function showScreen(t,p,r,tier){
+
+  let best = parseFloat(localStorage.getItem("apex_best"));
+  let near = best && Math.abs(best-t)<1;
 
   let div=document.createElement("div");
   div.className="result-screen";
@@ -156,8 +173,9 @@ function showScreen(t,p,r,tier){
     <div class="sub">${tier}</div>
     <div class="sub">🔥 Top ${p}%</div>
     <div class="sub">🏆 Rank #${r}</div>
+    ${near ? `<div class="sub">👀 SO CLOSE TO BEST</div>`:""}
 
-    <button onclick="location.reload()">⚔️ Again</button>
+    <button onclick="location.reload()">⚔️ Beat Your Time</button>
   `;
 
   document.body.appendChild(div);
@@ -171,8 +189,8 @@ function submit(){
 
   if(ans===q.a){
 
-    let {percentile,rank}=getRank(t);
     let tier=getTier(t);
+    let {percentile,rank}=getRank(t);
 
     // SAVE BEST
     let best=parseFloat(localStorage.getItem("apex_best"));
@@ -187,7 +205,7 @@ function submit(){
     scores=scores.slice(0,5);
     localStorage.setItem("apex_scores",JSON.stringify(scores));
 
-    document.getElementById("result").innerHTML=
+    document.getElementById("result").innerHTML =
       `${tier}<br>${t.toFixed(2)}s`;
 
     showLeaderboard();
@@ -197,7 +215,7 @@ function submit(){
     },1000);
 
   } else {
-    document.getElementById("result").innerText="❌ Try again";
+    document.getElementById("result").innerText="❌ Wrong";
   }
 }
 
