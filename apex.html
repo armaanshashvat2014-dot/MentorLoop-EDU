@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Apex Elite</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:radial-gradient(circle,#020617,#000);
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#020617;
+  padding:25px;
+  border-radius:20px;
+  width:420px;
+  text-align:center;
+  box-shadow:0 0 80px rgba(56,189,248,0.4);
+}
+
+h1{color:#38bdf8;}
+
+input{
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  width:80%;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.result-screen{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:999;
+}
+
+.big{
+  font-size:50px;
+  color:#38bdf8;
+}
+
+.sub{
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<h1>⚡ Apex Elite</h1>
+
+<div id="status"></div>
+
+<div id="area" style="display:none">
+  <div id="question"></div>
+  <input id="answer" placeholder="Answer">
+  <button onclick="submit()">Submit</button>
+
+  <div id="result"></div>
+  <div id="leaderboard"></div>
+</div>
+
+</div>
+
+<script>
+
+// ACCESS CONTROL
+let access = localStorage.getItem("ml_apex_access");
+let start = localStorage.getItem("ml_apex_start");
+
+if(!access || !start){
+  document.getElementById("status").innerHTML =
+    "🔒 Apex Elite Locked<br>Activate access to continue";
+} else {
+
+  let days = (Date.now()-start)/(1000*60*60*24);
+
+  if(days > 365){
+    document.getElementById("status").innerHTML =
+      "⛔ Access expired";
+  } else {
+
+    let left = Math.floor(365-days);
+
+    document.getElementById("status").innerHTML =
+      `🔥 Apex Active (${left} days left)`;
+
+    document.getElementById("area").style.display="block";
+  }
+}
+
+// HARD QUESTIONS
+const Q = [
+  {q:"(25×4)+36=?",a:"136"},
+  {q:"√625 + 15=?",a:"40"},
+  {q:"18×7 - 26=?",a:"100"},
+  {q:"(12²)/4=?",a:"36"},
+  {q:"9³ - 100=?",a:"629"}
+];
+
+let q = Q[new Date().getDate()%Q.length];
+document.getElementById("question").innerHTML = `<b>${q.q}</b>`;
+
+let startTime = Date.now();
+
+// RANK SYSTEM
+function getRank(t){
+  let percentile = Math.max(1, Math.round((8/t)*10));
+  let rank = Math.max(1, 100-percentile);
+  return {percentile, rank};
+}
+
+// SPEED TIERS
+function getTier(t){
+  if(t<6) return "⚡ ULTRA INSTINCT";
+  if(t<10) return "🔥 Apex Speed";
+  if(t<15) return "🧠 Elite";
+  return "📘 Advanced";
+}
+
+// RESULT SCREEN
+function showScreen(t,p,r,tier){
+
+  let div=document.createElement("div");
+  div.className="result-screen";
+
+  div.innerHTML=`
+    <div class="big">${t.toFixed(2)}s</div>
+    <div class="sub">${tier}</div>
+    <div class="sub">🔥 Top ${p}%</div>
+    <div class="sub">🏆 Rank #${r}</div>
+
+    <button onclick="location.reload()">⚔️ Again</button>
+  `;
+
+  document.body.appendChild(div);
+}
+
+// SUBMIT
+function submit(){
+
+  let ans=document.getElementById("answer").value.trim();
+  let t=(Date.now()-startTime)/1000;
+
+  if(ans===q.a){
+
+    let {percentile,rank}=getRank(t);
+    let tier=getTier(t);
+
+    // SAVE BEST
+    let best=parseFloat(localStorage.getItem("apex_best"));
+    if(!best || t<best){
+      localStorage.setItem("apex_best",t);
+    }
+
+    // LEADERBOARD
+    let scores=JSON.parse(localStorage.getItem("apex_scores"))||[];
+    scores.push(t);
+    scores.sort((a,b)=>a-b);
+    scores=scores.slice(0,5);
+    localStorage.setItem("apex_scores",JSON.stringify(scores));
+
+    document.getElementById("result").innerHTML=
+      `${tier}<br>${t.toFixed(2)}s`;
+
+    showLeaderboard();
+
+    setTimeout(()=>{
+      showScreen(t,percentile,rank,tier);
+    },1000);
+
+  } else {
+    document.getElementById("result").innerText="❌ Try again";
+  }
+}
+
+// LEADERBOARD
+function showLeaderboard(){
+
+  let scores=JSON.parse(localStorage.getItem("apex_scores"))||[];
+
+  let html="<b>🏆 Apex Board:</b><br>";
+
+  scores.forEach((t,i)=>{
+    html+=`${i+1}. ${t.toFixed(2)}s<br>`;
+  });
+
+  document.getElementById("leaderboard").innerHTML=html;
+}
+
+showLeaderboard();
+
+</script>
+
+</body>
+</html>
