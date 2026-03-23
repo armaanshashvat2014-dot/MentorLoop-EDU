@@ -19,7 +19,7 @@ body{
 
 .card{
   background:#020617;
-  padding:25px;
+  padding:20px;
   border-radius:20px;
   width:420px;
   text-align:center;
@@ -36,27 +36,16 @@ button{
   cursor:pointer;
 }
 
-select, input{
+input, select{
+  margin-top:10px;
   padding:10px;
   border-radius:10px;
-  margin-top:10px;
   border:none;
 }
 
-.question{
-  margin-top:20px;
-  font-size:18px;
-}
-
-.stats{
-  margin-top:15px;
-  font-size:14px;
-}
-
-.feedback{
-  margin-top:10px;
-  color:#38bdf8;
-}
+.question{margin-top:15px;font-size:18px;}
+.stats{margin-top:10px;font-size:14px;}
+.feed{font-size:12px;margin-top:10px;color:#94a3b8;}
 </style>
 </head>
 
@@ -64,36 +53,41 @@ select, input{
 
 <div class="card">
 
-<h1>🎯 Focus Mode Pro</h1>
+<h1>🎯 Focus Ultimate</h1>
 
 <div id="setup">
 
-  <select id="grade">
-    <option value="">Select Grade</option>
-    <option>5</option>
-    <option>6</option>
-    <option>7</option>
-    <option>8</option>
-  </select>
+<select id="subject">
+<option value="">Select Subject</option>
+<option value="math">Math</option>
+<option value="science">Science</option>
+</select>
 
-  <select id="subject">
-    <option value="">Select Subject</option>
-    <option value="math">Math</option>
-    <option value="science">Science</option>
-  </select>
+<select id="mode">
+<option value="learn">Learning Mode</option>
+<option value="test">Test Mode</option>
+</select>
 
-  <button onclick="startQuiz()">Start Quiz</button>
+<button onclick="startQuiz()">Start</button>
 
 </div>
 
 <div id="quiz" style="display:none">
 
-  <div class="question" id="question"></div>
-  <input id="answer" placeholder="Answer">
-  <button onclick="submitAnswer()">Submit</button>
+<div id="goal"></div>
 
-  <div class="feedback" id="feedback"></div>
-  <div class="stats" id="stats"></div>
+<div class="question" id="question"></div>
+<input id="answer" placeholder="Answer">
+
+<button onclick="submit()">Submit</button>
+<button onclick="hint()">💡 Hint</button>
+
+<div class="stats" id="stats"></div>
+
+<button onclick="retryWeak()">🔁 Practice Weak Topic</button>
+<button onclick="share()">📢 Share Progress</button>
+
+<div class="feed" id="feed"></div>
 
 </div>
 
@@ -101,65 +95,18 @@ select, input{
 
 <script>
 
-let subject;
+let subject, mode;
 let correct=0, wrong=0, streak=0;
 let difficulty=1;
-
-// 🧠 TOPIC TRACKING
-let weakTopics = {};
-
-// GENERATOR
-function generateQuestion(){
-
-  let q,a,topic;
-
-  if(subject==="math"){
-
-    if(difficulty===1){
-      let x=Math.floor(Math.random()*10)+1;
-      let y=Math.floor(Math.random()*10)+1;
-      q=`${x}+${y}`;
-      a=x+y;
-      topic="addition";
-    }
-
-    else if(difficulty===2){
-      let x=Math.floor(Math.random()*20)+5;
-      let y=Math.floor(Math.random()*10)+2;
-      q=`${x}×${y}`;
-      a=x*y;
-      topic="multiplication";
-    }
-
-    else{
-      let x=Math.floor(Math.random()*30)+10;
-      q=`${x}²`;
-      a=x*x;
-      topic="squares";
-    }
-
-  }
-
-  if(subject==="science"){
-    let data=[
-      ["Water formula?","h2o","chemistry"],
-      ["Gas we breathe?","oxygen","biology"],
-      ["Unit of force?","newton","physics"]
-    ];
-
-    let item=data[Math.floor(Math.random()*data.length)];
-    q=item[0]; a=item[1]; topic=item[2];
-  }
-
-  return {q,a,topic};
-}
-
-let current;
+let weakTopics={};
+let mastery={};
+let goalTarget=10;
 
 // START
 function startQuiz(){
 
   subject=document.getElementById("subject").value;
+  mode=document.getElementById("mode").value;
 
   if(!subject){
     alert("Select subject");
@@ -169,76 +116,143 @@ function startQuiz(){
   document.getElementById("setup").style.display="none";
   document.getElementById("quiz").style.display="block";
 
+  document.getElementById("goal").innerHTML =
+    `🎯 Goal: ${goalTarget} correct answers`;
+
   nextQ();
 }
 
-// NEXT
+// GENERATE
+function gen(){
+
+  let q,a,topic;
+
+  if(subject==="math"){
+
+    if(difficulty===1){
+      let x=Math.floor(Math.random()*10)+1;
+      let y=Math.floor(Math.random()*10)+1;
+      q=`${x}+${y}`; a=x+y; topic="addition";
+    }
+
+    else if(difficulty===2){
+      let x=Math.floor(Math.random()*20)+5;
+      let y=Math.floor(Math.random()*10)+2;
+      q=`${x}×${y}`; a=x*y; topic="multiplication";
+    }
+
+    else{
+      let x=Math.floor(Math.random()*20)+10;
+      q=`${x}²`; a=x*x; topic="squares";
+    }
+
+  }
+
+  if(subject==="science"){
+    let data=[
+      ["Water formula?","h2o","chem"],
+      ["Gas we breathe?","oxygen","bio"],
+      ["Unit of force?","newton","phy"]
+    ];
+    let i=data[Math.floor(Math.random()*data.length)];
+    q=i[0]; a=i[1]; topic=i[2];
+  }
+
+  return {q,a,topic};
+}
+
+let current;
+
 function nextQ(){
-  current=generateQuestion();
+  current=gen();
   document.getElementById("question").innerText=current.q;
   document.getElementById("answer").value="";
 }
 
 // SUBMIT
-function submitAnswer(){
+function submit(){
 
   let user=document.getElementById("answer").value.toLowerCase().trim();
 
   if(user==current.a){
 
-    correct++;
-    streak++;
+    correct++; streak++;
 
-    document.getElementById("feedback").innerText="🔥 Correct!";
+    mastery[current.topic]=(mastery[current.topic]||0)+1;
 
-    // INCREASE DIFFICULTY
-    if(streak>=2 && difficulty<3){
-      difficulty++;
-    }
+    if(streak>=2 && difficulty<3) difficulty++;
 
   } else {
 
-    wrong++;
-    streak=0;
+    wrong++; streak=0;
 
-    document.getElementById("feedback").innerText="❌ Wrong";
-
-    // TRACK WEAKNESS
     weakTopics[current.topic]=(weakTopics[current.topic]||0)+1;
 
-    // DECREASE DIFFICULTY
     if(difficulty>1) difficulty--;
   }
 
-  updateStats();
+  update();
   nextQ();
 }
 
-// STATS + INTELLIGENCE
-function updateStats(){
+// HINT
+function hint(){
+  if(mode==="test") return alert("No hints in Test mode 😈");
+  alert("Think step by step!");
+}
+
+// RETRY WEAK
+function retryWeak(){
+  let weak=Object.keys(weakTopics).sort((a,b)=>weakTopics[b]-weakTopics[a])[0];
+  if(weak) alert("Focus on: "+weak);
+}
+
+// UPDATE
+function update(){
 
   let total=correct+wrong;
-  let acc= total? Math.round((correct/total)*100):0;
+  let acc= total?Math.round((correct/total)*100):0;
 
-  let weak=Object.keys(weakTopics).sort((a,b)=>weakTopics[b]-weakTopics[a])[0];
+  let level = acc>85 ? "Master" :
+              acc>70 ? "Advanced" :
+              acc>50 ? "Skilled" : "Beginner";
 
   let msg="";
 
-  if(acc>80) msg="🔥 You're improving fast!";
-  else if(acc<50) msg="👀 Focus more, you can do better!";
+  if(acc>80) msg="🔥 Improving fast!";
+  else if(acc<50) msg="👀 Focus more";
 
-  if(weak){
-    msg+=`<br>🧠 Weak area: ${weak}`;
-  }
+  // MILESTONE
+  if(correct===5) msg+="<br>🎉 Milestone reached!";
+  if(correct>=goalTarget) msg+="<br>🏆 Goal Completed!";
 
   document.getElementById("stats").innerHTML=`
     ✅ ${correct} | ❌ ${wrong}<br>
-    📊 Accuracy: ${acc}%<br>
-    🎯 Difficulty: ${difficulty}<br>
+    📊 ${acc}% Accuracy<br>
+    🧬 Level: ${level}<br>
     ⚡ Streak: ${streak}<br>
+    🎯 Difficulty: ${difficulty}<br>
     ${msg}
   `;
 }
+
+// SHARE
+function share(){
+  let text=`I reached ${correct} correct answers in Focus Mode 🔥`;
+  navigator.clipboard.writeText(text);
+  alert("Copied 😎");
+}
+
+// FAKE LIVE FEED
+setInterval(()=>{
+  let msgs=[
+    "User improved accuracy 🔥",
+    "Someone mastered multiplication 👑",
+    "3 users learning now 👀"
+  ];
+  document.getElementById("feed").innerText =
+    msgs[Math.floor(Math.random()*msgs.length)];
+},3000);
 
 </script>
 
