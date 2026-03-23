@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Focus Mode</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#020617;
+  padding:25px;
+  border-radius:20px;
+  width:420px;
+  text-align:center;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+select, input{
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+  border:none;
+}
+
+.question{
+  margin-top:20px;
+  font-size:18px;
+}
+
+.stats{
+  margin-top:15px;
+  font-size:14px;
+}
+
+.feedback{
+  margin-top:10px;
+  color:#38bdf8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>🎯 Focus Mode Pro</h1>
+
+<div id="setup">
+
+  <select id="grade">
+    <option value="">Select Grade</option>
+    <option>5</option>
+    <option>6</option>
+    <option>7</option>
+    <option>8</option>
+  </select>
+
+  <select id="subject">
+    <option value="">Select Subject</option>
+    <option value="math">Math</option>
+    <option value="science">Science</option>
+  </select>
+
+  <button onclick="startQuiz()">Start Quiz</button>
+
+</div>
+
+<div id="quiz" style="display:none">
+
+  <div class="question" id="question"></div>
+  <input id="answer" placeholder="Answer">
+  <button onclick="submitAnswer()">Submit</button>
+
+  <div class="feedback" id="feedback"></div>
+  <div class="stats" id="stats"></div>
+
+</div>
+
+</div>
+
+<script>
+
+let subject;
+let correct=0, wrong=0, streak=0;
+let difficulty=1;
+
+// 🧠 TOPIC TRACKING
+let weakTopics = {};
+
+// GENERATOR
+function generateQuestion(){
+
+  let q,a,topic;
+
+  if(subject==="math"){
+
+    if(difficulty===1){
+      let x=Math.floor(Math.random()*10)+1;
+      let y=Math.floor(Math.random()*10)+1;
+      q=`${x}+${y}`;
+      a=x+y;
+      topic="addition";
+    }
+
+    else if(difficulty===2){
+      let x=Math.floor(Math.random()*20)+5;
+      let y=Math.floor(Math.random()*10)+2;
+      q=`${x}×${y}`;
+      a=x*y;
+      topic="multiplication";
+    }
+
+    else{
+      let x=Math.floor(Math.random()*30)+10;
+      q=`${x}²`;
+      a=x*x;
+      topic="squares";
+    }
+
+  }
+
+  if(subject==="science"){
+    let data=[
+      ["Water formula?","h2o","chemistry"],
+      ["Gas we breathe?","oxygen","biology"],
+      ["Unit of force?","newton","physics"]
+    ];
+
+    let item=data[Math.floor(Math.random()*data.length)];
+    q=item[0]; a=item[1]; topic=item[2];
+  }
+
+  return {q,a,topic};
+}
+
+let current;
+
+// START
+function startQuiz(){
+
+  subject=document.getElementById("subject").value;
+
+  if(!subject){
+    alert("Select subject");
+    return;
+  }
+
+  document.getElementById("setup").style.display="none";
+  document.getElementById("quiz").style.display="block";
+
+  nextQ();
+}
+
+// NEXT
+function nextQ(){
+  current=generateQuestion();
+  document.getElementById("question").innerText=current.q;
+  document.getElementById("answer").value="";
+}
+
+// SUBMIT
+function submitAnswer(){
+
+  let user=document.getElementById("answer").value.toLowerCase().trim();
+
+  if(user==current.a){
+
+    correct++;
+    streak++;
+
+    document.getElementById("feedback").innerText="🔥 Correct!";
+
+    // INCREASE DIFFICULTY
+    if(streak>=2 && difficulty<3){
+      difficulty++;
+    }
+
+  } else {
+
+    wrong++;
+    streak=0;
+
+    document.getElementById("feedback").innerText="❌ Wrong";
+
+    // TRACK WEAKNESS
+    weakTopics[current.topic]=(weakTopics[current.topic]||0)+1;
+
+    // DECREASE DIFFICULTY
+    if(difficulty>1) difficulty--;
+  }
+
+  updateStats();
+  nextQ();
+}
+
+// STATS + INTELLIGENCE
+function updateStats(){
+
+  let total=correct+wrong;
+  let acc= total? Math.round((correct/total)*100):0;
+
+  let weak=Object.keys(weakTopics).sort((a,b)=>weakTopics[b]-weakTopics[a])[0];
+
+  let msg="";
+
+  if(acc>80) msg="🔥 You're improving fast!";
+  else if(acc<50) msg="👀 Focus more, you can do better!";
+
+  if(weak){
+    msg+=`<br>🧠 Weak area: ${weak}`;
+  }
+
+  document.getElementById("stats").innerHTML=`
+    ✅ ${correct} | ❌ ${wrong}<br>
+    📊 Accuracy: ${acc}%<br>
+    🎯 Difficulty: ${difficulty}<br>
+    ⚡ Streak: ${streak}<br>
+    ${msg}
+  `;
+}
+
+</script>
+
+</body>
+</html>
