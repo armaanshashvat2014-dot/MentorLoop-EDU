@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop | Focus Mode</title>
+<title>MentorLoop | Focus mode</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -53,7 +53,7 @@ input, select{
 
 <div class="card">
 
-<h1>🎯 Focus Ultimate</h1>
+<h1>🎯 Focus mode</h1>
 
 <div id="setup">
 
@@ -61,11 +61,18 @@ input, select{
 <option value="">Select Subject</option>
 <option value="math">Math</option>
 <option value="science">Science</option>
+<option value="mixed">Mixed</option>
 </select>
 
 <select id="mode">
 <option value="learn">Learning Mode</option>
 <option value="test">Test Mode</option>
+</select>
+
+<select id="goalAcc">
+<option value="70">Goal 70%</option>
+<option value="80">Goal 80%</option>
+<option value="90">Goal 90%</option>
 </select>
 
 <button onclick="startQuiz()">Start</button>
@@ -84,8 +91,8 @@ input, select{
 
 <div class="stats" id="stats"></div>
 
-<button onclick="retryWeak()">🔁 Practice Weak Topic</button>
-<button onclick="share()">📢 Share Progress</button>
+<button onclick="retryWeak()">🔁 Weak Topic</button>
+<button onclick="share()">📢 Share</button>
 
 <div class="feed" id="feed"></div>
 
@@ -95,57 +102,61 @@ input, select{
 
 <script>
 
-let subject, mode;
-let correct=0, wrong=0, streak=0;
+let subject, mode, goalAcc;
+let correct=0, wrong=0, streak=0, combo=0;
 let difficulty=1;
-let weakTopics={};
-let mastery={};
-let goalTarget=10;
+let weakTopics={}, mastery={};
+let energy=100, streakSaver=false;
+let totalTime=0, qCount=0;
+let lastAcc = localStorage.getItem("last_acc") || 0;
+
+let current, timer, timed=false;
 
 // START
 function startQuiz(){
 
   subject=document.getElementById("subject").value;
   mode=document.getElementById("mode").value;
+  goalAcc=document.getElementById("goalAcc").value;
 
   if(!subject){
     alert("Select subject");
     return;
   }
 
+  timed = confirm("Enable timed mode? ⏱");
+
   document.getElementById("setup").style.display="none";
   document.getElementById("quiz").style.display="block";
 
   document.getElementById("goal").innerHTML =
-    `🎯 Goal: ${goalTarget} correct answers`;
+    `🎯 Goal: ${goalAcc}% accuracy`;
 
   nextQ();
 }
 
-// GENERATE
+// GENERATOR
 function gen(){
+
+  if(subject==="mixed"){
+    subject = Math.random()>0.5 ? "math":"science";
+  }
 
   let q,a,topic;
 
   if(subject==="math"){
-
     if(difficulty===1){
       let x=Math.floor(Math.random()*10)+1;
       let y=Math.floor(Math.random()*10)+1;
       q=`${x}+${y}`; a=x+y; topic="addition";
-    }
-
-    else if(difficulty===2){
+    } else if(difficulty===2){
       let x=Math.floor(Math.random()*20)+5;
       let y=Math.floor(Math.random()*10)+2;
       q=`${x}×${y}`; a=x*y; topic="multiplication";
-    }
-
-    else{
+    } else {
       let x=Math.floor(Math.random()*20)+10;
       q=`${x}²`; a=x*x; topic="squares";
     }
-
   }
 
   if(subject==="science"){
@@ -161,34 +172,69 @@ function gen(){
   return {q,a,topic};
 }
 
-let current;
-
+// NEXT Q
 function nextQ(){
   current=gen();
   document.getElementById("question").innerText=current.q;
   document.getElementById("answer").value="";
+
+  if(timed){
+    let t=8;
+    timer=setInterval(()=>{
+      t--;
+      if(t<=0){
+        clearInterval(timer);
+        submit();
+      }
+    },1000);
+  }
 }
 
 // SUBMIT
 function submit(){
 
+  clearInterval(timer);
+
+  let startTime = Date.now();
+
   let user=document.getElementById("answer").value.toLowerCase().trim();
+  let isCorrect = user==current.a;
 
-  if(user==current.a){
+  qCount++;
+  totalTime += (Date.now()-startTime)/1000;
 
-    correct++; streak++;
+  if(isCorrect){
 
+    correct++; streak++; combo++;
     mastery[current.topic]=(mastery[current.topic]||0)+1;
+
+    if(combo>=3) alert("🔥 COMBO x"+combo);
 
     if(streak>=2 && difficulty<3) difficulty++;
 
   } else {
 
-    wrong++; streak=0;
+    wrong++; combo=0;
+
+    if(!streakSaver){
+      streakSaver=true;
+      alert("⚡ Streak saved!");
+    } else streak=0;
 
     weakTopics[current.topic]=(weakTopics[current.topic]||0)+1;
 
+    energy -=10;
+
+    alert("Correct: "+current.a);
+
     if(difficulty>1) difficulty--;
+  }
+
+  if(energy<40) alert("⚠️ Low Energy");
+
+  if(qCount%5===0){
+    alert("👑 Boss Question!");
+    difficulty=3;
   }
 
   update();
@@ -197,14 +243,14 @@ function submit(){
 
 // HINT
 function hint(){
-  if(mode==="test") return alert("No hints in Test mode 😈");
+  if(mode==="test") return alert("No hints 😈");
   alert("Think step by step!");
 }
 
 // RETRY WEAK
 function retryWeak(){
   let weak=Object.keys(weakTopics).sort((a,b)=>weakTopics[b]-weakTopics[a])[0];
-  if(weak) alert("Focus on: "+weak);
+  if(weak) alert("Focus on "+weak);
 }
 
 // UPDATE
@@ -213,42 +259,47 @@ function update(){
   let total=correct+wrong;
   let acc= total?Math.round((correct/total)*100):0;
 
-  let level = acc>85 ? "Master" :
-              acc>70 ? "Advanced" :
-              acc>50 ? "Skilled" : "Beginner";
+  let avgTime = totalTime/(qCount||1);
+  let improvement = acc - lastAcc;
+  localStorage.setItem("last_acc",acc);
 
-  let msg="";
+  let rank =
+    acc>90?"💎 Diamond":
+    acc>75?"🥇 Gold":
+    acc>60?"🥈 Silver":"🥉 Bronze";
 
-  if(acc>80) msg="🔥 Improving fast!";
-  else if(acc<50) msg="👀 Focus more";
-
-  // MILESTONE
-  if(correct===5) msg+="<br>🎉 Milestone reached!";
-  if(correct>=goalTarget) msg+="<br>🏆 Goal Completed!";
+  let score=Math.round(acc + combo*2);
 
   document.getElementById("stats").innerHTML=`
-    ✅ ${correct} | ❌ ${wrong}<br>
-    📊 ${acc}% Accuracy<br>
-    🧬 Level: ${level}<br>
-    ⚡ Streak: ${streak}<br>
-    🎯 Difficulty: ${difficulty}<br>
-    ${msg}
+    ⚡ Energy: ${energy}%<br>
+    🔥 Combo: ${combo}<br>
+    📊 Accuracy: ${acc}%<br>
+    📈 Improvement: ${improvement}%<br>
+    ⏱ Avg Time: ${avgTime.toFixed(2)}s<br>
+    🏆 Rank: ${rank}<br>
+    🎯 Score: ${score}/100
   `;
+
+  if(qCount>10) alert("🧠 Take a break!");
+
+  if(acc>80){
+    document.body.style.background="linear-gradient(#020617,#022c22)";
+  }
 }
 
 // SHARE
 function share(){
-  let text=`I reached ${correct} correct answers in Focus Mode 🔥`;
+  let text=`I reached ${correct} correct with ${goalAcc}% goal 🔥`;
   navigator.clipboard.writeText(text);
   alert("Copied 😎");
 }
 
-// FAKE LIVE FEED
+// LIVE FEED
 setInterval(()=>{
   let msgs=[
     "User improved accuracy 🔥",
-    "Someone mastered multiplication 👑",
-    "3 users learning now 👀"
+    "Someone mastered topic 👑",
+    "4 users focusing now 👀"
   ];
   document.getElementById("feed").innerText =
     msgs[Math.floor(Math.random()*msgs.length)];
