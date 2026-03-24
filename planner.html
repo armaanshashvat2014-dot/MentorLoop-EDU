@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:#020617;
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  transition:0.4s;
+}
+
+.card{
+  background:rgba(0,0,0,0.6);
+  padding:20px;
+  border-radius:20px;
+  width:420px;
+  text-align:center;
+}
+
+textarea{
+  width:100%;
+  height:120px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+  padding:10px;
+  font-size:14px;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.theme-btn{
+  margin:5px;
+  padding:8px;
+  border-radius:8px;
+  cursor:pointer;
+  border:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>📝 Next Day Planner</h2>
+
+<textarea id="plan" placeholder="What will you do tomorrow?"></textarea>
+
+<button onclick="savePlan()">💾 Save Plan</button>
+
+<h3>🎨 Choose Theme</h3>
+
+<button class="theme-btn" onclick="setTheme('ocean')">🌊 Ocean</button>
+<button class="theme-btn" onclick="setTheme('black')">⚫ Black</button>
+<button class="theme-btn" onclick="setTheme('space')">🌌 Space</button>
+<button class="theme-btn" onclick="setTheme('nature')">🌿 Nature</button>
+
+</div>
+
+<script>
+
+// LOAD PLAN
+let savedPlan = localStorage.getItem("ml_plan") || "";
+let savedDate = localStorage.getItem("ml_plan_date");
+
+document.getElementById("plan").value = savedPlan;
+
+// CHECK MISSED TASK
+let today = new Date().toDateString();
+
+if(savedDate && savedDate !== today && savedPlan){
+  alert("⚠️ You may have skipped your planned tasks!");
+}
+
+// SAVE PLAN
+function savePlan(){
+
+  let text = document.getElementById("plan").value;
+
+  localStorage.setItem("ml_plan", text);
+  localStorage.setItem("ml_plan_date", new Date().toDateString());
+
+  alert("✅ Plan saved!");
+}
+
+// THEMES
+function setTheme(theme){
+
+  if(theme === "ocean"){
+    document.body.style.background =
+      "linear-gradient(135deg,#0ea5e9,#020617)";
+  }
+
+  if(theme === "black"){
+    document.body.style.background = "#020617";
+  }
+
+  if(theme === "space"){
+    document.body.style.background =
+      "radial-gradient(circle,#1e293b,#000)";
+  }
+
+  if(theme === "nature"){
+    document.body.style.background =
+      "linear-gradient(135deg,#16a34a,#020617)";
+  }
+
+  localStorage.setItem("ml_theme", theme);
+}
+
+// LOAD THEME
+let savedTheme = localStorage.getItem("ml_theme");
+
+if(savedTheme){
+  setTheme(savedTheme);
+}
+
+</script>
+
+</body>
+</html>
