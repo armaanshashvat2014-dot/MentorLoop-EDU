@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Achievements</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#020617;
+  padding:25px;
+  border-radius:20px;
+  width:420px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(56,189,248,0.2);
+}
+
+h1{color:#38bdf8;}
+
+.section{
+  margin-top:15px;
+}
+
+.bar{
+  background:#1e293b;
+  height:10px;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:5px;
+}
+
+.fill{
+  background:#38bdf8;
+  height:100%;
+  width:0%;
+}
+
+.highlight{
+  color:#38bdf8;
+  font-weight:bold;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>📊 Dashboard</h1>
+
+<div id="summary"></div>
+
+<div class="section">
+  <b>🚀 Progress to Apex</b>
+  <div class="bar"><div id="fill" class="fill"></div></div>
+</div>
+
+<div class="section" id="achievements"></div>
+
+<div class="section" id="focusStats"></div>
+
+<div class="section" id="identity"></div>
+
+<button onclick="goElite()">🔥 Elite</button>
+<button onclick="goApex()">⚡ Apex</button>
+<button onclick="goFocus()">🎯 Focus</button>
+
+</div>
+
+<script>
+
+// LOAD DATA
+let streak = parseInt(localStorage.getItem("ml_streak")) || 0;
+let points = parseInt(localStorage.getItem("ml_points")) || 0;
+let best = parseFloat(localStorage.getItem("best_time")) || 0;
+let focusAcc = parseInt(localStorage.getItem("last_acc")) || 0;
+
+// SUMMARY
+document.getElementById("summary").innerHTML = `
+🔥 Streak: <span class="highlight">${streak}</span><br>
+💠 Points: <span class="highlight">${points}</span>
+`;
+
+// PROGRESS BAR
+let progress = Math.min((streak/50 + points/100000)/2,1)*100;
+document.getElementById("fill").style.width = progress + "%";
+
+// ACHIEVEMENTS
+let ach = "";
+
+if(streak >= 15) ach += "🔥 Elite Unlocked<br>";
+if(streak >= 50 && points >= 100000) ach += "⚡ Apex Unlocked<br>";
+if(best > 0) ach += `⚡ Best Speed: ${best.toFixed(2)}s<br>`;
+if(points > 50000) ach += "💠 High Achiever<br>";
+
+document.getElementById("achievements").innerHTML =
+  `<b>🏆 Achievements</b><br>${ach}`;
+
+// FOCUS STATS
+document.getElementById("focusStats").innerHTML = `
+<b>🎯 Focus Stats</b><br>
+📊 Accuracy: ${focusAcc}%<br>
+`;
+
+// IDENTITY
+let identity =
+  points > 100000 ? "⚡ Apex Player" :
+  points > 50000 ? "🔥 Elite Mind" :
+  points > 10000 ? "🧠 Fast Learner" :
+  "🌱 Beginner";
+
+document.getElementById("identity").innerHTML =
+  `<b>🧬 Identity</b><br>${identity}`;
+
+// CLOSE TO APEX
+if(streak > 40 || points > 80000){
+  document.getElementById("summary").innerHTML +=
+    "<br><br>👀 You are VERY close to Apex!";
+}
+
+// NAVIGATION
+function goElite(){
+  window.location.href="elite.html";
+}
+
+function goApex(){
+  window.location.href="apex.html";
+}
+
+function goFocus(){
+  window.location.href="focus.html";
+}
+
+</script>
+
+</body>
+</html>
