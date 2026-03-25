@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop | Planner</title>
+<title>MentorLoop | Planner Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -28,12 +28,17 @@ body{
 
 textarea{
   width:100%;
-  height:120px;
+  height:80px;
   margin-top:10px;
   border-radius:10px;
   border:none;
   padding:10px;
-  font-size:14px;
+}
+
+input{
+  padding:8px;
+  border-radius:8px;
+  border:none;
 }
 
 button{
@@ -47,14 +52,27 @@ button{
   cursor:pointer;
 }
 
-.theme-btn{
-  margin:5px;
+.task{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+  background:#1e293b;
   padding:8px;
   border-radius:8px;
-  cursor:pointer;
-  border:none;
 }
 
+.done{
+  text-decoration:line-through;
+  color:#94a3b8;
+}
+
+.theme-btn{
+  margin:5px;
+  padding:6px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -62,78 +80,118 @@ button{
 
 <div class="card">
 
-<h2>📝 Next Day Planner</h2>
+<h2>📝 Planner + Notes</h2>
 
-<textarea id="plan" placeholder="What will you do tomorrow?"></textarea>
+<!-- NOTES -->
+<textarea id="notes" placeholder="Write your study notes..."></textarea>
 
-<button onclick="savePlan()">💾 Save Plan</button>
+<!-- TASK INPUT -->
+<input id="taskInput" placeholder="Add task">
+<button onclick="addTask()">Add Task</button>
 
-<h3>🎨 Choose Theme</h3>
+<!-- TASK LIST -->
+<div id="tasks"></div>
 
-<button class="theme-btn" onclick="setTheme('ocean')">🌊 Ocean</button>
-<button class="theme-btn" onclick="setTheme('black')">⚫ Black</button>
-<button class="theme-btn" onclick="setTheme('space')">🌌 Space</button>
-<button class="theme-btn" onclick="setTheme('nature')">🌿 Nature</button>
+<button onclick="saveAll()">💾 Save</button>
+
+<h3>🎨 Themes</h3>
+
+<button class="theme-btn" onclick="setTheme('ocean')">🌊</button>
+<button class="theme-btn" onclick="setTheme('black')">⚫</button>
+<button class="theme-btn" onclick="setTheme('space')">🌌</button>
+<button class="theme-btn" onclick="setTheme('nature')">🌿</button>
 
 </div>
 
 <script>
 
-// LOAD PLAN
-let savedPlan = localStorage.getItem("ml_plan") || "";
+// LOAD DATA
+let notes = localStorage.getItem("ml_notes") || "";
+let tasks = JSON.parse(localStorage.getItem("ml_tasks")) || [];
 let savedDate = localStorage.getItem("ml_plan_date");
 
-document.getElementById("plan").value = savedPlan;
+document.getElementById("notes").value = notes;
 
-// CHECK MISSED TASK
+// MISSED TASK CHECK
 let today = new Date().toDateString();
 
-if(savedDate && savedDate !== today && savedPlan){
-  alert("⚠️ You may have skipped your planned tasks!");
+if(savedDate && savedDate !== today && tasks.length){
+  let unfinished = tasks.filter(t => !t.done);
+  if(unfinished.length){
+    alert("⚠️ You didn’t complete all tasks yesterday!");
+  }
 }
 
-// SAVE PLAN
-function savePlan(){
+// RENDER TASKS
+function renderTasks(){
+  let html="";
+  tasks.forEach((t,i)=>{
+    html += `
+      <div class="task">
+        <span class="${t.done?'done':''}" onclick="toggleTask(${i})">${t.text}</span>
+        <button onclick="deleteTask(${i})">❌</button>
+      </div>
+    `;
+  });
+  document.getElementById("tasks").innerHTML = html;
+}
 
-  let text = document.getElementById("plan").value;
+// ADD TASK
+function addTask(){
+  let val = document.getElementById("taskInput").value;
+  if(!val) return;
 
-  localStorage.setItem("ml_plan", text);
+  tasks.push({text:val, done:false});
+  document.getElementById("taskInput").value="";
+  renderTasks();
+}
+
+// TOGGLE TASK
+function toggleTask(i){
+  tasks[i].done = !tasks[i].done;
+  renderTasks();
+}
+
+// DELETE
+function deleteTask(i){
+  tasks.splice(i,1);
+  renderTasks();
+}
+
+// SAVE
+function saveAll(){
+  localStorage.setItem("ml_notes", document.getElementById("notes").value);
+  localStorage.setItem("ml_tasks", JSON.stringify(tasks));
   localStorage.setItem("ml_plan_date", new Date().toDateString());
 
-  alert("✅ Plan saved!");
+  alert("✅ Saved!");
 }
 
 // THEMES
-function setTheme(theme){
+function setTheme(t){
 
-  if(theme === "ocean"){
-    document.body.style.background =
-      "linear-gradient(135deg,#0ea5e9,#020617)";
+  if(t==="ocean"){
+    document.body.style.background="linear-gradient(135deg,#0ea5e9,#020617)";
+  }
+  if(t==="black"){
+    document.body.style.background="#020617";
+  }
+  if(t==="space"){
+    document.body.style.background="radial-gradient(circle,#1e293b,#000)";
+  }
+  if(t==="nature"){
+    document.body.style.background="linear-gradient(135deg,#16a34a,#020617)";
   }
 
-  if(theme === "black"){
-    document.body.style.background = "#020617";
-  }
-
-  if(theme === "space"){
-    document.body.style.background =
-      "radial-gradient(circle,#1e293b,#000)";
-  }
-
-  if(theme === "nature"){
-    document.body.style.background =
-      "linear-gradient(135deg,#16a34a,#020617)";
-  }
-
-  localStorage.setItem("ml_theme", theme);
+  localStorage.setItem("ml_theme", t);
 }
 
 // LOAD THEME
 let savedTheme = localStorage.getItem("ml_theme");
+if(savedTheme) setTheme(savedTheme);
 
-if(savedTheme){
-  setTheme(savedTheme);
-}
+// INIT
+renderTasks();
 
 </script>
 
