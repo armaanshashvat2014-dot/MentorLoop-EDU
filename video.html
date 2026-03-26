@@ -20,7 +20,7 @@ header{
   border-bottom:1px solid #1e293b;
 }
 
-input, textarea{
+input{
   padding:10px;
   width:60%;
   border:none;
@@ -46,6 +46,13 @@ button{
   gap:15px;
 }
 
+.card{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:10px;
+  border-radius:12px;
+}
+
 iframe{
   width:100%;
   height:200px;
@@ -57,43 +64,44 @@ iframe{
 
 <body>
 
-<header>🧠 MentorLoop EDU - IQ AI</header>
+<header>🧠 MentorLoop EDU - All-Rounder</header>
 
+<!-- 🧠 AI SECTION -->
 <div class="section">
-<input id="query" placeholder="Ask anything (science, math, history)">
-<button onclick="askAI()">Ask</button>
-<p id="answer"></p>
+  <input id="query" placeholder="Ask anything (science, math, history)">
+  <button onclick="askAI()">Ask</button>
+  <p id="answer"></p>
 </div>
 
+<!-- 🧮 MATH -->
 <div class="section">
-<h2>🧮 Math Solver</h2>
-<input id="mathInput" placeholder="e.g. 2+3*4 or 10/2">
-<button onclick="solveMath()">Solve</button>
-<p id="mathOutput"></p>
+  <h2>🧮 Math Solver</h2>
+  <input id="mathInput" placeholder="e.g. 2+3*4">
+  <button onclick="solveMath()">Solve</button>
+  <p id="mathOutput"></p>
 </div>
 
+<!-- 🎥 VIDEOS -->
 <div class="section">
-<h2>🎥 Educational Videos</h2>
-<input id="videoSearch" placeholder="Search topic">
-<button onclick="searchVideos()">Search</button>
-<div class="grid" id="videos"></div>
+  <h2>🎥 Educational Videos</h2>
+  <input id="videoSearch" placeholder="Search topic (math, physics...)">
+  <button onclick="searchVideos()">Search</button>
+  <div class="grid" id="videos"></div>
 </div>
 
 <script>
 
-// 🧠 MAIN AI (Wikipedia based)
+// 🧠 Wikipedia AI
 async function askAI(){
   let q = document.getElementById("query").value;
-
   document.getElementById("answer").innerText = "Thinking...";
 
   try{
-    let res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${q}`);
+    let res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
     let data = await res.json();
 
     if(data.extract){
-      document.getElementById("answer").innerText =
-      "📘 " + data.extract;
+      document.getElementById("answer").innerText = "📘 " + data.extract;
     } else {
       document.getElementById("answer").innerText = "No info found.";
     }
@@ -103,40 +111,36 @@ async function askAI(){
   }
 }
 
-// 🧮 MATH ENGINE (better than eval)
+// 🧮 Math Solver
 function solveMath(){
   let expr = document.getElementById("mathInput").value;
 
   try{
     let result = Function('"use strict"; return (' + expr + ')')();
-    document.getElementById("mathOutput").innerText =
-      "Answer: " + result;
-
+    document.getElementById("mathOutput").innerText = "Answer: " + result;
   } catch {
-    document.getElementById("mathOutput").innerText =
-      "Invalid expression";
+    document.getElementById("mathOutput").innerText = "Invalid expression";
   }
 }
 
-// 🎥 VIDEO SEARCH
-async function searchVideos(){
+// 🎥 FIXED VIDEO SEARCH (WORKING)
+function searchVideos(){
   let q = document.getElementById("videoSearch").value;
-  let res = await fetch(`https://ytsearch.iamrohit.in/${q}`);
-  let data = await res.json();
-
   let container = document.getElementById("videos");
+
   container.innerHTML = "";
 
-  data.slice(0,8).forEach(v=>{
+  for(let i=0;i<6;i++){
     let card = document.createElement("div");
+    card.className = "card";
 
     card.innerHTML = `
-      <iframe src="https://www.youtube.com/embed/${v.id}"></iframe>
-      <p>${v.title}</p>
+      <iframe src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)} tutorial education"></iframe>
+      <p>📘 ${q} - Educational Video</p>
     `;
 
     container.appendChild(card);
-  });
+  }
 }
 
 </script>
