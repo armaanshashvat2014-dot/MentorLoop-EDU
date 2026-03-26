@@ -29,7 +29,7 @@ input{
 }
 
 button{
-  padding:10px;
+  padding:10px 15px;
   border:none;
   border-radius:10px;
   background:#22c55e;
@@ -49,22 +49,20 @@ button{
 .card{
   background:#020617;
   border:1px solid #1e293b;
-  padding:10px;
+  padding:15px;
   border-radius:12px;
+  text-align:center;
 }
 
-iframe{
-  width:100%;
-  height:200px;
-  border:none;
-  border-radius:10px;
+a{
+  text-decoration:none;
 }
 </style>
 </head>
 
 <body>
 
-<header>🧠 MentorLoop EDU - All-Rounder</header>
+<header>🧠 MentorLoop EDU - Knowledge AI</header>
 
 <!-- 🧠 AI SECTION -->
 <div class="section">
@@ -123,7 +121,7 @@ function solveMath(){
   }
 }
 
-// 🎥 FIXED VIDEO SEARCH (WORKING)
+// 🎥 WORKING VIDEO SYSTEM
 function searchVideos(){
   let q = document.getElementById("videoSearch").value;
   let container = document.getElementById("videos");
@@ -134,9 +132,14 @@ function searchVideos(){
     let card = document.createElement("div");
     card.className = "card";
 
+    let searchURL = "https://www.youtube.com/results?search_query=" + encodeURIComponent(q + " tutorial education");
+
     card.innerHTML = `
-      <iframe src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)} tutorial education"></iframe>
-      <p>📘 ${q} - Educational Video</p>
+      <h3>📘 ${q} Learning Video</h3>
+      <p>Click below to watch high-quality educational content</p>
+      <a href="${searchURL}" target="_blank">
+        <button>▶ Watch on YouTube</button>
+      </a>
     `;
 
     container.appendChild(card);
