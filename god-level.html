@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop GOD AI</title>
+
+<style>
+body{
+  font-family:Segoe UI;
+  background:#020617;
+  color:white;
+  margin:0;
+}
+
+h1{text-align:center;}
+
+.section{
+  padding:20px;
+  border-bottom:1px solid #1e293b;
+}
+
+input,button{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin:5px;
+}
+
+button{
+  background:#22c55e;
+  cursor:pointer;
+}
+
+.card{
+  background:#0f172a;
+  padding:15px;
+  border-radius:10px;
+  margin:10px 0;
+}
+
+.locked{opacity:0.4;}
+
+</style>
+</head>
+
+<body>
+
+<h1>🧠 MentorLoop EDU Learning SYSTEM</h1>
+
+<!-- 🎯 GOAL -->
+<div class="section">
+<h2>🎯 Goal → Roadmap</h2>
+<input id="goal" placeholder="e.g. Learn algebra in 7 days">
+<button onclick="generateRoadmap()">Generate</button>
+<div id="roadmap"></div>
+</div>
+
+<!-- 📊 XP -->
+<div class="section">
+<h2>📊 XP & Level</h2>
+<p id="xp"></p>
+</div>
+
+<!-- 🎯 WEAKNESS -->
+<div class="section">
+<h2>🎯 Weakness Tracker</h2>
+<p id="weakness"></p>
+</div>
+
+<!-- 🎮 BOSS -->
+<div class="section">
+<h2>🎮 Boss Battle</h2>
+<button onclick="startBoss()">Start Boss</button>
+<p id="question"></p>
+<input id="answerInput">
+<button onclick="submitAnswer()">Submit</button>
+<p id="battle"></p>
+<p id="hp"></p>
+</div>
+
+<!-- 🧠 EMOTION -->
+<div class="section">
+<h2>🧠 Emotion AI</h2>
+<p id="emotion"></p>
+</div>
+
+<script>
+
+// =======================
+// STORAGE
+// =======================
+let xp = localStorage.getItem("xp") || 0;
+let level = Math.floor(xp / 50);
+let mistakes = localStorage.getItem("mistakes") || 0;
+
+updateXP();
+
+// =======================
+// 🎯 SMART ROADMAP
+// =======================
+function generateRoadmap(){
+  let goal = document.getElementById("goal").value.toLowerCase();
+
+  let topics = [];
+
+  if(goal.includes("algebra")){
+    topics = [
+      "Monomials",
+      "Binomials",
+      "Polynomials",
+      "Factorization",
+      "Linear Equations",
+      "Quadratic Equations",
+      "Word Problems"
+    ];
+  }
+  else if(goal.includes("physics")){
+    topics = [
+      "Motion",
+      "Forces",
+      "Energy",
+      "Work",
+      "Waves",
+      "Electricity",
+      "Magnetism"
+    ];
+  }
+  else{
+    topics = ["Basics","Intermediate","Advanced"];
+  }
+
+  let html = "";
+
+  topics.forEach((t,i)=>{
+    html += `<div class="card ${i>level?'locked':''}">
+      Day ${i+1}: ${t}
+      <button onclick="completeDay(${i})">Complete</button>
+    </div>`;
+  });
+
+  document.getElementById("roadmap").innerHTML = html;
+}
+
+// =======================
+// COMPLETE DAY
+// =======================
+function completeDay(i){
+  xp += 20;
+  localStorage.setItem("xp", xp);
+  updateXP();
+}
+
+// =======================
+// XP SYSTEM
+// =======================
+function updateXP(){
+  level = Math.floor(xp / 50);
+  document.getElementById("xp").innerText =
+    "XP: " + xp + " | Level: " + level;
+}
+
+// =======================
+// 🎯 WEAKNESS SYSTEM
+// =======================
+function updateWeakness(){
+  document.getElementById("weakness").innerText =
+    "Mistakes: " + mistakes;
+}
+
+// =======================
+// 🎮 BOSS SYSTEM
+// =======================
+let hp = 3;
+let currentAnswer = 0;
+
+function startBoss(){
+  hp = 3;
+  nextQ();
+}
+
+function nextQ(){
+
+  let difficulty = level;
+
+  let a = Math.floor(Math.random()*10*(difficulty+1));
+  let b = Math.floor(Math.random()*10*(difficulty+1));
+
+  currentAnswer = a + b;
+
+  document.getElementById("question").innerText =
+    `Solve: ${a} + ${b}`;
+
+  document.getElementById("hp").innerText =
+    "HP: " + hp;
+}
+
+function submitAnswer(){
+  let user = Number(answerInput.value);
+
+  if(user === currentAnswer){
+    xp += 10;
+  } else {
+    hp--;
+    mistakes++;
+    localStorage.setItem("mistakes", mistakes);
+  }
+
+  updateXP();
+  updateWeakness();
+  updateEmotion();
+
+  if(hp <= 0){
+    document.getElementById("battle").innerText =
+      "💀 You lost!";
+  } else {
+    nextQ();
+  }
+}
+
+// =======================
+// 🧠 EMOTION AI
+// =======================
+function updateEmotion(){
+
+  let text="";
+
+  if(mistakes > 5){
+    text="😤 Frustrated → lowering difficulty";
+  }
+  else if(xp > 100){
+    text="😎 You are on fire!";
+  }
+  else{
+    text="🤔 Keep going!";
+  }
+
+  document.getElementById("emotion").innerText = text;
+}
+
+// INIT
+updateWeakness();
+updateEmotion();
+
+</script>
+
+</body>
+</html>
