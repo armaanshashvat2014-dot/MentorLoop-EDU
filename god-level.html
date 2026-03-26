@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop GOD AI</title>
+<title>MentorLoop GOD SYSTEM</title>
 
 <style>
 body{
@@ -38,16 +38,17 @@ button{
   margin:10px 0;
 }
 
-.locked{opacity:0.4;}
-
+.locked{
+  opacity:0.4;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🧠 MentorLoop EDU Learning SYSTEM</h1>
+<h1>🧠 MentorLoop GOD SYSTEM</h1>
 
-<!-- 🎯 GOAL -->
+<!-- 🎯 ROADMAP -->
 <div class="section">
 <h2>🎯 Goal → Roadmap</h2>
 <input id="goal" placeholder="e.g. Learn algebra in 7 days">
@@ -63,7 +64,7 @@ button{
 
 <!-- 🎯 WEAKNESS -->
 <div class="section">
-<h2>🎯 Weakness Tracker</h2>
+<h2>🎯 Weakness</h2>
 <p id="weakness"></p>
 </div>
 
@@ -87,20 +88,57 @@ button{
 <script>
 
 // =======================
-// STORAGE
+// STORAGE INIT
 // =======================
-let xp = localStorage.getItem("xp") || 0;
-let level = Math.floor(xp / 50);
-let mistakes = localStorage.getItem("mistakes") || 0;
+let xp = Number(localStorage.getItem("xp") || 0);
+let mistakes = Number(localStorage.getItem("mistakes") || 0);
+let dailyXP = Number(localStorage.getItem("dailyXP") || 0);
+let lastDate = localStorage.getItem("lastDate") || "";
+let completedDays = JSON.parse(localStorage.getItem("completedDays") || "[]");
+let bossCooldown = Number(localStorage.getItem("bossCooldown") || 0);
 
-updateXP();
+function checkDailyReset(){
+  let today = new Date().toDateString();
+  if(today !== lastDate){
+    dailyXP = 0;
+    localStorage.setItem("lastDate", today);
+  }
+}
+checkDailyReset();
+
+let level = Math.floor(xp / 50);
+
+// =======================
+// XP SYSTEM
+// =======================
+function addXP(amount){
+
+  if(dailyXP >= 100){
+    alert("Daily XP limit reached!");
+    return;
+  }
+
+  xp += amount;
+  dailyXP += amount;
+
+  localStorage.setItem("xp", xp);
+  localStorage.setItem("dailyXP", dailyXP);
+
+  updateXP();
+}
+
+function updateXP(){
+  level = Math.floor(xp / 50);
+  document.getElementById("xp").innerText =
+    "XP: " + xp + " | Level: " + level;
+}
 
 // =======================
 // 🎯 SMART ROADMAP
 // =======================
 function generateRoadmap(){
-  let goal = document.getElementById("goal").value.toLowerCase();
 
+  let goal = document.getElementById("goal").value.toLowerCase();
   let topics = [];
 
   if(goal.includes("algebra")){
@@ -110,14 +148,14 @@ function generateRoadmap(){
       "Polynomials",
       "Factorization",
       "Linear Equations",
-      "Quadratic Equations",
+      "Quadratics",
       "Word Problems"
     ];
   }
   else if(goal.includes("physics")){
     topics = [
       "Motion",
-      "Forces",
+      "Force",
       "Energy",
       "Work",
       "Waves",
@@ -132,7 +170,9 @@ function generateRoadmap(){
   let html = "";
 
   topics.forEach((t,i)=>{
-    html += `<div class="card ${i>level?'locked':''}">
+    let locked = i > level ? "locked" : "";
+
+    html += `<div class="card ${locked}">
       Day ${i+1}: ${t}
       <button onclick="completeDay(${i})">Complete</button>
     </div>`;
@@ -142,21 +182,24 @@ function generateRoadmap(){
 }
 
 // =======================
-// COMPLETE DAY
+// COMPLETE DAY (ANTI-SPAM)
 // =======================
 function completeDay(i){
-  xp += 20;
-  localStorage.setItem("xp", xp);
-  updateXP();
-}
 
-// =======================
-// XP SYSTEM
-// =======================
-function updateXP(){
-  level = Math.floor(xp / 50);
-  document.getElementById("xp").innerText =
-    "XP: " + xp + " | Level: " + level;
+  if(completedDays.includes(i)){
+    alert("Already completed!");
+    return;
+  }
+
+  if(i > level){
+    alert("Locked! Level up first.");
+    return;
+  }
+
+  completedDays.push(i);
+  localStorage.setItem("completedDays", JSON.stringify(completedDays));
+
+  addXP(20);
 }
 
 // =======================
@@ -174,16 +217,27 @@ let hp = 3;
 let currentAnswer = 0;
 
 function startBoss(){
+
+  let now = Date.now();
+
+  if(now < bossCooldown){
+    alert("Boss on cooldown!");
+    return;
+  }
+
+  bossCooldown = now + 60000;
+  localStorage.setItem("bossCooldown", bossCooldown);
+
   hp = 3;
   nextQ();
 }
 
 function nextQ(){
 
-  let difficulty = level;
+  let difficulty = level + 1;
 
-  let a = Math.floor(Math.random()*10*(difficulty+1));
-  let b = Math.floor(Math.random()*10*(difficulty+1));
+  let a = Math.floor(Math.random()*10*difficulty);
+  let b = Math.floor(Math.random()*10*difficulty);
 
   currentAnswer = a + b;
 
@@ -195,14 +249,23 @@ function nextQ(){
 }
 
 function submitAnswer(){
-  let user = Number(answerInput.value);
+
+  let user = Number(document.getElementById("answerInput").value);
 
   if(user === currentAnswer){
-    xp += 10;
+    addXP(10);
+    document.getElementById("battle").innerText = "Correct!";
   } else {
     hp--;
     mistakes++;
     localStorage.setItem("mistakes", mistakes);
+    document.getElementById("battle").innerText = "Wrong!";
+  }
+
+  // Anti-farming penalty
+  if(mistakes > 10){
+    xp = Math.max(0, xp - 20);
+    alert("XP penalty for too many mistakes!");
   }
 
   updateXP();
@@ -210,8 +273,7 @@ function submitAnswer(){
   updateEmotion();
 
   if(hp <= 0){
-    document.getElementById("battle").innerText =
-      "💀 You lost!";
+    document.getElementById("battle").innerText += " 💀 You lost!";
   } else {
     nextQ();
   }
@@ -222,22 +284,23 @@ function submitAnswer(){
 // =======================
 function updateEmotion(){
 
-  let text="";
+  let text = "";
 
-  if(mistakes > 5){
-    text="😤 Frustrated → lowering difficulty";
+  if(mistakes > 8){
+    text = "😤 Frustrated → slowing difficulty";
   }
-  else if(xp > 100){
-    text="😎 You are on fire!";
+  else if(xp > 150){
+    text = "😎 You are on fire!";
   }
   else{
-    text="🤔 Keep going!";
+    text = "🤔 Keep going!";
   }
 
   document.getElementById("emotion").innerText = text;
 }
 
 // INIT
+updateXP();
 updateWeakness();
 updateEmotion();
 
