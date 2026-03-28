@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MentorLoop Olympiad Elite</title>
+<title>Olympiad Elite</title>
 
 <style>
 body{
@@ -14,7 +14,7 @@ body{
 }
 
 .container{
-  max-width:1200px;
+  max-width:1100px;
   margin:auto;
   padding:20px;
 }
@@ -26,7 +26,7 @@ h1{
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
   gap:10px;
 }
 
@@ -52,18 +52,19 @@ h1{
 
 .timer{
   text-align:center;
-  font-size:20px;
+  font-size:18px;
   color:#facc15;
 }
 
 .options button{
   width:100%;
-  margin:6px 0;
+  margin:5px 0;
   padding:10px;
   background:#1e293b;
   border:none;
   border-radius:8px;
   color:white;
+  cursor:pointer;
 }
 
 .options button:hover{
@@ -78,14 +79,14 @@ h1{
 
 .result{
   text-align:center;
-  font-size:24px;
+  font-size:22px;
   margin-top:20px;
 }
 
 .leaderboard{
   margin-top:20px;
   background:#020617;
-  padding:15px;
+  padding:10px;
   border-radius:10px;
 }
 </style>
@@ -94,11 +95,11 @@ h1{
 <body>
 
 <div class="container">
-<h1>🚀 Olympiad ELITE</h1>
+<h1>🚀 Olympiad Elite</h1>
 
 <div class="grid">
-<div class="card" onclick="start('IMO')">Math (IMO)</div>
-<div class="card" onclick="start('NSO')">Science (NSO)</div>
+<div class="card" onclick="start('IMO')">Math</div>
+<div class="card" onclick="start('NSO')">Science</div>
 <div class="card" onclick="start('IEO')">English</div>
 <div class="card" onclick="start('ICSO')">Computer</div>
 <div class="card" onclick="start('IGKO')">GK</div>
@@ -133,11 +134,9 @@ h1{
 </div>
 
 <script>
-
 let rounds=[],answers=[],currentRound=0,currentQ=0;
 let timerInterval,timeLeft=900;
 
-// ================= START =================
 function start(type){
   document.getElementById("quizBox").style.display="block";
   document.getElementById("title").innerText=type+" Olympiad";
@@ -152,7 +151,6 @@ function start(type){
   loadLeaderboard();
 }
 
-// ================= TIMER =================
 function startTimer(){
   clearInterval(timerInterval);
   timeLeft=900;
@@ -170,88 +168,85 @@ function startTimer(){
   },1000);
 }
 
-// ================= QUESTION BANK =================
 function generate(type){
 
-// ===== MATH (HARDER) =====
+// ===== MATH =====
 if(type==="IMO"){
 return [
 [
-{q:"Find remainder: 123 ÷ 7",opt:[4,3,5,6],c:4},
-{q:"LCM of 12,15?",opt:[60,30,45,90],c:60},
-{q:"HCF of 18,24?",opt:[6,12,3,9],c:6},
-{q:"If x+5=12, x=?",opt:[7,6,8,5],c:7},
-{q:"Area rectangle 8×5?",opt:[40,30,35,45],c:40}
+{q:"12+15=?",opt:[27,25,30,26],c:27},
+{q:"8×7=?",opt:[56,48,54,64],c:56},
+{q:"144÷12=?",opt:[12,10,14,16],c:12},
+{q:"Square of 11?",opt:[121,111,131,101],c:121},
+{q:"15²=?",opt:[225,215,205,235],c:225}
 ],
 [
-{q:"(3²+4²)=?",opt:[25,49,12,7],c:25},
-{q:"Perimeter square side 7?",opt:[28,14,21,35],c:28},
-{q:"1/4 of 200?",opt:[50,40,60,25],c:50},
-{q:"0.2×50?",opt:[10,5,20,15],c:10},
-{q:"Find next: 2,6,12,20,?",opt:[30,28,32,24],c:30}
+{q:"LCM 6,8?",opt:[24,12,48,16],c:24},
+{q:"HCF 12,18?",opt:[6,12,3,9],c:6},
+{q:"7³=?",opt:[343,49,21,63],c:343},
+{q:"Area square 6?",opt:[36,30,42,48],c:36},
+{q:"Perimeter 5?",opt:[20,25,15,10],c:20}
 ],
 [
-{q:"If 3x=21, x=?",opt:[7,6,5,8],c:7},
-{q:"Square root of 144?",opt:[12,10,14,16],c:12},
-{q:"25% of 80?",opt:[20,25,15,10],c:20},
-{q:"Sum angles triangle?",opt:["180°","360°","90°","270°"],c:"180°"},
+{q:"25% of 200?",opt:[50,25,75,100],c:50},
+{q:"0.5×10?",opt:[5,10,15,20],c:5},
+{q:"9×9?",opt:[81,72,90,99],c:81},
+{q:"100-37?",opt:[63,53,73,67],c:63},
 {q:"Cube of 4?",opt:[64,16,32,48],c:64}
 ]
 ];
 }
-// ===== MATH (HARDER) =====
+
+// ===== ENGLISH =====
 if(type==="IEO"){
 return [
 [
+{q:"Plural of child?",opt:["Children","Childs","Childes","Child"],c:"Children"},
+{q:"Opposite of happy?",opt:["Sad","Big","Fast","Good"],c:"Sad"},
+{q:"Synonym of big?",opt:["Large","Tiny","Cold","Slow"],c:"Large"},
+{q:"They ___ going.",opt:["are","is","am","be"],c:"are"},
+{q:"He ___ playing.",opt:["is","are","am","be"],c:"is"}
+],
 [
-  [
-    { q: "In the sentence 'The stars danced playfully,' identify the number of syllables in the word 'playfully'.", opt: [4, 3, 5, 6], c: 4 },
-    { q: "How many letters are in the English word for the number '60'?", opt: [60, 30, 45, 90], c: 60 }, // This is a trick/logic IEO style
-    { q: "Identify the number of vowels in the word 'EDUCATION'.", opt: [6, 12, 3, 9], c: 6 },
-    { q: "In the phrase 'Seven swans a-swimming,' how many swans are mentioned?", opt: [7, 6, 8, 5], c: 7 },
-    { q: "Choose the correct spelling: 'The speed limit is ______ mph.'", opt: [40, 30, 35, 45], c: 40 }
-  ],
-  [
-    { q: "Which number is the 'sum' of the letters in the word 'BE' (if A=1, B=2)?", opt: [25, 49, 12, 7], c: 25 }, // Logic Section
-    { q: "A 'fortnight' consists of how many days?", opt: [28, 14, 21, 35], c: 28 }, // Vocabulary Section
-    { q: "If a book has 200 pages and you read 'half of a half,' how many pages is that?", opt: [50, 40, 60, 25], c: 50 },
-    { q: "In the word 'DECADES,' how many years does one decade represent?", opt: [10, 5, 20, 15], c: 10 },
-    { q: "Complete the pattern: Two, Six, Twelve, Twenty, _______.", opt: [30, 28, 32, 24], c: 30 }
-  ],
-  [
-    { q: "Identify the number of words in the sentence: 'She ran to the park very quickly.'", opt: [7, 6, 5, 8], c: 7 },
-    { q: "In the word 'DOZEN,' how many items are represented?", opt: [12, 10, 14, 16], c: 12 },
-    { q: "A 'score' in old English (like in Lincoln's speech) represents which number?", opt: [20, 25, 15, 10], c: 20 },
-    { q: "What is the antonym of 'obtuse' in a literary sense when describing a person's wit?", opt: ["Sharp", "Dull", "Slow", "Round"], c: "Sharp" }, // Adjusted for 180 logic
-    { q: "The word 'sixty-four' has how many consonants?", opt: [64, 16, 32, 48], c: 64 } // Keeping your original 'c' value
-  ]
+{q:"Past of go?",opt:["Went","Goed","Go","Gone"],c:"Went"},
+{q:"Noun example?",opt:["Book","Run","Quick","Fast"],c:"Book"},
+{q:"Verb example?",opt:["Run","Book","Red","Big"],c:"Run"},
+{q:"Adjective example?",opt:["Beautiful","Run","Jump","Eat"],c:"Beautiful"},
+{q:"Article?",opt:["The","Run","Big","Quick"],c:"The"}
+],
+[
+{q:"Pronoun?",opt:["He","Run","Table","Fast"],c:"He"},
+{q:"Sentence ends?",opt:[".","?","!",","],c:"."},
+{q:"Opposite hot?",opt:["Cold","Warm","Heat","Fire"],c:"Cold"},
+{q:"I ___ happy.",opt:["am","is","are","be"],c:"am"},
+{q:"Synonym fast?",opt:["Quick","Slow","Cold","Big"],c:"Quick"}
 ]
-
 ];
 }
+
 // ===== SCIENCE =====
 if(type==="NSO"){
 return [
 [
-{q:"Speed of light approx?",opt:["3×10^8","3×10^6","3×10^5","3×10^7"],c:"3×10^8"},
-{q:"pH of neutral?",opt:[7,0,14,1],c:7},
-{q:"Unit of energy?",opt:["Joule","Watt","Volt","Newton"],c:"Joule"},
-{q:"Gas in photosynthesis?",opt:["CO2","O2","N2","H2"],c:"CO2"},
-{q:"Heart chambers?",opt:[4,2,3,5],c:4}
+{q:"H2O?",opt:["Water","Oxygen","Hydrogen","Helium"],c:"Water"},
+{q:"Red planet?",opt:["Mars","Earth","Venus","Jupiter"],c:"Mars"},
+{q:"Gas we breathe?",opt:["Oxygen","CO2","Nitrogen","Helium"],c:"Oxygen"},
+{q:"Sun is?",opt:["Star","Planet","Moon","Comet"],c:"Star"},
+{q:"Photosynthesis?",opt:["Food making","Digestion","Respiration","None"],c:"Food making"}
 ],
 [
-{q:"Force = ?",opt:["mass×acc","mass×vel","vel×acc","mass/acc"],c:"mass×acc"},
-{q:"Planet largest?",opt:["Jupiter","Earth","Mars","Venus"],c:"Jupiter"},
-{q:"Electron charge?",opt:["Negative","Positive","Neutral","None"],c:"Negative"},
-{q:"Boiling water?",opt:["100°C","0°C","50°C","90°C"],c:"100°C"},
-{q:"DNA stands?",opt:["Deoxyribo","Dynamic","Double","None"],c:"Deoxyribo"}
+{q:"Boiling point?",opt:["100°C","0°C","50°C","90°C"],c:"100°C"},
+{q:"Heart pumps?",opt:["Blood","Water","Air","Oxygen"],c:"Blood"},
+{q:"Earth satellite?",opt:["Moon","Mars","Sun","Venus"],c:"Moon"},
+{q:"Magnet attracts?",opt:["Iron","Wood","Glass","Plastic"],c:"Iron"},
+{q:"Largest planet?",opt:["Jupiter","Earth","Mars","Venus"],c:"Jupiter"}
 ],
 [
-{q:"Work formula?",opt:["F×d","F/d","d/F","None"],c:"F×d"},
+{q:"Energy source?",opt:["Sun","Rock","Plastic","Sand"],c:"Sun"},
+{q:"Water freezes?",opt:["0°C","100°C","50°C","10°C"],c:"0°C"},
+{q:"Unit of force?",opt:["Newton","Watt","Volt","Joule"],c:"Newton"},
 {q:"Human bones?",opt:[206,210,150,180],c:206},
-{q:"Cell unit?",opt:["Life","Energy","Matter","Atom"],c:"Life"},
-{q:"Light travels?",opt:["Straight","Curved","Zigzag","Random"],c:"Straight"},
-{q:"Energy stored?",opt:["Potential","Kinetic","Heat","Sound"],c:"Potential"}
+{q:"Cell unit?",opt:["Life","Energy","Matter","Atom"],c:"Life"}
 ]
 ];
 }
@@ -262,33 +257,33 @@ return [
 [
 {q:"2,6,12,20,?",opt:[30,28,32,24],c:30},
 {q:"Odd one?",opt:["Dog","Cat","Lion","Car"],c:"Car"},
-{q:"Mirror of P?",opt:["Ԁ","P","b","d"],c:"Ԁ"},
+{q:"Next: 3,9,27,?",opt:[81,72,54,90],c:81},
 {q:"A=1,B=2 → C=?",opt:[3,4,5,6],c:3},
-{q:"Next: 3,9,27,?",opt:[81,72,54,90],c:81}
+{q:"Mirror of P?",opt:["Ԁ","P","b","d"],c:"Ԁ"}
 ],
 [
-{q:"Clock 3→6 angle?",opt:["90°","180°","120°","60°"],c:"90°"},
 {q:"Series: 1,4,9,16,?",opt:[25,20,30,36],c:25},
 {q:"Opposite fast?",opt:["Slow","Quick","Run","Speed"],c:"Slow"},
-{q:"If CAT→3, DOG→?",opt:[3,2,4,5],c:3},
-{q:"Alphabet after Y?",opt:["Z","X","A","B"],c:"Z"}
+{q:"Alphabet after Y?",opt:["Z","X","A","B"],c:"Z"},
+{q:"Even number?",opt:[8,7,5,9],c:8},
+{q:"Triangle sides?",opt:[3,4,5,6],c:3}
 ],
 [
 {q:"Cube faces?",opt:[6,4,8,12],c:6},
-{q:"Triangle sides?",opt:[3,4,5,6],c:3},
-{q:"Even number?",opt:[8,7,5,9],c:8},
 {q:"Series: 5,10,20,?",opt:[40,30,25,50],c:40},
-{q:"Day after Monday?",opt:["Tuesday","Sunday","Friday","Wednesday"],c:"Tuesday"}
+{q:"Day after Monday?",opt:["Tuesday","Sunday","Friday","Wednesday"],c:"Tuesday"},
+{q:"Clock angle 3→6?",opt:["90°","180°","120°","60°"],c:"90°"},
+{q:"Opposite big?",opt:["Small","Tall","Fast","Wide"],c:"Small"}
 ]
 ];
 }
 
-// ===== DEFAULT OTHER SUBJECTS =====
+// ===== DEFAULT =====
 return [
 [
-{q:"Capital of India?",opt:["Delhi","Mumbai","Chennai","Kolkata"],c:"Delhi"},
+{q:"Capital India?",opt:["Delhi","Mumbai","Chennai","Kolkata"],c:"Delhi"},
 {q:"National animal?",opt:["Tiger","Lion","Cow","Elephant"],c:"Tiger"},
-{q:"Currency India?",opt:["Rupee","Dollar","Euro","Yen"],c:"Rupee"},
+{q:"Currency?",opt:["Rupee","Dollar","Euro","Yen"],c:"Rupee"},
 {q:"PM India?",opt:["Modi","Nehru","Gandhi","Patel"],c:"Modi"},
 {q:"Flag colors?",opt:["3","2","4","5"],c:"3"}
 ],
@@ -309,7 +304,6 @@ return [
 ];
 }
 
-// ================= LOAD =================
 function load(){
 let q=rounds[currentRound][currentQ];
 let index=currentRound*5+currentQ;
@@ -326,7 +320,6 @@ html+=`<button onclick="select('${o}')">${o}</button>`;
 document.getElementById("options").innerHTML=html;
 }
 
-// ================= NAV =================
 function select(ans){
 answers[currentRound*5+currentQ]=ans;
 }
@@ -343,7 +336,6 @@ else if(currentRound>0){currentRound--;currentQ=4;}
 load();
 }
 
-// ================= SUBMIT =================
 function submitTest(){
 clearInterval(timerInterval);
 
@@ -361,7 +353,6 @@ saveScore(score);
 loadLeaderboard();
 }
 
-// ================= LEADERBOARD =================
 function saveScore(score){
 let data=JSON.parse(localStorage.getItem("scores")||"[]");
 data.push(score);
@@ -378,7 +369,6 @@ html+=`#${i+1} - ${s}/15<br>`;
 });
 document.getElementById("leaderboard").innerHTML=html;
 }
-
 </script>
 
 </body>
