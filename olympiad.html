@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olympiad Mastery Hub</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  color:#38bdf8;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
+}
+
+.card{
+  background:#0f172a;
+  border:1px solid #1e293b;
+  padding:12px;
+  border-radius:10px;
+  text-align:center;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.card:hover{
+  box-shadow:0 0 15px #38bdf8;
+  transform:scale(1.05);
+}
+
+.quiz{
+  display:none;
+  margin-top:20px;
+}
+
+.question{
+  font-size:18px;
+  margin-bottom:10px;
+}
+
+.options button{
+  width:100%;
+  margin:5px 0;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#1e293b;
+  color:white;
+  cursor:pointer;
+}
+
+.options button:hover{
+  background:#38bdf8;
+}
+
+.nav{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+
+.result{
+  text-align:center;
+  font-size:22px;
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🚀 Olympiad Mastery Hub</h1>
+
+<div class="grid">
+<div class="card" onclick="start('IMO')">IMO</div>
+<div class="card" onclick="start('NSO')">NSO</div>
+<div class="card" onclick="start('IEO')">IEO</div>
+<div class="card" onclick="start('ICSO')">Computer</div>
+<div class="card" onclick="start('IGKO')">GK</div>
+<div class="card" onclick="start('ISSO')">Social</div>
+<div class="card" onclick="start('IHO')">Hindi</div>
+<div class="card" onclick="start('CRO')">Reasoning</div>
+</div>
+
+<div class="quiz" id="quizBox">
+<h2 id="title"></h2>
+<div id="roundInfo"></div>
+<div id="qNum"></div>
+
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+
+<div class="nav">
+<button onclick="prev()">⬅ Prev</button>
+<button onclick="next()">Next ➡</button>
+</div>
+
+<button onclick="submitTest()">Submit Test</button>
+
+<div class="result" id="result"></div>
+</div>
+</div>
+
+<script>
+
+let rounds = [];
+let currentRound = 0;
+let currentQ = 0;
+let answers = [];
+
+function start(type){
+  document.getElementById("quizBox").style.display="block";
+  document.getElementById("title").innerText = type + " Olympiad";
+
+  rounds = generate(type);
+  answers = new Array(15).fill(null);
+
+  currentRound = 0;
+  currentQ = 0;
+
+  load();
+}
+
+function generate(type){
+
+  // ===== MATH =====
+  if(type==="IMO"){
+    return [
+      [
+        {q:"5 + 7 = ?", opt:[12,13,10,11], c:12},
+        {q:"9 × 3 = ?", opt:[27,24,21,30], c:27},
+        {q:"15 - 6 = ?", opt:[9,8,7,10], c:9},
+        {q:"2² = ?", opt:[4,2,6,8], c:4},
+        {q:"10 ÷ 2 = ?", opt:[5,2,10,8], c:5}
+      ],
+      [
+        {q:"7 × 8 = ?", opt:[56,54,48,64], c:56},
+        {q:"Square of 9?", opt:[81,72,90,99], c:81},
+        {q:"100 - 45 = ?", opt:[55,65,45,60], c:55},
+        {q:"Half of 50?", opt:[25,20,30,15], c:25},
+        {q:"LCM of 4,6?", opt:[12,24,6,18], c:12}
+      ],
+      [
+        {q:"Area side 5?", opt:[25,20,15,30], c:25},
+        {q:"3 × 6 = ?", opt:[18,12,21,24], c:18},
+        {q:"9 + 11 = ?", opt:[20,19,21,18], c:20},
+        {q:"Cube of 3?", opt:[27,9,6,18], c:27},
+        {q:"Perimeter side 4?", opt:[16,12,8,20], c:16}
+      ]
+    ];
+  }
+
+  // ===== SCIENCE =====
+  if(type==="NSO"){
+    return [
+      [
+        {q:"What is H2O?", opt:["Water","Oxygen","Hydrogen","Helium"], c:"Water"},
+        {q:"Red planet?", opt:["Mars","Earth","Venus","Jupiter"], c:"Mars"},
+        {q:"Gas we breathe?", opt:["Oxygen","CO2","Nitrogen","Helium"], c:"Oxygen"},
+        {q:"Sun is a?", opt:["Star","Planet","Moon","Comet"], c:"Star"},
+        {q:"Plants make food?", opt:["Photosynthesis","Respiration","Digestion","Evaporation"], c:"Photosynthesis"}
+      ],
+      [
+        {q:"Heart pumps?", opt:["Blood","Water","Air","Oxygen"], c:"Blood"},
+        {q:"Boiling point?", opt:["100°C","0°C","50°C","90°C"], c:"100°C"},
+        {q:"Earth satellite?", opt:["Moon","Mars","Sun","Venus"], c:"Moon"},
+        {q:"Solid to liquid?", opt:["Melting","Freezing","Evaporation","Condensation"], c:"Melting"},
+        {q:"Force unit?", opt:["Newton","Watt","Volt","Joule"], c:"Newton"}
+      ],
+      [
+        {q:"Energy source?", opt:["Sun","Rock","Plastic","Sand"], c:"Sun"},
+        {q:"Water freezes?", opt:["0°C","100°C","50°C","10°C"], c:"0°C"},
+        {q:"Magnet attracts?", opt:["Iron","Wood","Glass","Plastic"], c:"Iron"},
+        {q:"Largest planet?", opt:["Jupiter","Earth","Mars","Venus"], c:"Jupiter"},
+        {q:"Humans need?", opt:["Oxygen","Gold","Plastic","Stone"], c:"Oxygen"}
+      ]
+    ];
+  }
+
+  // ===== ENGLISH =====
+  if(type==="IEO"){
+    return [
+      [
+        {q:"He ___ playing.", opt:["is","are","am","be"], c:"is"},
+        {q:"Opposite happy?", opt:["Sad","Big","Fast","Good"], c:"Sad"},
+        {q:"Plural child?", opt:["Children","Childs","Childes","Child"], c:"Children"},
+        {q:"Synonym big?", opt:["Large","Tiny","Cold","Slow"], c:"Large"},
+        {q:"They ___ going.", opt:["are","is","am","be"], c:"are"}
+      ],
+      [
+        {q:"Past of go?", opt:["Went","Goed","Go","Gone"], c:"Went"},
+        {q:"Noun?", opt:["Book","Run","Quick","Fast"], c:"Book"},
+        {q:"Verb?", opt:["Run","Book","Red","Big"], c:"Run"},
+        {q:"Adjective?", opt:["Beautiful","Run","Jump","Eat"], c:"Beautiful"},
+        {q:"Article?", opt:["The","Run","Big","Quick"], c:"The"}
+      ],
+      [
+        {q:"Pronoun?", opt:["He","Run","Table","Fast"], c:"He"},
+        {q:"Sentence ends?", opt:[".","?","!",","], c:"."},
+        {q:"Synonym fast?", opt:["Quick","Slow","Cold","Big"], c:"Quick"},
+        {q:"Opposite hot?", opt:["Cold","Warm","Heat","Fire"], c:"Cold"},
+        {q:"I ___ happy.", opt:["am","is","are","be"], c:"am"}
+      ]
+    ];
+  }
+
+  // ===== DEFAULT (others reuse GK style for now) =====
+  return [
+    [
+      {q:"Capital of India?", opt:["Delhi","Mumbai","Chennai","Kolkata"], c:"Delhi"},
+      {q:"National animal?", opt:["Tiger","Lion","Cow","Elephant"], c:"Tiger"},
+      {q:"Currency?", opt:["Rupee","Dollar","Euro","Yen"], c:"Rupee"},
+      {q:"PM of India?", opt:["Modi","Gandhi","Nehru","Patel"], c:"Modi"},
+      {q:"Flag colors?", opt:["3","2","4","5"], c:"3"}
+    ],
+    [
+      {q:"Largest country?", opt:["Russia","India","USA","China"], c:"Russia"},
+      {q:"Smallest country?", opt:["Vatican","India","Nepal","USA"], c:"Vatican"},
+      {q:"National bird?", opt:["Peacock","Crow","Sparrow","Eagle"], c:"Peacock"},
+      {q:"Ocean largest?", opt:["Pacific","Indian","Atlantic","Arctic"], c:"Pacific"},
+      {q:"Freedom year?", opt:["1947","1950","1930","1960"], c:"1947"}
+    ],
+    [
+      {q:"National anthem?", opt:["Jana Gana Mana","Vande Mataram","None","Song"], c:"Jana Gana Mana"},
+      {q:"Earth shape?", opt:["Sphere","Flat","Cube","Triangle"], c:"Sphere"},
+      {q:"ISRO country?", opt:["India","USA","Russia","China"], c:"India"},
+      {q:"Currency USA?", opt:["Dollar","Euro","Yen","Rupee"], c:"Dollar"},
+      {q:"National sport?", opt:["Hockey","Cricket","Football","Tennis"], c:"Hockey"}
+    ]
+  ];
+}
+
+function load(){
+  let q = rounds[currentRound][currentQ];
+  let index = currentRound*5 + currentQ;
+
+  document.getElementById("roundInfo").innerText =
+    `Round ${currentRound+1} / 3`;
+
+  document.getElementById("qNum").innerText =
+    `Question ${index+1} / 15`;
+
+  document.getElementById("question").innerText = q.q;
+
+  let html="";
+  q.opt.forEach(o=>{
+    html += `<button onclick="select('${o}')">${o}</button>`;
+  });
+
+  document.getElementById("options").innerHTML = html;
+}
+
+function select(ans){
+  let index = currentRound*5 + currentQ;
+  answers[index] = ans;
+}
+
+function next(){
+  if(currentQ < 4){
+    currentQ++;
+  } else if(currentRound < 2){
+    currentRound++;
+    currentQ = 0;
+  }
+  load();
+}
+
+function prev(){
+  if(currentQ > 0){
+    currentQ--;
+  } else if(currentRound > 0){
+    currentRound--;
+    currentQ = 4;
+  }
+  load();
+}
+
+function submitTest(){
+  let score = 0;
+
+  for(let r=0;r<3;r++){
+    for(let q=0;q<5;q++){
+      let index = r*5 + q;
+      if(answers[index] == rounds[r][q].c){
+        score++;
+      }
+    }
+  }
+
+  document.getElementById("result").innerText =
+    `🔥 Your Score: ${score} / 15`;
+}
+
+</script>
+
+</body>
+</html>
