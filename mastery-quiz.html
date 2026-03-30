@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Mastery Quiz</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  color:#38bdf8;
+}
+
+select, button{
+  padding:10px;
+  margin:5px;
+  border-radius:8px;
+  border:none;
+}
+
+.quiz{
+  margin-top:20px;
+  display:none;
+}
+
+.options button{
+  width:100%;
+  margin:5px 0;
+  background:#1e293b;
+  color:white;
+}
+
+.options button:hover{
+  background:#38bdf8;
+}
+
+.timer{
+  text-align:center;
+  color:#facc15;
+}
+
+.result{
+  text-align:center;
+  font-size:22px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🤖 AI Mastery Quiz</h1>
+
+<!-- SETTINGS -->
+<div>
+
+<select id="subject">
+  <option>Maths</option>
+  <option>Science</option>
+  <option>GK</option>
+  <option>Geography</option>
+</select>
+
+<select id="difficulty">
+  <option>Easy</option>
+  <option>Medium</option>
+  <option>Hard</option>
+</select>
+
+<select id="mode">
+  <option>Learning</option>
+  <option>Test</option>
+  <option>Olympiad</option>
+</select>
+
+<select id="timerMode">
+  <option>Untimed</option>
+  <option>Timed</option>
+</select>
+
+<button onclick="startQuiz()">Start Quiz</button>
+<button onclick="shareQuiz()">Share</button>
+
+</div>
+
+<!-- QUIZ -->
+<div class="quiz" id="quizBox">
+<div class="timer" id="timer"></div>
+<div id="qNum"></div>
+<div id="question"></div>
+<div class="options" id="options"></div>
+
+<button onclick="next()">Next</button>
+<button onclick="submitQuiz()">Submit</button>
+
+<div class="result" id="result"></div>
+</div>
+
+</div>
+
+<script>
+
+let questions=[],answers=[],current=0;
+let timerInterval,timeLeft=300;
+
+// ================= START =================
+function startQuiz(){
+  document.getElementById("quizBox").style.display="block";
+
+  let subject=document.getElementById("subject").value;
+  let diff=document.getElementById("difficulty").value;
+  let mode=document.getElementById("mode").value;
+
+  questions = generateAIQuestions(subject,diff,mode);
+  answers = new Array(questions.length).fill(null);
+  current=0;
+
+  if(document.getElementById("timerMode").value==="Timed"){
+    startTimer();
+  }
+
+  load();
+}
+
+// ================= TIMER =================
+function startTimer(){
+  clearInterval(timerInterval);
+  timeLeft=300;
+
+  timerInterval=setInterval(()=>{
+    let m=Math.floor(timeLeft/60);
+    let s=timeLeft%60;
+    document.getElementById("timer").innerText=`⏱ ${m}:${s<10?'0'+s:s}`;
+    timeLeft--;
+
+    if(timeLeft<0){
+      clearInterval(timerInterval);
+      submitQuiz();
+    }
+  },1000);
+}
+
+// ================= AI QUESTION GENERATOR =================
+function generateAIQuestions(subject,diff,mode){
+  let q=[];
+
+  for(let i=0;i<10;i++){
+
+    let a = diff==="Easy" ? rand(1,10) :
+            diff==="Medium" ? rand(10,50) :
+            rand(50,100);
+
+    let b = rand(1,20);
+
+    // ===== SUBJECT LOGIC =====
+
+    if(subject==="Maths"){
+      if(mode==="Olympiad"){
+        q.push({
+          q:`Find value: (${a}² + ${b}²)`,
+          opt:[a*a+b*b, a*a+b*b+1, a*a+b*b-1, a*a+b*b+2],
+          c:a*a+b*b
+        });
+      } else if(mode==="Test"){
+        q.push({
+          q:`Solve: ${a} × ${b}`,
+          opt:[a*b, a*b+2, a*b-1, a*b+3],
+          c:a*b
+        });
+      } else {
+        q.push({
+          q:`What is ${a} + ${b}?`,
+          opt:[a+b, a+b+1, a+b-1, a+b+2],
+          c:a+b
+        });
+      }
+    }
+
+    else if(subject==="Science"){
+      let sciQ=[
+        ["What gas do humans breathe?","Oxygen"],
+        ["Water formula?","H2O"],
+        ["Planet known as Red Planet?","Mars"],
+        ["Sun is a?","Star"],
+        ["Unit of force?","Newton"]
+      ];
+      let pick=sciQ[rand(0,sciQ.length-1)];
+
+      q.push({
+        q:pick[0],
+        opt:[pick[1],"Hydrogen","Earth","Energy"],
+        c:pick[1]
+      });
+    }
+
+    else if(subject==="GK"){
+      let gkQ=[
+        ["Capital of India?","Delhi"],
+        ["National animal?","Tiger"],
+        ["Prime Minister?","Modi"],
+        ["Currency?","Rupee"],
+        ["National bird?","Peacock"]
+      ];
+      let pick=gkQ[rand(0,gkQ.length-1)];
+
+      q.push({
+        q:pick[0],
+        opt:[pick[1],"USA","China","Japan"],
+        c:pick[1]
+      });
+    }
+
+    else if(subject==="Geography"){
+      let geoQ=[
+        ["Largest ocean?","Pacific"],
+        ["Highest mountain?","Everest"],
+        ["River in India?","Ganga"],
+        ["Desert in India?","Thar"],
+        ["Continent India is in?","Asia"]
+      ];
+      let pick=geoQ[rand(0,geoQ.length-1)];
+
+      q.push({
+        q:pick[0],
+        opt:[pick[1],"Africa","Europe","Australia"],
+        c:pick[1]
+      });
+    }
+  }
+
+  return q;
+}
+
+function rand(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+// ================= LOAD =================
+function load(){
+  let q=questions[current];
+
+  document.getElementById("qNum").innerText=
+    `Question ${current+1}/${questions.length}`;
+
+  document.getElementById("question").innerText=q.q;
+
+  let html="";
+  q.opt.forEach(o=>{
+    html+=`<button onclick="select('${o}')">${o}</button>`;
+  });
+
+  document.getElementById("options").innerHTML=html;
+}
+
+// ================= NAV =================
+function select(ans){
+  answers[current]=ans;
+}
+
+function next(){
+  if(current<questions.length-1){
+    current++;
+    load();
+  }
+}
+
+// ================= SUBMIT =================
+function submitQuiz(){
+  clearInterval(timerInterval);
+
+  let score=0;
+  for(let i=0;i<questions.length;i++){
+    if(answers[i]==questions[i].c) score++;
+  }
+
+  document.getElementById("result").innerText=
+    `🔥 Score: ${score}/${questions.length}`;
+}
+
+// ================= SHARE =================
+function shareQuiz(){
+  let link=window.location.href;
+  navigator.clipboard.writeText(link);
+  alert("Link copied! 🚀");
+}
+
+</script>
+
+</body>
+</html>
