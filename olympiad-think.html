@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentorLoop Arena</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{text-align:center;color:#38bdf8;}
+
+button{
+  padding:10px;
+  margin:5px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.mode-btn{
+  width:100%;
+  background:#1e293b;
+  color:white;
+}
+
+.mode-btn:hover{
+  background:#38bdf8;
+}
+
+.quiz, .puzzle{
+  display:none;
+  margin-top:20px;
+}
+
+.options button{
+  width:100%;
+  background:#1e293b;
+  color:white;
+}
+
+.options button:hover{
+  background:#38bdf8;
+}
+
+.result{
+  text-align:center;
+  font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🧠 MentorLoop Arena</h1>
+
+<button class="mode-btn" onclick="startPuzzle()">🧩 Puzzle Mode</button>
+<button class="mode-btn" onclick="startAI()">🤖 AI Challenge Mode</button>
+
+<!-- PUZZLE MODE -->
+<div class="puzzle" id="puzzleBox">
+<h2>Puzzle Level <span id="level">1</span></h2>
+<div id="puzzleQ"></div>
+<input id="puzzleAns" placeholder="Enter answer">
+<button onclick="checkPuzzle()">Submit</button>
+<div id="puzzleResult"></div>
+</div>
+
+<!-- AI MODE -->
+<div class="quiz" id="quizBox">
+<h2>AI Challenge</h2>
+<div id="qNum"></div>
+<div id="question"></div>
+<div class="options" id="options"></div>
+<button onclick="next()">Next</button>
+<div class="result" id="result"></div>
+</div>
+
+</div>
+
+<script>
+
+// ================= PUZZLE MODE =================
+let level=1;
+
+function startPuzzle(){
+  document.getElementById("puzzleBox").style.display="block";
+  generatePuzzle();
+}
+
+function generatePuzzle(){
+  let q,ans;
+
+  if(level<5){
+    let a=rand(1,10);
+    let b=rand(1,10);
+    q=`${a} + ${b} = ?`;
+    ans=a+b;
+  }
+  else if(level<10){
+    let a=rand(5,20);
+    q=`Find next: ${a}, ${a+2}, ${a+4}, ?`;
+    ans=a+6;
+  }
+  else{
+    let a=rand(2,5);
+    q=`If ${a}² + ${a+1}² = ?`;
+    ans=a*a+(a+1)*(a+1);
+  }
+
+  window.currentPuzzleAns=ans;
+  document.getElementById("puzzleQ").innerText=q;
+  document.getElementById("level").innerText=level;
+}
+
+function checkPuzzle(){
+  let user=document.getElementById("puzzleAns").value;
+
+  if(user==window.currentPuzzleAns){
+    level++;
+    document.getElementById("puzzleResult").innerText="🔥 Correct!";
+  } else {
+    document.getElementById("puzzleResult").innerText="❌ Try again";
+  }
+
+  document.getElementById("puzzleAns").value="";
+  generatePuzzle();
+}
+
+// ================= AI MODE =================
+let questions=[],answers=[],current=0;
+let difficulty=1;
+
+function startAI(){
+  document.getElementById("quizBox").style.display="block";
+  generateAI();
+  load();
+}
+
+function generateAI(){
+  questions=[];
+
+  for(let i=0;i<10;i++){
+    let a=rand(1,10*difficulty);
+    let b=rand(1,10*difficulty);
+
+    questions.push({
+      q:`Solve: ${a} × ${b}`,
+      opt:[a*b, a*b+1, a*b-1, a*b+2],
+      c:a*b
+    });
+  }
+
+  answers=new Array(10).fill(null);
+  current=0;
+}
+
+function load(){
+  let q=questions[current];
+  document.getElementById("qNum").innerText=`Q ${current+1}/10`;
+  document.getElementById("question").innerText=q.q;
+
+  let html="";
+  q.opt.forEach(o=>{
+    html+=`<button onclick="select('${o}')">${o}</button>`;
+  });
+
+  document.getElementById("options").innerHTML=html;
+}
+
+function select(ans){
+  answers[current]=ans;
+}
+
+function next(){
+  if(current<questions.length-1){
+    current++;
+    load();
+  } else {
+    submitAI();
+  }
+}
+
+function submitAI(){
+  let score=0;
+
+  for(let i=0;i<10;i++){
+    if(answers[i]==questions[i].c) score++;
+  }
+
+  document.getElementById("result").innerText=`Score: ${score}/10`;
+
+  // 🔥 ADAPTIVE DIFFICULTY
+  if(score>7) difficulty++;
+  else if(score<4 && difficulty>1) difficulty--;
+
+  setTimeout(()=>{
+    generateAI();
+    load();
+    document.getElementById("result").innerText="";
+  },2000);
+}
+
+// ================= UTIL =================
+function rand(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+</script>
+
+</body>
+</html>
