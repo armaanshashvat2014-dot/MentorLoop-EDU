@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Create Quiz & play it</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background:#020617;
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  width:450px;
+  background:#020617;
+  padding:20px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(56,189,248,0.3);
+}
+
+input{
+  width:90%;
+  margin:5px;
+  padding:8px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  margin:5px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.option{
+  margin-top:10px;
+  padding:10px;
+  background:#1e293b;
+  border-radius:10px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>🧠 Create Your Quiz</h2>
+
+<input id="q" placeholder="Enter Question">
+
+<input id="o1" placeholder="Option 1">
+<input id="o2" placeholder="Option 2">
+<input id="o3" placeholder="Option 3">
+<input id="o4" placeholder="Option 4">
+
+<input id="ans" placeholder="Correct Answer">
+
+<button onclick="addQ()">➕ Add Question</button>
+<button onclick="saveQuiz()">💾 Save Quiz</button>
+<button onclick="startQuiz()">▶️ Play Quiz</button>
+<button onclick="generateCode()">🔗 Share Link</button>
+
+<div id="status"></div>
+<div id="quizArea"></div>
+
+</div>
+
+<script>
+
+let customQuiz = JSON.parse(localStorage.getItem("custom_quiz")) || [];
+let i=0, score=0, start;
+
+// ➕ ADD QUESTION
+function addQ(){
+  let q = document.getElementById("q").value;
+  let o1 = document.getElementById("o1").value;
+  let o2 = document.getElementById("o2").value;
+  let o3 = document.getElementById("o3").value;
+  let o4 = document.getElementById("o4").value;
+  let a = document.getElementById("ans").value;
+
+  if(!q || !o1 || !o2 || !o3 || !o4 || !a){
+    alert("Fill all fields!");
+    return;
+  }
+
+  customQuiz.push({q:q, o:[o1,o2,o3,o4], a:a});
+
+  document.getElementById("status").innerText = "✅ Question Added";
+
+  // Clear inputs
+  document.getElementById("q").value="";
+  document.getElementById("o1").value="";
+  document.getElementById("o2").value="";
+  document.getElementById("o3").value="";
+  document.getElementById("o4").value="";
+  document.getElementById("ans").value="";
+}
+
+// 💾 SAVE
+function saveQuiz(){
+  localStorage.setItem("custom_quiz", JSON.stringify(customQuiz));
+  alert("💾 Quiz Saved!");
+}
+
+// ▶️ START QUIZ
+function startQuiz(){
+  if(customQuiz.length === 0){
+    alert("No questions!");
+    return;
+  }
+
+  i=0;
+  score=0;
+  showQ();
+}
+
+// SHOW QUESTION
+function showQ(){
+  start = Date.now();
+
+  let q = customQuiz[i];
+
+  let html = `<b>${q.q}</b><br>`;
+
+  q.o.forEach(opt=>{
+    html += `<div class="option" onclick="check('${opt}')">${opt}</div>`;
+  });
+
+  document.getElementById("quizArea").innerHTML = html;
+}
+
+// CHECK ANSWER
+function check(ans){
+
+  let t = (Date.now() - start)/1000;
+
+  if(ans === customQuiz[i].a){
+    score += (t < 8) ? 100 : 50;
+  }
+
+  i++;
+
+  if(i < customQuiz.length){
+    showQ();
+  } else {
+    finish();
+  }
+}
+
+// FINISH
+function finish(){
+  document.getElementById("quizArea").innerHTML =
+    `🏆 Finished!<br>Score: ${score}`;
+}
+
+// 🔗 GENERATE SHARE LINK
+function generateCode(){
+
+  if(customQuiz.length === 0){
+    alert("No quiz to share!");
+    return;
+  }
+
+  let data = JSON.stringify(customQuiz);
+  let encoded = btoa(data);
+
+  let link = window.location.origin + window.location.pathname + "?quiz=" + encoded;
+
+  navigator.clipboard.writeText(link);
+
+  alert("🔗 Link copied! Share it 😈");
+}
+
+// 🌍 LOAD FROM URL
+function loadFromURL(){
+
+  let params = new URLSearchParams(window.location.search);
+  let code = params.get("quiz");
+
+  if(code){
+
+    try{
+      let decoded = atob(code);
+      let importedQuiz = JSON.parse(decoded);
+
+      customQuiz = importedQuiz;
+
+      localStorage.setItem("custom_quiz", JSON.stringify(customQuiz));
+
+      document.getElementById("status").innerText =
+        "🔥 Shared quiz loaded!";
+
+      // AUTO START (optional)
+      startQuiz();
+
+    }catch{
+      alert("Invalid quiz link!");
+    }
+  }
+}
+
+// RUN ON LOAD
+loadFromURL();
+
+</script>
+
+</body>
+</html>
