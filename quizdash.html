@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Ultimate Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background:#020617;
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  width:520px;
+  background:#020617;
+  padding:20px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(56,189,248,0.3);
+}
+
+button{
+  margin:6px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.option{
+  margin-top:10px;
+  padding:10px;
+  background:#1e293b;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+select,input{
+  padding:8px;
+  border-radius:8px;
+}
+
+canvas{
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>🚀 MentorLoop Quiz Ultimate</h2>
+
+<div id="setup">
+<input id="name" placeholder="Enter Name"><br><br>
+
+<select id="grade">
+<option value="6">Grade 6</option>
+<option value="7">Grade 7</option>
+<option value="8">Grade 8</option>
+<option value="9">Grade 9</option>
+<option value="10">Grade 10</option>
+</select>
+
+<select id="subject">
+<option value="math">Math</option>
+<option value="science">Science</option>
+<option value="gk">GK</option>
+</select>
+
+<br><br>
+<button onclick="start()">Start Quiz</button>
+<button onclick="teacher()">👨‍🏫 Teacher Panel</button>
+</div>
+
+<div id="quizArea" style="display:none">
+<div id="q"></div>
+<div id="opts"></div>
+<button onclick="next()">Next</button>
+</div>
+
+<div id="result"></div>
+<canvas id="chart" width="400" height="150"></canvas>
+<div id="leaderboard"></div>
+
+</div>
+
+<script>
+
+// 🔥 FULL QUESTION BANK
+const questions = {
+
+6:{
+math:[
+{q:"5+7=?",o:["10","12","14","11"],a:"12",e:"5+7=12"},
+{q:"8×3=?",o:["24","21","26","20"],a:"24",e:"8×3=24"},
+{q:"15-6=?",o:["9","8","7","10"],a:"9",e:"15-6=9"},
+{q:"10÷2=?",o:["5","2","10","4"],a:"5",e:"10÷2=5"},
+{q:"9×2=?",o:["18","16","20","14"],a:"18",e:"9×2=18"},
+{q:"14+5=?",o:["19","18","17","20"],a:"19",e:"14+5=19"},
+{q:"20-11=?",o:["9","8","10","7"],a:"9",e:"20-11=9"},
+{q:"6×6=?",o:["36","30","32","34"],a:"36",e:"36"},
+{q:"12÷4=?",o:["3","4","2","5"],a:"3",e:"3"},
+{q:"25+5=?",o:["30","35","25","40"],a:"30",e:"30"}
+],
+science:[
+{q:"Water formula?",o:["H2O","CO2","O2","H2"],a:"H2O",e:"H2O"},
+{q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:"Star",e:"Star"},
+{q:"Gas we breathe?",o:["Oxygen","CO2","Nitrogen","Hydrogen"],a:"Oxygen",e:"Oxygen"},
+{q:"Plants make food?",o:["Photosynthesis","Respiration","Growth","Digestion"],a:"Photosynthesis",e:"Photosynthesis"},
+{q:"Earth shape?",o:["Round","Flat","Cube","Oval"],a:"Round",e:"Round"},
+{q:"Boiling point water?",o:["100","90","80","120"],a:"100",e:"100"},
+{q:"We see with?",o:["Eyes","Nose","Ears","Skin"],a:"Eyes",e:"Eyes"},
+{q:"Day-night cause?",o:["Rotation","Sun move","Moon","Cloud"],a:"Rotation",e:"Rotation"},
+{q:"Human senses?",o:["5","4","6","3"],a:"5",e:"5"},
+{q:"Animal with 4 legs?",o:["Dog","Snake","Fish","Bird"],a:"Dog",e:"Dog"}
+],
+gk:[
+{q:"Capital India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:"Delhi",e:"Delhi"},
+{q:"Largest animal?",o:["Blue Whale","Elephant","Tiger","Giraffe"],a:"Blue Whale",e:"Blue Whale"},
+{q:"National animal?",o:["Tiger","Lion","Elephant","Leopard"],a:"Tiger",e:"Tiger"},
+{q:"Flag colors?",o:["3","2","4","5"],a:"3",e:"3"},
+{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:"Pacific",e:"Pacific"},
+{q:"Currency India?",o:["Rupee","Dollar","Euro","Yen"],a:"Rupee",e:"Rupee"},
+{q:"Festival lights?",o:["Diwali","Holi","Eid","Christmas"],a:"Diwali",e:"Diwali"},
+{q:"Fastest land animal?",o:["Cheetah","Tiger","Horse","Lion"],a:"Cheetah",e:"Cheetah"},
+{q:"National bird?",o:["Peacock","Crow","Parrot","Sparrow"],a:"Peacock",e:"Peacock"},
+{q:"Earth is a?",o:["Planet","Star","Galaxy","Comet"],a:"Planet",e:"Planet"}
+]
+},
+
+7:{
+math:[
+{q:"12×8=?",o:["96","88","100","92"],a:"96",e:"96"},
+{q:"15²=?",o:["225","200","250","210"],a:"225",e:"225"},
+{q:"√81=?",o:["9","8","7","6"],a:"9",e:"9"},
+{q:"20% of 100?",o:["20","10","30","40"],a:"20",e:"20"},
+{q:"14+28=?",o:["42","40","44","38"],a:"42",e:"42"},
+{q:"45÷5=?",o:["9","8","7","6"],a:"9",e:"9"},
+{q:"7×9=?",o:["63","56","72","54"],a:"63",e:"63"},
+{q:"100-36=?",o:["64","60","70","66"],a:"64",e:"64"},
+{q:"6³=?",o:["216","36","108","200"],a:"216",e:"216"},
+{q:"50% of 80?",o:["40","20","60","30"],a:"40",e:"40"}
+],
+science:[
+{q:"Heart chambers?",o:["4","3","2","5"],a:"4",e:"4"},
+{q:"Force unit?",o:["Newton","Watt","Volt","Joule"],a:"Newton",e:"Newton"},
+{q:"Energy unit?",o:["Joule","Volt","Amp","Newton"],a:"Joule",e:"Joule"},
+{q:"Plant cell has?",o:["Cell wall","Bone","Blood","Hair"],a:"Cell wall",e:"Cell wall"},
+{q:"Water boils at?",o:["100","90","80","120"],a:"100",e:"100"},
+{q:"Earth revolves?",o:["Sun","Moon","Mars","Venus"],a:"Sun",e:"Sun"},
+{q:"Gas in soda?",o:["CO2","O2","N2","H2"],a:"CO2",e:"CO2"},
+{q:"Sound travels?",o:["Medium","Vacuum","Light","Space"],a:"Medium",e:"Medium"},
+{q:"Bones count?",o:["206","210","180","300"],a:"206",e:"206"},
+{q:"Light fastest?",o:["Vacuum","Water","Air","Glass"],a:"Vacuum",e:"Vacuum"}
+],
+gk:[
+{q:"UN founded?",o:["1945","1950","1930","1920"],a:"1945",e:"1945"},
+{q:"Largest desert?",o:["Sahara","Thar","Gobi","Kalahari"],a:"Sahara",e:"Sahara"},
+{q:"Currency USA?",o:["Dollar","Euro","Rupee","Yen"],a:"Dollar",e:"Dollar"},
+{q:"Olympics every?",o:["4","2","3","5"],a:"4",e:"4"},
+{q:"Everest height?",o:["8848","8000","9000","8500"],a:"8848",e:"8848"},
+{q:"Smallest continent?",o:["Australia","Europe","Asia","Africa"],a:"Australia",e:"Australia"},
+{q:"Indian PM?",o:["Modi","Nehru","Gandhi","Patel"],a:"Modi",e:"Modi"},
+{q:"Fastest bird?",o:["Falcon","Eagle","Crow","Parrot"],a:"Falcon",e:"Falcon"},
+{q:"Largest river?",o:["Amazon","Ganga","Nile","Yangtze"],a:"Amazon",e:"Amazon"},
+{q:"Earth satellite?",o:["Moon","Sun","Mars","Jupiter"],a:"Moon",e:"Moon"}
+]
+},
+
+8:{
+math:[
+{q:"√256=?",o:["14","16","18","12"],a:"16",e:"16"},
+{q:"25% of 200?",o:["50","40","60","70"],a:"50",e:"50"},
+{q:"(5×6)+10=?",o:["40","30","35","50"],a:"40",e:"40"},
+{q:"LCM of 6,8?",o:["24","12","18","30"],a:"24",e:"24"},
+{q:"HCF of 12,18?",o:["6","12","3","9"],a:"6",e:"6"},
+{q:"9²=?",o:["81","72","90","64"],a:"81",e:"81"},
+{q:"100÷4=?",o:["25","20","30","40"],a:"25",e:"25"},
+{q:"15×4=?",o:["60","50","55","65"],a:"60",e:"60"},
+{q:"144÷12=?",o:["12","14","10","16"],a:"12",e:"12"},
+{q:"10²=?",o:["100","10","20","200"],a:"100",e:"100"}
+],
+science:[
+{q:"Cell basic unit?",o:["Cell","Atom","Molecule","Organ"],a:"Cell",e:"Cell"},
+{q:"Photosynthesis needs?",o:["Sunlight","Air","Water","All"],a:"All",e:"All"},
+{q:"Blood color?",o:["Red","Blue","Green","Yellow"],a:"Red",e:"Red"},
+{q:"Earth layer?",o:["Crust","Core","Mantle","All"],a:"All",e:"All"},
+{q:"Human organ pump?",o:["Heart","Brain","Liver","Lung"],a:"Heart",e:"Heart"},
+{q:"Water freezes at?",o:["0","10","-10","5"],a:"0",e:"0"},
+{q:"Energy source sun?",o:["Nuclear","Electric","Chemical","Heat"],a:"Nuclear",e:"Nuclear"},
+{q:"Plants release?",o:["Oxygen","CO2","Nitrogen","Hydrogen"],a:"Oxygen",e:"Oxygen"},
+{q:"Largest organ?",o:["Skin","Heart","Brain","Liver"],a:"Skin",e:"Skin"},
+{q:"Gravity pulls?",o:["Objects","Light","Sound","Air"],a:"Objects",e:"Objects"}
+],
+gk:[
+{q:"Capital France?",o:["Paris","Rome","Berlin","Madrid"],a:"Paris",e:"Paris"},
+{q:"Largest country?",o:["Russia","USA","China","India"],a:"Russia",e:"Russia"},
+{q:"Currency Japan?",o:["Yen","Dollar","Euro","Rupee"],a:"Yen",e:"Yen"},
+{q:"Desert India?",o:["Thar","Sahara","Gobi","Kalahari"],a:"Thar",e:"Thar"},
+{q:"River India?",o:["Ganga","Nile","Amazon","Yangtze"],a:"Ganga",e:"Ganga"},
+{q:"Animal king?",o:["Lion","Tiger","Dog","Elephant"],a:"Lion",e:"Lion"},
+{q:"Planet red?",o:["Mars","Earth","Jupiter","Venus"],a:"Mars",e:"Mars"},
+{q:"Smallest ocean?",o:["Arctic","Indian","Pacific","Atlantic"],a:"Arctic",e:"Arctic"},
+{q:"Fastest train India?",o:["Vande Bharat","Rajdhani","Shatabdi","Duronto"],a:"Vande Bharat",e:"Vande Bharat"},
+{q:"Flag USA stars?",o:["50","40","45","60"],a:"50",e:"50"}
+]
+},
+
+9:{
+math:[
+{q:"x+5=10?",o:["5","10","0","15"],a:"5",e:"5"},
+{q:"3²+4²=?",o:["25","12","9","16"],a:"25",e:"25"},
+{q:"√169=?",o:["13","12","14","11"],a:"13",e:"13"},
+{q:"20% of 150?",o:["30","25","35","40"],a:"30",e:"30"},
+{q:"(a+b)²=?",o:["a²+b²+2ab","a²-b²","a²+b²","ab"],a:"a²+b²+2ab",e:"formula"},
+{q:"2x=12?",o:["6","12","4","8"],a:"6",e:"6"},
+{q:"5³=?",o:["125","25","100","150"],a:"125",e:"125"},
+{q:"HCF 18,24?",o:["6","12","3","9"],a:"6",e:"6"},
+{q:"LCM 3,5?",o:["15","10","20","30"],a:"15",e:"15"},
+{q:"Area square 5?",o:["25","20","30","15"],a:"25",e:"25"}
+],
+science:[
+{q:"Atom smallest?",o:["Yes","No","Maybe","None"],a:"Yes",e:"Yes"},
+{q:"Unit power?",o:["Watt","Volt","Joule","Newton"],a:"Watt",e:"Watt"},
+{q:"Speed unit?",o:["m/s","km","kg","N"],a:"m/s",e:"m/s"},
+{q:"Human brain part?",o:["Cerebrum","Heart","Liver","Kidney"],a:"Cerebrum",e:"Cerebrum"},
+{q:"Lens eye?",o:["Convex","Concave","Flat","None"],a:"Convex",e:"Convex"},
+{q:"Acid pH?",o:["<7","7",">7","0"],a:"<7",e:"<7"},
+{q:"Base pH?",o:[">7","7","<7","0"],a:">7",e:">7"},
+{q:"Metal conducts?",o:["Electricity","Water","Air","Light"],a:"Electricity",e:"Electricity"},
+{q:"Force formula?",o:["F=ma","E=mc2","v=d/t","P=IV"],a:"F=ma",e:"F=ma"},
+{q:"Energy conserved?",o:["Yes","No","Maybe","None"],a:"Yes",e:"Yes"}
+],
+gk:[
+{q:"UNO HQ?",o:["New York","London","Delhi","Paris"],a:"New York",e:"NY"},
+{q:"Largest democracy?",o:["India","USA","China","UK"],a:"India",e:"India"},
+{q:"World war ended?",o:["1945","1939","1918","1950"],a:"1945",e:"1945"},
+{q:"Currency UK?",o:["Pound","Dollar","Euro","Yen"],a:"Pound",e:"Pound"},
+{q:"Capital Japan?",o:["Tokyo","Kyoto","Osaka","Nagoya"],a:"Tokyo",e:"Tokyo"},
+{q:"Olympics symbol?",o:["5 rings","3 stars","2 circles","4 dots"],a:"5 rings",e:"5 rings"},
+{q:"Biggest continent?",o:["Asia","Africa","Europe","America"],a:"Asia",e:"Asia"},
+{q:"Earth age?",o:["4.5bn","2bn","6bn","1bn"],a:"4.5bn",e:"4.5bn"},
+{q:"Human DNA shape?",o:["Double helix","Circle","Line","Square"],a:"Double helix",e:"Double helix"},
+{q:"Light speed?",o:["3e8","3e6","3e5","3e7"],a:"3e8",e:"3e8"}
+]
+},
+
+10:{
+math:[
+{q:"sin90=?",o:["1","0","-1","0.5"],a:"1",e:"1"},
+{q:"cos0=?",o:["1","0","-1","0.5"],a:"1",e:"1"},
+{q:"tan45=?",o:["1","0","-1","0.5"],a:"1",e:"1"},
+{q:"log10=?",o:["1","0","10","2"],a:"1",e:"1"},
+{q:"x²=25?",o:["±5","5","-5","0"],a:"±5",e:"±5"},
+{q:"2x+3=7?",o:["2","3","1","4"],a:"2",e:"2"},
+{q:"Area circle r=7?",o:["154","140","100","120"],a:"154",e:"22/7×49"},
+{q:"√196=?",o:["14","13","15","16"],a:"14",e:"14"},
+{q:"Probability coin?",o:["1/2","1","0","2"],a:"1/2",e:"1/2"},
+{q:"Mean of 2,4,6?",o:["4","3","5","6"],a:"4",e:"4"}
+],
+science:[
+{q:"Ohm law?",o:["V=IR","F=ma","E=mc2","P=IV"],a:"V=IR",e:"V=IR"},
+{q:"Electron charge?",o:["Negative","Positive","Neutral","None"],a:"Negative",e:"Negative"},
+{q:"Speed sound?",o:["343","300","400","200"],a:"343",e:"343"},
+{q:"pH neutral?",o:["7","0","14","1"],a:"7",e:"7"},
+{q:"Lens convex?",o:["Converging","Diverging","Flat","None"],a:"Converging",e:"Converging"},
+{q:"Energy unit?",o:["Joule","Volt","Watt","Amp"],a:"Joule",e:"Joule"},
+{q:"Current unit?",o:["Ampere","Volt","Watt","Ohm"],a:"Ampere",e:"Ampere"},
+{q:"Magnet poles?",o:["2","3","1","4"],a:"2",e:"2"},
+{q:"Work formula?",o:["W=Fd","F=ma","V=IR","E=mc2"],a:"W=Fd",e:"W=Fd"},
+{q:"Power formula?",o:["P=VI","F=ma","E=mc2","W=Fd"],a:"P=VI",e:"P=VI"}
+],
+gk:[
+{q:"Capital USA?",o:["Washington DC","New York","LA","Chicago"],a:"Washington DC",e:"DC"},
+{q:"UN Secretary?",o:["Guterres","Obama","Biden","Xi"],a:"Guterres",e:"Guterres"},
+{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:"Pacific",e:"Pacific"},
+{q:"India independence?",o:["1947","1950","1945","1930"],a:"1947",e:"1947"},
+{q:"Currency EU?",o:["Euro","Dollar","Yen","Pound"],a:"Euro",e:"Euro"},
+{q:"Olympics city 2020?",o:["Tokyo","Paris","London","Rio"],a:"Tokyo",e:"Tokyo"},
+{q:"Fastest car?",o:["Bugatti","BMW","Audi","Tesla"],a:"Bugatti",e:"Bugatti"},
+{q:"Largest planet?",o:["Jupiter","Earth","Mars","Saturn"],a:"Jupiter",e:"Jupiter"},
+{q:"DNA full form?",o:["Deoxyribonucleic Acid","Data","Code","Gene"],a:"Deoxyribonucleic Acid",e:"DNA"},
+{q:"Light fastest?",o:["Yes","No","Maybe","None"],a:"Yes",e:"Yes"}
+]
+}
+
+};
+
+let quiz=[],i=0,score=0,correct=0,startTime,history=[],mistakes=[];
+
+function start(){
+let g=document.getElementById("grade").value;
+let s=document.getElementById("subject").value;
+
+quiz=[...questions[g][s]].sort(()=>0.5-Math.random());
+
+document.getElementById("setup").style.display="none";
+document.getElementById("quizArea").style.display="block";
+
+i=0;score=0;correct=0;history=[];mistakes=[];
+load();
+}
+
+function load(){
+startTime=Date.now();
+document.getElementById("q").innerHTML=quiz[i].q;
+
+let html="";
+quiz[i].o.forEach(opt=>{
+html+=`<div class="option" onclick="check('${opt}')">${opt}</div>`;
+});
+document.getElementById("opts").innerHTML=html;
+}
+
+function check(ans){
+let t=(Date.now()-startTime)/1000;
+
+if(ans===quiz[i].a){
+correct++;
+score+=(t<8)?120:60;
+}else{
+mistakes.push(quiz[i]);
+}
+history.push(score);
+}
+
+function next(){
+i++;
+if(i<quiz.length) load();
+else finish();
+}
+
+function finish(){
+let name=document.getElementById("name").value;
+let grade=document.getElementById("grade").value;
+let acc=Math.round((correct/quiz.length)*100);
+
+document.getElementById("quizArea").style.display="none";
+
+document.getElementById("result").innerHTML=
+`🏆 ${name}<br>Score:${score}<br>Accuracy:${acc}%`;
+
+saveLeaderboard(name,score,grade);
+drawChart();
+showLeaderboard(grade);
+
+let rev="<br><b>❌ Mistakes:</b><br>";
+mistakes.forEach(m=>{
+rev+=`${m.q}<br>✔ ${m.a}<br>💡 ${m.e}<br><br>`;
+});
+document.getElementById("result").innerHTML+=rev;
+}
+
+function saveLeaderboard(n,s,g){
+let d=JSON.parse(localStorage.getItem("leader_"+g))||[];
+d.push({name:n,score:s});
+d.sort((a,b)=>b.score-a.score);
+d=d.slice(0,5);
+localStorage.setItem("leader_"+g,JSON.stringify(d));
+}
+
+function showLeaderboard(g){
+let d=JSON.parse(localStorage.getItem("leader_"+g))||[];
+let h="<br><b>🏆 Leaderboard</b><br>";
+d.forEach((x,i)=>{h+=`${i+1}. ${x.name} - ${x.score}<br>`;});
+document.getElementById("leaderboard").innerHTML=h;
+}
+
+function drawChart(){
+let c=document.getElementById("chart");
+let ctx=c.getContext("2d");
+ctx.clearRect(0,0,400,150);
+ctx.beginPath();
+ctx.moveTo(0,150-history[0]);
+history.forEach((h,i)=>ctx.lineTo(i*35,150-h));
+ctx.strokeStyle="#38bdf8";
+ctx.stroke();
+}
+
+function teacher(){
+let all="👨‍🏫 Teacher Panel<br>";
+for(let g=6;g<=10;g++){
+let d=JSON.parse(localStorage.getItem("leader_"+g))||[];
+all+=`<br><b>Grade ${g}</b><br>`;
+d.forEach(x=>{all+=`${x.name} - ${x.score}<br>`;});
+}
+document.getElementById("result").innerHTML=all;
+}
+
+</script>
+
+</body>
+</html>
