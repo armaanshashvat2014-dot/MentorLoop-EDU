@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop Extension</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
+  text-align:center;
+  padding:40px;
+}
+
+.card{
+  background:#020617;
+  padding:30px;
+  border-radius:20px;
+  max-width:500px;
+  margin:auto;
+  box-shadow:0 0 40px rgba(56,189,248,0.3);
+}
+
+button{
+  margin-top:20px;
+  padding:12px 20px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.steps{
+  text-align:left;
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>⚡ MentorLoop Extension</h1>
+
+<p>Learn instantly from ANY website 😈</p>
+
+<button onclick="download()">⬇️ Download Extension</button>
+
+<div class="steps">
+<h3>📦 How to Install:</h3>
+<ol>
+<li>Download the zip</li>
+<li>Extract it</li>
+<li>Go to <b>chrome://extensions/</b></li>
+<li>Enable Developer Mode</li>
+<li>Click "Load Unpacked"</li>
+<li>Select the extracted folder</li>
+</ol>
+</div>
+
+</div>
+
+<script>
+function download(){
+  window.location.href = "mentorloop-extension.zip";
+}
+</script>
+
+</body>
+</html>
