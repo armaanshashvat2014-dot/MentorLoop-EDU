@@ -13,8 +13,8 @@ body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
 .card{background:#020617;padding:20px;border-radius:15px;max-width:500px;margin:auto;text-align:center;box-shadow:0 0 30px rgba(56,189,248,0.2);}
 .option{background:#1e293b;padding:10px;margin:5px;border-radius:8px;cursor:pointer;}
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="nav">
@@ -29,6 +29,7 @@ body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
 <!-- HOMEWORK -->
 <div id="homework" class="page active">
 <div class="card">
+
 <h2>🔗 Homework Generator</h2>
 
 <select id="grade">
@@ -53,7 +54,8 @@ body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
 <option value="hard">Hard</option>
 </select>
 
-<br>
+<br><br>
+
 <button onclick="generateHW()">Generate Homework</button>
 
 <div id="hw"></div>
@@ -65,8 +67,7 @@ body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
 <div id="worksheet" class="page">
 <div class="card">
 <h2>🧾 Worksheet</h2>
-<button onclick="printSheet()">Print Clean Sheet</button>
-<div id="sheet"></div>
+<button onclick="printSheet()">Print Clean Worksheet</button>
 </div>
 </div>
 
@@ -89,7 +90,7 @@ body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
 <!-- BATTLE -->
 <div id="battle" class="page">
 <div class="card">
-<h2>⚔️ Battle</h2>
+<h2>⚔️ Class Battle</h2>
 <p>A: <span id="a">0</span> | B: <span id="b">0</span></p>
 <button onclick="score('a')">Team A</button>
 <button onclick="score('b')">Team B</button>
@@ -106,71 +107,129 @@ body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
 
 <script>
 
-// NAV
+// NAVIGATION
 function show(id){
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 document.getElementById(id).classList.add('active');
 }
 
-// 🔥 QUESTION GENERATOR (BASED ON GRADE + DIFFICULTY)
-function genQuestion(grade,subject,difficulty){
+// RANDOM HELPER
+function rand(min,max){
+return Math.floor(Math.random()*(max-min+1))+min;
+}
 
-grade=parseInt(grade);
+// QUESTION ENGINE
+function genQuestion(grade, subject, difficulty){
 
+grade = parseInt(grade);
+
+// MATH
 if(subject==="math"){
-if(difficulty==="easy") return `${grade}+${Math.floor(Math.random()*10)}=?`;
-if(difficulty==="medium") return `${grade*2}×${Math.floor(Math.random()*10)}=?`;
-if(difficulty==="hard") return `√${grade*grade*4}=?`;
+
+if(difficulty==="easy"){
+if(grade<=3) return `${rand(1,10)} + ${rand(1,10)} = ?`;
+if(grade<=5) return `${rand(10,50)} - ${rand(1,20)} = ?`;
+if(grade<=7) return `${rand(2,12)} × ${rand(2,10)} = ?`;
 }
 
+if(difficulty==="medium"){
+if(grade<=6) return `${rand(2,15)} × ${rand(2,15)} = ?`;
+if(grade<=8) return `${rand(50,200)} ÷ ${rand(2,12)} = ?`;
+if(grade<=11){
+let x=rand(1,20);
+return `x + ${x} = ${x*2}, find x`;
+}
+}
+
+if(difficulty==="hard"){
+if(grade<=8){
+let n=rand(10,20);
+return `${n}² = ?`;
+}
+if(grade<=11){
+let n=rand(10,30);
+return `√${n*n} = ?`;
+}
+}
+}
+
+// SCIENCE
 if(subject==="science"){
-return "What is basic unit of life?";
+let arr=[
+"What is the unit of force?",
+"What gas do humans breathe?",
+"What is photosynthesis?",
+"What is boiling point of water?",
+"What is basic unit of life?"
+];
+return arr[rand(0,arr.length-1)];
 }
 
+// ENGLISH
 if(subject==="english"){
-return "Opposite of GOOD?";
+let arr=[
+"Opposite of happy?",
+"Plural of child?",
+"Past tense of go?",
+"Synonym of fast?",
+"Adjective of beauty?"
+];
+return arr[rand(0,arr.length-1)];
 }
 
+// GK
 if(subject==="gk"){
-return "Capital of India?";
+let arr=[
+"Capital of India?",
+"Largest ocean?",
+"National animal of India?",
+"Fastest land animal?",
+"Currency of India?"
+];
+return arr[rand(0,arr.length-1)];
+}
 }
 
-}
-
-// HOMEWORK
+// GENERATE HOMEWORK
 function generateHW(){
 
 let grade=document.getElementById("grade").value;
 let subject=document.getElementById("subject").value;
 let difficulty=document.getElementById("difficulty").value;
 
+let used=new Set();
 let list=[];
 
-for(let i=0;i<5;i++){
-list.push(genQuestion(grade,subject,difficulty));
+while(list.length<5){
+let q=genQuestion(grade,subject,difficulty);
+if(!used.has(q)){
+used.add(q);
+list.push(q);
+}
 }
 
+// SAVE
 localStorage.setItem("lastHW",JSON.stringify(list));
 
+// DISPLAY
 let html="<b>Homework:</b><br><br>";
 list.forEach((q,i)=>{
 html+=`${i+1}. ${q}<br>`;
 });
-
 document.getElementById("hw").innerHTML=html;
 
-// update others
+// UPDATE OTHER FEATURES
 updateWarmup(grade,subject,difficulty);
 updateReset(grade,subject,difficulty);
 updateAdaptive(difficulty);
 }
 
-// WORKSHEET PRINT
+// PRINT CLEAN WORKSHEET
 function printSheet(){
 
 let hw=JSON.parse(localStorage.getItem("lastHW"))||[];
 
-let html="<h2>Homework Worksheet</h2>";
+let html="<h2>Homework Worksheet</h2><br>";
 hw.forEach((q,i)=>{
 html+=`${i+1}. ${q}<br><br>`;
 });
@@ -180,13 +239,13 @@ win.document.write(html);
 win.print();
 }
 
-// WARMUP BASED ON DATA
+// WARMUP
 function updateWarmup(g,s,d){
 document.getElementById("warmQ").innerText=
 "Warmup: "+genQuestion(g,s,d);
 }
 
-// RESET BASED ON DATA
+// RESET
 function updateReset(g,s,d){
 document.getElementById("resetQ").innerText=
 "Reset: "+genQuestion(g,s,d);
@@ -200,13 +259,10 @@ document.getElementById("a").innerText=A;
 document.getElementById("b").innerText=B;
 }
 
-// ADAPTIVE (REAL)
+// ADAPTIVE
 function updateAdaptive(diff){
-
 let next = diff==="easy" ? "Medium" : diff==="medium" ? "Hard" : "Hard";
-
-document.getElementById("level").innerText=
-"Next Difficulty: "+next;
+document.getElementById("level").innerText="Next Difficulty: "+next;
 }
 
 </script>
