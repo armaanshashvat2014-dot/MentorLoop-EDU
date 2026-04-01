@@ -5,71 +5,59 @@
 <title>MentorLoop Teacher Tools</title>
 
 <style>
-body{
-  margin:0;
-  font-family:'Segoe UI';
-  background:#020617;
-  color:#e2e8f0;
-}
-
-.nav{
-  display:flex;
-  flex-wrap:wrap;
-  background:#0f172a;
-  padding:10px;
-}
-
-.nav button{
-  margin:5px;
-  padding:8px;
-  border:none;
-  border-radius:8px;
-  background:#38bdf8;
-  cursor:pointer;
-}
-
-.page{
-  display:none;
-  padding:20px;
-}
-
-.active{
-  display:block;
-}
-
-.card{
-  background:#020617;
-  padding:20px;
-  border-radius:15px;
-  box-shadow:0 0 30px rgba(56,189,248,0.2);
-  max-width:500px;
-  margin:auto;
-  text-align:center;
-}
+body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
+.nav{display:flex;flex-wrap:wrap;background:#0f172a;padding:10px;}
+.nav button{margin:5px;padding:8px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;}
+.page{display:none;padding:20px;}
+.active{display:block;}
+.card{background:#020617;padding:20px;border-radius:15px;max-width:500px;margin:auto;text-align:center;box-shadow:0 0 30px rgba(56,189,248,0.2);}
+.option{background:#1e293b;padding:10px;margin:5px;border-radius:8px;cursor:pointer;}
 </style>
 </head>
 
 <body>
 
 <div class="nav">
-<button onclick="show('warmup')">Warmup</button>
-<button onclick="show('worksheet')">Worksheet</button>
-<button onclick="show('focus')">Focus</button>
-<button onclick="show('battle')">Battle</button>
-<button onclick="show('reset')">Reset</button>
-<button onclick="show('tracker')">Tracker</button>
-<button onclick="show('concept')">Concept</button>
-<button onclick="show('top')">Top</button>
 <button onclick="show('homework')">Homework</button>
+<button onclick="show('worksheet')">Worksheet</button>
+<button onclick="show('warmup')">Warmup</button>
+<button onclick="show('reset')">Reset</button>
+<button onclick="show('battle')">Battle</button>
 <button onclick="show('adaptive')">Adaptive</button>
 </div>
 
-<!-- WARMUP -->
-<div id="warmup" class="page active">
+<!-- HOMEWORK -->
+<div id="homework" class="page active">
 <div class="card">
-<h2>🏫 Warmup</h2>
-<p>2 + 2 = ?</p>
-<button onclick="alert('Correct: 4')">Show Answer</button>
+<h2>🔗 Homework Generator</h2>
+
+<select id="grade">
+<option value="1">G1</option><option value="2">G2</option>
+<option value="3">G3</option><option value="4">G4</option>
+<option value="5">G5</option><option value="6">G6</option>
+<option value="7">G7</option><option value="8">G8</option>
+<option value="9">G9</option><option value="10">G10</option>
+<option value="11">G11</option>
+</select>
+
+<select id="subject">
+<option value="math">Math</option>
+<option value="science">Science</option>
+<option value="english">English</option>
+<option value="gk">GK</option>
+</select>
+
+<select id="difficulty">
+<option value="easy">Easy</option>
+<option value="medium">Medium</option>
+<option value="hard">Hard</option>
+</select>
+
+<br>
+<button onclick="generateHW()">Generate Homework</button>
+
+<div id="hw"></div>
+
 </div>
 </div>
 
@@ -77,69 +65,34 @@ body{
 <div id="worksheet" class="page">
 <div class="card">
 <h2>🧾 Worksheet</h2>
-<button onclick="window.print()">Print Worksheet</button>
-<p>1. 5+3 = ___<br>2. 10-4 = ___</p>
+<button onclick="printSheet()">Print Clean Sheet</button>
+<div id="sheet"></div>
 </div>
 </div>
 
-<!-- FOCUS -->
-<div id="focus" class="page">
+<!-- WARMUP -->
+<div id="warmup" class="page">
 <div class="card">
-<h2>🎯 Focus Mode</h2>
-<p>No distractions. Timer ON.</p>
-<h1 id="timer">10</h1>
-<button onclick="startTimer()">Start</button>
-</div>
-</div>
-
-<!-- BATTLE -->
-<div id="battle" class="page">
-<div class="card">
-<h2>⚔️ Class Battle</h2>
-<p>Team A vs Team B</p>
-<button onclick="alert('Battle Started!')">Start</button>
+<h2>🏫 Warmup</h2>
+<div id="warmQ"></div>
 </div>
 </div>
 
 <!-- RESET -->
 <div id="reset" class="page">
 <div class="card">
-<h2>🔔 Attention Reset</h2>
-<p>Quick Question: 9×9?</p>
-<button onclick="alert('81')">Answer</button>
+<h2>🔔 Reset</h2>
+<div id="resetQ"></div>
 </div>
 </div>
 
-<!-- TRACKER -->
-<div id="tracker" class="page">
+<!-- BATTLE -->
+<div id="battle" class="page">
 <div class="card">
-<h2>📈 Improvement</h2>
-<p>Class improved 15% this week</p>
-</div>
-</div>
-
-<!-- CONCEPT -->
-<div id="concept" class="page">
-<div class="card">
-<h2>🧠 Concept</h2>
-<p>Fractions represent parts of a whole.</p>
-</div>
-</div>
-
-<!-- TOP -->
-<div id="top" class="page">
-<div class="card">
-<h2>🏆 Top Students</h2>
-<p>🥇 Rahul<br>🥈 Aditi<br>🥉 Arjun</p>
-</div>
-</div>
-
-<!-- HOMEWORK -->
-<div id="homework" class="page">
-<div class="card">
-<h2>🔗 Homework</h2>
-<button onclick="genLink()">Generate Link</button>
-<p id="link"></p>
+<h2>⚔️ Battle</h2>
+<p>A: <span id="a">0</span> | B: <span id="b">0</span></p>
+<button onclick="score('a')">Team A</button>
+<button onclick="score('b')">Team B</button>
 </div>
 </div>
 
@@ -147,44 +100,113 @@ body{
 <div id="adaptive" class="page">
 <div class="card">
 <h2>🧬 Adaptive</h2>
-<button onclick="adaptive()">Check Level</button>
 <p id="level"></p>
 </div>
 </div>
 
 <script>
 
+// NAV
 function show(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
 }
 
-// TIMER
-function startTimer(){
-  let t=10;
-  let el=document.getElementById("timer");
+// 🔥 QUESTION GENERATOR (BASED ON GRADE + DIFFICULTY)
+function genQuestion(grade,subject,difficulty){
 
-  let interval=setInterval(()=>{
-    t--;
-    el.innerText=t;
-    if(t<=0) clearInterval(interval);
-  },1000);
+grade=parseInt(grade);
+
+if(subject==="math"){
+if(difficulty==="easy") return `${grade}+${Math.floor(Math.random()*10)}=?`;
+if(difficulty==="medium") return `${grade*2}×${Math.floor(Math.random()*10)}=?`;
+if(difficulty==="hard") return `√${grade*grade*4}=?`;
 }
 
-// HOMEWORK LINK
-function genLink(){
-  let link = window.location.href + "?hw=1";
-  document.getElementById("link").innerText = link;
+if(subject==="science"){
+return "What is basic unit of life?";
 }
 
-// ADAPTIVE
-function adaptive(){
-  let score = Math.random()*100;
+if(subject==="english"){
+return "Opposite of GOOD?";
+}
 
-  let level = score>70 ? "Hard" : score>40 ? "Medium" : "Easy";
+if(subject==="gk"){
+return "Capital of India?";
+}
 
-  document.getElementById("level").innerText =
-    "Next Quiz Difficulty: " + level;
+}
+
+// HOMEWORK
+function generateHW(){
+
+let grade=document.getElementById("grade").value;
+let subject=document.getElementById("subject").value;
+let difficulty=document.getElementById("difficulty").value;
+
+let list=[];
+
+for(let i=0;i<5;i++){
+list.push(genQuestion(grade,subject,difficulty));
+}
+
+localStorage.setItem("lastHW",JSON.stringify(list));
+
+let html="<b>Homework:</b><br><br>";
+list.forEach((q,i)=>{
+html+=`${i+1}. ${q}<br>`;
+});
+
+document.getElementById("hw").innerHTML=html;
+
+// update others
+updateWarmup(grade,subject,difficulty);
+updateReset(grade,subject,difficulty);
+updateAdaptive(difficulty);
+}
+
+// WORKSHEET PRINT
+function printSheet(){
+
+let hw=JSON.parse(localStorage.getItem("lastHW"))||[];
+
+let html="<h2>Homework Worksheet</h2>";
+hw.forEach((q,i)=>{
+html+=`${i+1}. ${q}<br><br>`;
+});
+
+let win=window.open("");
+win.document.write(html);
+win.print();
+}
+
+// WARMUP BASED ON DATA
+function updateWarmup(g,s,d){
+document.getElementById("warmQ").innerText=
+"Warmup: "+genQuestion(g,s,d);
+}
+
+// RESET BASED ON DATA
+function updateReset(g,s,d){
+document.getElementById("resetQ").innerText=
+"Reset: "+genQuestion(g,s,d);
+}
+
+// BATTLE
+let A=0,B=0;
+function score(t){
+if(t==="a") A++; else B++;
+document.getElementById("a").innerText=A;
+document.getElementById("b").innerText=B;
+}
+
+// ADAPTIVE (REAL)
+function updateAdaptive(diff){
+
+let next = diff==="easy" ? "Medium" : diff==="medium" ? "Hard" : "Hard";
+
+document.getElementById("level").innerText=
+"Next Difficulty: "+next;
 }
 
 </script>
