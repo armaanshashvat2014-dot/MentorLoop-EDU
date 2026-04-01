@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop Teacher Tools</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background:#020617;
+  color:#e2e8f0;
+}
+
+.nav{
+  display:flex;
+  flex-wrap:wrap;
+  background:#0f172a;
+  padding:10px;
+}
+
+.nav button{
+  margin:5px;
+  padding:8px;
+  border:none;
+  border-radius:8px;
+  background:#38bdf8;
+  cursor:pointer;
+}
+
+.page{
+  display:none;
+  padding:20px;
+}
+
+.active{
+  display:block;
+}
+
+.card{
+  background:#020617;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 0 30px rgba(56,189,248,0.2);
+  max-width:500px;
+  margin:auto;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+<button onclick="show('warmup')">Warmup</button>
+<button onclick="show('worksheet')">Worksheet</button>
+<button onclick="show('focus')">Focus</button>
+<button onclick="show('battle')">Battle</button>
+<button onclick="show('reset')">Reset</button>
+<button onclick="show('tracker')">Tracker</button>
+<button onclick="show('concept')">Concept</button>
+<button onclick="show('top')">Top</button>
+<button onclick="show('homework')">Homework</button>
+<button onclick="show('adaptive')">Adaptive</button>
+</div>
+
+<!-- WARMUP -->
+<div id="warmup" class="page active">
+<div class="card">
+<h2>🏫 Warmup</h2>
+<p>2 + 2 = ?</p>
+<button onclick="alert('Correct: 4')">Show Answer</button>
+</div>
+</div>
+
+<!-- WORKSHEET -->
+<div id="worksheet" class="page">
+<div class="card">
+<h2>🧾 Worksheet</h2>
+<button onclick="window.print()">Print Worksheet</button>
+<p>1. 5+3 = ___<br>2. 10-4 = ___</p>
+</div>
+</div>
+
+<!-- FOCUS -->
+<div id="focus" class="page">
+<div class="card">
+<h2>🎯 Focus Mode</h2>
+<p>No distractions. Timer ON.</p>
+<h1 id="timer">10</h1>
+<button onclick="startTimer()">Start</button>
+</div>
+</div>
+
+<!-- BATTLE -->
+<div id="battle" class="page">
+<div class="card">
+<h2>⚔️ Class Battle</h2>
+<p>Team A vs Team B</p>
+<button onclick="alert('Battle Started!')">Start</button>
+</div>
+</div>
+
+<!-- RESET -->
+<div id="reset" class="page">
+<div class="card">
+<h2>🔔 Attention Reset</h2>
+<p>Quick Question: 9×9?</p>
+<button onclick="alert('81')">Answer</button>
+</div>
+</div>
+
+<!-- TRACKER -->
+<div id="tracker" class="page">
+<div class="card">
+<h2>📈 Improvement</h2>
+<p>Class improved 15% this week</p>
+</div>
+</div>
+
+<!-- CONCEPT -->
+<div id="concept" class="page">
+<div class="card">
+<h2>🧠 Concept</h2>
+<p>Fractions represent parts of a whole.</p>
+</div>
+</div>
+
+<!-- TOP -->
+<div id="top" class="page">
+<div class="card">
+<h2>🏆 Top Students</h2>
+<p>🥇 Rahul<br>🥈 Aditi<br>🥉 Arjun</p>
+</div>
+</div>
+
+<!-- HOMEWORK -->
+<div id="homework" class="page">
+<div class="card">
+<h2>🔗 Homework</h2>
+<button onclick="genLink()">Generate Link</button>
+<p id="link"></p>
+</div>
+</div>
+
+<!-- ADAPTIVE -->
+<div id="adaptive" class="page">
+<div class="card">
+<h2>🧬 Adaptive</h2>
+<button onclick="adaptive()">Check Level</button>
+<p id="level"></p>
+</div>
+</div>
+
+<script>
+
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// TIMER
+function startTimer(){
+  let t=10;
+  let el=document.getElementById("timer");
+
+  let interval=setInterval(()=>{
+    t--;
+    el.innerText=t;
+    if(t<=0) clearInterval(interval);
+  },1000);
+}
+
+// HOMEWORK LINK
+function genLink(){
+  let link = window.location.href + "?hw=1";
+  document.getElementById("link").innerText = link;
+}
+
+// ADAPTIVE
+function adaptive(){
+  let score = Math.random()*100;
+
+  let level = score>70 ? "Hard" : score>40 ? "Medium" : "Easy";
+
+  document.getElementById("level").innerText =
+    "Next Quiz Difficulty: " + level;
+}
+
+</script>
+
+</body>
+</html>
