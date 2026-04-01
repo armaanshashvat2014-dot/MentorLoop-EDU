@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop | Class Mode</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background:#020617;
+  color:#e2e8f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  width:520px;
+  background:#020617;
+  padding:25px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(56,189,248,0.3);
+}
+
+select,button{
+  margin:10px;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+}
+
+button{
+  background:#38bdf8;
+  color:#020617;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.option{
+  margin-top:10px;
+  padding:12px;
+  background:#1e293b;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.big{font-size:22px;}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>🏫 Class Mode</h2>
+
+<div id="setup">
+
+<select id="grade">
+<option value="1">Grade 1</option>
+<option value="2">Grade 2</option>
+<option value="3">Grade 3</option>
+<option value="4">Grade 4</option>
+<option value="5">Grade 5</option>
+<option value="6">Grade 6</option>
+<option value="7">Grade 7</option>
+<option value="8">Grade 8</option>
+<option value="9">Grade 9</option>
+<option value="10">Grade 10</option>
+</select>
+
+<select id="subject">
+<option value="math">Math</option>
+<option value="science">Science</option>
+<option value="gk">GK</option>
+</select>
+
+<select id="count">
+<option value="5">5 Questions</option>
+<option value="11">11 Questions</option>
+</select>
+
+<br>
+<button onclick="startQuiz()">⚡ Start Class Quiz</button>
+
+</div>
+
+<div id="quizArea" style="display:none">
+<div id="q" class="big"></div>
+<div id="opts"></div>
+</div>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+// 🔥 QUESTION BANK (GRADE-WISE DIFFICULTY)
+
+const bank = {
+
+// 🟢 EASY (1–3)
+1:{math:[
+{q:"2+3=?",o:["4","5","6","3"],a:"5"},
+{q:"5-2=?",o:["2","3","4","1"],a:"3"},
+{q:"1+1=?",o:["1","2","3","4"],a:"2"},
+{q:"3+2=?",o:["5","4","6","3"],a:"5"},
+{q:"4-1=?",o:["2","3","1","4"],a:"3"}
+]},
+2:{math:[
+{q:"6+4=?",o:["10","9","11","8"],a:"10"},
+{q:"7-3=?",o:["4","5","6","3"],a:"4"},
+{q:"2×3=?",o:["6","5","4","7"],a:"6"},
+{q:"8+2=?",o:["10","9","11","8"],a:"10"},
+{q:"9-5=?",o:["4","3","5","2"],a:"4"}
+]},
+3:{math:[
+{q:"3×4=?",o:["12","10","14","11"],a:"12"},
+{q:"12÷3=?",o:["4","3","5","6"],a:"4"},
+{q:"15+5=?",o:["20","18","22","19"],a:"20"},
+{q:"20-7=?",o:["13","12","14","15"],a:"13"},
+{q:"9×2=?",o:["18","16","20","14"],a:"18"}
+]},
+
+// 🟡 MEDIUM (4–6)
+4:{math:[
+{q:"12×3=?",o:["36","30","32","34"],a:"36"},
+{q:"50÷5=?",o:["10","5","15","8"],a:"10"},
+{q:"25+15=?",o:["40","35","45","50"],a:"40"},
+{q:"60-20=?",o:["40","30","50","20"],a:"40"},
+{q:"8×6=?",o:["48","42","50","36"],a:"48"}
+]},
+5:{math:[
+{q:"20% of 50?",o:["10","5","15","20"],a:"10"},
+{q:"15²=?",o:["225","200","250","210"],a:"225"},
+{q:"100-37=?",o:["63","60","65","70"],a:"63"},
+{q:"9×8=?",o:["72","64","80","70"],a:"72"},
+{q:"45÷5=?",o:["9","8","7","6"],a:"9"}
+]},
+6:{math:[
+{q:"√144=?",o:["12","10","14","16"],a:"12"},
+{q:"12×8=?",o:["96","88","100","92"],a:"96"},
+{q:"50% of 200?",o:["100","50","150","200"],a:"100"},
+{q:"100÷4=?",o:["25","20","30","40"],a:"25"},
+{q:"15×4=?",o:["60","50","55","65"],a:"60"}
+]},
+
+// 🔴 HARD (7–10)
+7:{math:[
+{q:"15²=?",o:["225","200","250","210"],a:"225"},
+{q:"6³=?",o:["216","36","108","200"],a:"216"},
+{q:"50% of 80?",o:["40","20","60","30"],a:"40"},
+{q:"√81=?",o:["9","8","7","6"],a:"9"},
+{q:"100-36=?",o:["64","60","70","66"],a:"64"}
+]},
+8:{math:[
+{q:"√256=?",o:["16","14","18","12"],a:"16"},
+{q:"25% of 200?",o:["50","40","60","70"],a:"50"},
+{q:"LCM 6,8?",o:["24","12","18","30"],a:"24"},
+{q:"9²=?",o:["81","72","90","64"],a:"81"},
+{q:"100÷4=?",o:["25","20","30","40"],a:"25"}
+]},
+9:{math:[
+{q:"x+5=10?",o:["5","10","0","15"],a:"5"},
+{q:"3²+4²=?",o:["25","12","9","16"],a:"25"},
+{q:"√169=?",o:["13","12","14","11"],a:"13"},
+{q:"2x=12?",o:["6","12","4","8"],a:"6"},
+{q:"5³=?",o:["125","25","100","150"],a:"125"}
+]},
+10:{math:[
+{q:"sin90=?",o:["1","0","-1","0.5"],a:"1"},
+{q:"cos0=?",o:["1","0","-1","0.5"],a:"1"},
+{q:"tan45=?",o:["1","0","-1","0.5"],a:"1"},
+{q:"x²=25?",o:["±5","5","-5","0"],a:"±5"},
+{q:"√196=?",o:["14","13","15","16"],a:"14"}
+]}
+
+};
+
+// VARIABLES
+let quiz=[],i=0,correct=0;
+
+// START
+function startQuiz(){
+
+  let grade=document.getElementById("grade").value;
+  let subject=document.getElementById("subject").value;
+  let count=parseInt(document.getElementById("count").value);
+
+  let arr=[...(bank[grade][subject] || [])];
+
+  quiz = arr.sort(()=>0.5-Math.random()).slice(0,count);
+
+  document.getElementById("setup").style.display="none";
+  document.getElementById("quizArea").style.display="block";
+
+  i=0;
+  correct=0;
+
+  loadQ();
+}
+
+// LOAD
+function loadQ(){
+  document.getElementById("q").innerText = `Q${i+1}: ${quiz[i].q}`;
+
+  let html="";
+  quiz[i].o.forEach(opt=>{
+    html+=`<div class="option" onclick="check('${opt}')">${opt}</div>`;
+  });
+
+  document.getElementById("opts").innerHTML=html;
+}
+
+// CHECK
+function check(ans){
+  if(ans===quiz[i].a) correct++;
+
+  i++;
+
+  if(i<quiz.length){
+    loadQ();
+  }else{
+    finish();
+  }
+}
+
+// FINISH
+function finish(){
+
+  let score=Math.round((correct/quiz.length)*100);
+
+  document.getElementById("quizArea").style.display="none";
+
+  document.getElementById("result").innerHTML=
+    `🏆 Class Result<br>🎯 Accuracy: ${score}%`;
+}
+
+</script>
+
+</body>
+</html>
