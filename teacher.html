@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop EDU-teacher zone</title>
+<title>MentorLoop EDU</title>
 
 <style>
 body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
@@ -26,6 +26,7 @@ button{margin:4px;}
 <button onclick="show('adaptive')">Adaptive</button>
 </div>
 
+<!-- HOMEWORK -->
 <div id="homework" class="page active">
 <div class="card">
 
@@ -55,6 +56,13 @@ button{margin:4px;}
 
 <br><br>
 
+<label>
+<input type="checkbox" id="aiToggle" checked>
+Use AI Difficulty
+</label>
+
+<br><br>
+
 <button onclick="generateHW()">Generate Homework</button>
 <button onclick="shareHW()">Share 🔗</button>
 
@@ -63,6 +71,7 @@ button{margin:4px;}
 </div>
 </div>
 
+<!-- WORKSHEET -->
 <div id="worksheet" class="page">
 <div class="card">
 <h2>🧾 Worksheet</h2>
@@ -70,6 +79,7 @@ button{margin:4px;}
 </div>
 </div>
 
+<!-- WARMUP -->
 <div id="warmup" class="page">
 <div class="card">
 <h2>🔥 Warmup</h2>
@@ -77,6 +87,7 @@ button{margin:4px;}
 </div>
 </div>
 
+<!-- RESET -->
 <div id="reset" class="page">
 <div class="card">
 <h2>🔄 Reset</h2>
@@ -84,6 +95,7 @@ button{margin:4px;}
 </div>
 </div>
 
+<!-- BATTLE -->
 <div id="battle" class="page">
 <div class="card">
 <h2>⚔️ Battle</h2>
@@ -93,6 +105,7 @@ button{margin:4px;}
 </div>
 </div>
 
+<!-- ADAPTIVE -->
 <div id="adaptive" class="page">
 <div class="card">
 <h2>🧠 Adaptive</h2>
@@ -127,7 +140,7 @@ function genQuestion(grade, subject, difficulty){
 
 grade=parseInt(grade);
 
-// ===== MATH =====
+// MATH
 if(subject==="math"){
 if(difficulty==="easy"){
 if(grade<=3) return `${rand(1,20)} + ${rand(1,20)} = ?`;
@@ -151,65 +164,28 @@ return `√${n*n} = ?`;
 }
 }
 
-// ===== SCIENCE (1000+ ENGINE) =====
+// SCIENCE (1000+)
 if(subject==="science"){
-
-let q="";
-
-if(difficulty==="easy"){
-if(grade<=3){
-let t=["plant","animal","water","air","sun","soil"];
-let a=["need to grow","is important","helps life","is useful"];
-q=`Why does ${t[rand(0,5)]} ${a[rand(0,3)]}?`;
-}
-else if(grade<=6){
-let t=["plants","animals","air","water cycle","food","body"];
-q=`Why are ${t[rand(0,5)]} important?`;
-}
-}
-
-if(difficulty==="medium"){
-if(grade<=8){
-let t=["photosynthesis","gravity","friction","evaporation","force"];
-q=`Explain ${t[rand(0,4)]}.`;
-}
-else{
-let t=["velocity","energy","cells","atoms","ecosystem"];
-q=`Define ${t[rand(0,4)]}.`;
-}
-}
-
-if(difficulty==="hard"){
-let t=["Newton’s laws","Ohm’s law","chemical reactions","states of matter","energy transformation"];
-q=`Explain in detail ${t[rand(0,4)]}.`;
-}
-
-let extra=["with example","in daily life","simply","step by step","for class "+grade];
-if(Math.random()>0.5) q+=" "+extra[rand(0,4)];
-
+let topics=["photosynthesis","gravity","friction","energy","atoms","cells","ecosystem","Newton’s laws","Ohm’s law"];
+let ask=["Explain","Define","Describe","Give example of","Why is"];
+let q = `${ask[rand(0,4)]} ${topics[rand(0,8)]}`;
+let extra=["with example","in daily life","step by step","for class "+grade];
+if(Math.random()>0.5) q+=" "+extra[rand(0,3)];
 return q;
 }
 
-// ===== ENGLISH =====
+// ENGLISH
 if(subject==="english"){
-let easy=["cat","dog","book","toy"];
-let med=["because","although","however","quickly"];
-let hard=["metaphor","clause","passive voice"];
-
-if(difficulty==="easy") return `Plural of ${easy[rand(0,3)]}?`;
-if(difficulty==="medium") return `Make sentence using "${med[rand(0,3)]}".`;
-if(difficulty==="hard") return `Define ${hard[rand(0,2)]}.`;
+let words=["cat","dog","book","happy","fast"];
+if(difficulty==="easy") return `Plural of ${words[rand(0,4)]}?`;
+if(difficulty==="medium") return `Make sentence using "${words[rand(0,4)]}".`;
+if(difficulty==="hard") return `Define ${words[rand(0,4)]}.`;
 }
 
-// ===== GK =====
+// GK
 if(subject==="gk"){
-let easy=["capital of India","national animal","national bird"];
-let med=["UN","democracy","constitution"];
-let hard=["global warming","GDP","climate change"];
-
-if(difficulty==="easy") return `What is ${easy[rand(0,2)]}?`;
-if(difficulty==="medium") return `Explain ${med[rand(0,2)]}.`;
-if(difficulty==="hard") return `Explain ${hard[rand(0,2)]}.`;
+let items=["India","UN","democracy","GDP","climate change"];
+return `Explain ${items[rand(0,4)]}.`;
 }
 }
 
@@ -232,7 +208,10 @@ function generateHW(){
 
 let grade=document.getElementById("grade").value;
 let subject=document.getElementById("subject").value;
-let difficulty=studentStats.level;
+let selectedDifficulty=document.getElementById("difficulty").value;
+let useAI=document.getElementById("aiToggle").checked;
+
+let difficulty = useAI ? studentStats.level : selectedDifficulty;
 
 let list=[];
 history.clear();
