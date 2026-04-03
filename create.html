@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop | Create Quiz & play it</title>
+<title>MentorLoop | Create Quiz & Play</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -82,7 +82,7 @@ button{
 
 <script>
 
-let customQuiz = JSON.parse(localStorage.getItem("custom_quiz")) || [];
+let customQuiz = [];
 let i=0, score=0, start;
 
 // ➕ ADD QUESTION
@@ -112,10 +112,28 @@ function addQ(){
   document.getElementById("ans").value="";
 }
 
-// 💾 SAVE
+// 💾 SAVE (FIXED 🔥)
 function saveQuiz(){
+
+  if(customQuiz.length === 0){
+    alert("No quiz!");
+    return;
+  }
+
+  // ❌ DELETE OLD QUIZ
+  localStorage.removeItem("custom_quiz");
+
+  // ✅ SAVE NEW QUIZ
   localStorage.setItem("custom_quiz", JSON.stringify(customQuiz));
-  alert("💾 Quiz Saved!");
+
+  // 🔗 NEW UNIQUE URL
+  let encoded = btoa(JSON.stringify(customQuiz));
+  let newURL = window.location.origin + window.location.pathname + "?quiz=" + encoded;
+
+  // 🔄 REPLACE URL
+  window.history.replaceState({}, "", newURL);
+
+  document.getElementById("status").innerText = "💾 New quiz saved with new link!";
 }
 
 // ▶️ START QUIZ
@@ -169,7 +187,7 @@ function finish(){
     `🏆 Finished!<br>Score: ${score}`;
 }
 
-// 🔗 GENERATE SHARE LINK
+// 🔗 SHARE LINK
 function generateCode(){
 
   if(customQuiz.length === 0){
@@ -177,14 +195,12 @@ function generateCode(){
     return;
   }
 
-  let data = JSON.stringify(customQuiz);
-  let encoded = btoa(data);
-
+  let encoded = btoa(JSON.stringify(customQuiz));
   let link = window.location.origin + window.location.pathname + "?quiz=" + encoded;
 
   navigator.clipboard.writeText(link);
 
-  alert("🔗 Link copied! Share it 😈");
+  alert("🔗 Link copied!");
 }
 
 // 🌍 LOAD FROM URL
@@ -194,28 +210,27 @@ function loadFromURL(){
   let code = params.get("quiz");
 
   if(code){
-
     try{
       let decoded = atob(code);
-      let importedQuiz = JSON.parse(decoded);
-
-      customQuiz = importedQuiz;
+      customQuiz = JSON.parse(decoded);
 
       localStorage.setItem("custom_quiz", JSON.stringify(customQuiz));
 
-      document.getElementById("status").innerText =
-        "🔥 Shared quiz loaded!";
-
-      // AUTO START (optional)
+      document.getElementById("status").innerText = "🔥 Shared quiz loaded!";
       startQuiz();
 
     }catch{
       alert("Invalid quiz link!");
     }
+  } else {
+    let saved = localStorage.getItem("custom_quiz");
+    if(saved){
+      customQuiz = JSON.parse(saved);
+    }
   }
 }
 
-// RUN ON LOAD
+// INIT
 loadFromURL();
 
 </script>
