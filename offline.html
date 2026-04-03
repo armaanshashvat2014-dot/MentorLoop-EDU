@@ -2,17 +2,70 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop EDU - Level 100</title>
+<title>MentorLoop EDU</title>
 
 <style>
-body{margin:0;font-family:Segoe UI;background:#020617;color:#e2e8f0;}
-.container{padding:20px;max-width:900px;margin:auto;}
-.card{background:#0f172a;padding:15px;border-radius:12px;margin-bottom:15px;}
-button{padding:8px;margin:5px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;}
-input{padding:6px;margin:5px;border-radius:6px;border:none;}
+body{
+margin:0;
+font-family:'Segoe UI';
+background:linear-gradient(135deg,#020617,#0f172a);
+color:#e2e8f0;
+}
+
+.container{
+max-width:850px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#0f172a;
+padding:18px;
+border-radius:14px;
+margin-bottom:15px;
+box-shadow:0 0 25px rgba(56,189,248,0.15);
+}
+
+h2{
+text-align:center;
+color:#38bdf8;
+}
+
+button{
+padding:10px 14px;
+margin:5px;
+border:none;
+border-radius:10px;
+background:#38bdf8;
+color:#000;
+font-weight:bold;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+input{
+padding:10px;
+border-radius:8px;
+border:none;
+margin:5px;
+width:200px;
+}
+
+.question{
+padding:8px;
+margin:5px 0;
+background:#020617;
+border-radius:8px;
+}
+
 </style>
 
 </head>
+
 <body>
 
 <div class="container">
@@ -22,7 +75,8 @@ input{padding:6px;margin:5px;border-radius:6px;border:none;}
 <!-- LOGIN -->
 <div class="card" id="login">
 <h3>Login</h3>
-<input id="username" placeholder="Enter Name">
+<input id="name" placeholder="Enter name (type 'teacher' for teacher)">
+<br>
 <button onclick="login()">Login</button>
 </div>
 
@@ -30,13 +84,13 @@ input{padding:6px;margin:5px;border-radius:6px;border:none;}
 <div id="studentPanel" style="display:none">
 
 <div class="card">
-<h3>👨‍🎓 Student Dashboard</h3>
+<h3>Student Dashboard</h3>
 <p id="studentInfo"></p>
 </div>
 
 <div class="card">
-<h3>🧾 Questions</h3>
-<div id="questions"></div>
+<h3>Homework</h3>
+<div id="studentHW"></div>
 </div>
 
 </div>
@@ -45,18 +99,19 @@ input{padding:6px;margin:5px;border-radius:6px;border:none;}
 <div id="teacherPanel" style="display:none">
 
 <div class="card">
-<h3>🧑‍🏫 Teacher Dashboard</h3>
+<h3>Teacher Dashboard</h3>
 <button onclick="generateHW()">Generate Homework</button>
+<button onclick="clearHW()">Reset Homework</button>
 </div>
 
 <div class="card">
-<h3>📊 Students</h3>
+<h3>Homework Preview</h3>
+<div id="teacherHW"></div>
+</div>
+
+<div class="card">
+<h3>Students</h3>
 <div id="students"></div>
-</div>
-
-<div class="card">
-<h3>🏆 Leaderboard</h3>
-<div id="leader"></div>
 </div>
 
 </div>
@@ -66,20 +121,20 @@ input{padding:6px;margin:5px;border-radius:6px;border:none;}
 <script>
 
 // DATABASE
-let db = JSON.parse(localStorage.getItem("mentorDB")) || {
-students:{}
+let db = JSON.parse(localStorage.getItem("db")) || {
+students:{},
+homework:null
 };
 
-let currentUser = null;
+let currentUser=null;
 
 // LOGIN
 function login(){
-let name=document.getElementById("username").value.trim();
+let name=document.getElementById("name").value.trim();
 if(!name) return;
 
 currentUser=name;
 
-// TEACHER LOGIN
 if(name.toLowerCase()==="teacher"){
 document.getElementById("login").style.display="none";
 document.getElementById("teacherPanel").style.display="block";
@@ -87,14 +142,9 @@ renderTeacher();
 return;
 }
 
-// STUDENT LOGIN
+// STUDENT
 if(!db.students[name]){
-db.students[name]={
-correct:0,
-wrong:0,
-level:"easy",
-history:[]
-};
+db.students[name]={correct:0,wrong:0};
 }
 
 document.getElementById("login").style.display="none";
@@ -106,7 +156,7 @@ renderStudent();
 
 // SAVE
 function save(){
-localStorage.setItem("mentorDB",JSON.stringify(db));
+localStorage.setItem("db",JSON.stringify(db));
 }
 
 // RANDOM
@@ -114,26 +164,25 @@ function rand(min,max){
 return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-// GENERATE QUESTION
-function genQ(level){
-if(level==="easy") return `${rand(1,20)} + ${rand(1,20)}`;
-if(level==="medium") return `${rand(10,50)} × ${rand(2,10)}`;
-return `${rand(50,200)} ÷ ${rand(2,10)}`;
+// GENERATE ONCE
+function generateHW(){
+
+let questions=[];
+
+for(let i=0;i<10;i++){
+questions.push(`${rand(2,20)} × ${rand(2,10)}`);
 }
 
-// ADAPT
-function adapt(s){
-let total=s.correct+s.wrong;
-if(total>=5){
-let acc=s.correct/total;
-
-if(acc>0.7) s.level="hard";
-else if(acc>0.4) s.level="medium";
-else s.level="easy";
-
-s.correct=0;
-s.wrong=0;
+db.homework=questions;
+save();
+renderTeacher();
 }
+
+// RESET
+function clearHW(){
+db.homework=null;
+save();
+renderTeacher();
 }
 
 // STUDENT VIEW
@@ -141,22 +190,30 @@ function renderStudent(){
 
 let s=db.students[currentUser];
 
-adapt(s);
+let total=s.correct+s.wrong;
+let acc = total? Math.round((s.correct/total)*100):0;
 
 document.getElementById("studentInfo").innerText=
-`Level: ${s.level} | Correct: ${s.correct} | Wrong: ${s.wrong}`;
+`Accuracy: ${acc}% | Correct: ${s.correct} | Wrong: ${s.wrong}`;
 
 let html="";
-for(let i=0;i<5;i++){
-let q=genQ(s.level);
 
-html+=`${q} 
+if(!db.homework){
+html="No homework assigned";
+}else{
+
+db.homework.forEach((q,i)=>{
+html+=`
+<div class="question">
+${i+1}. ${q}
 <button onclick="answer(1)">✔</button>
-<button onclick="answer(0)">❌</button><br>`;
+<button onclick="answer(0)">❌</button>
+</div>
+`;
+});
 }
 
-document.getElementById("questions").innerHTML=html;
-save();
+document.getElementById("studentHW").innerHTML=html;
 }
 
 // ANSWER
@@ -166,8 +223,6 @@ let s=db.students[currentUser];
 if(c) s.correct++;
 else s.wrong++;
 
-s.history.push(c);
-
 save();
 renderStudent();
 }
@@ -176,38 +231,28 @@ renderStudent();
 function renderTeacher(){
 
 let html="";
-let leaderboard=[];
 
+if(!db.homework){
+html="No homework yet";
+}else{
+db.homework.forEach((q,i)=>{
+html+=`${i+1}. ${q}<br>`;
+});
+}
+
+document.getElementById("teacherHW").innerHTML=html;
+
+// STUDENTS
+let shtml="";
 Object.keys(db.students).forEach(name=>{
 let s=db.students[name];
-
 let total=s.correct+s.wrong;
 let acc = total? Math.round((s.correct/total)*100):0;
 
-html+=`${name} → ${acc}% (${s.level})<br>`;
-
-leaderboard.push({
-name:name,
-score:s.correct
-});
+shtml+=`${name} → ${acc}%<br>`;
 });
 
-document.getElementById("students").innerHTML=html;
-
-// LEADERBOARD
-leaderboard.sort((a,b)=>b.score-a.score);
-
-let lhtml="";
-leaderboard.forEach((s,i)=>{
-lhtml+=`${i+1}. ${s.name} (${s.score})<br>`;
-});
-
-document.getElementById("leader").innerHTML=lhtml;
-}
-
-// GENERATE HOMEWORK (TEACHER)
-function generateHW(){
-alert("Homework generated based on student levels!");
+document.getElementById("students").innerHTML=shtml;
 }
 
 </script>
