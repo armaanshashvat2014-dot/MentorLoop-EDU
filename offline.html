@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Offline Teacher Dashboard</title>
+
+<style>
+body{
+margin:0;
+font-family:'Segoe UI';
+background:#020617;
+color:#e2e8f0;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#0f172a;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 0 15px rgba(56,189,248,0.2);
+}
+
+button{
+margin:5px;
+padding:8px;
+border:none;
+border-radius:8px;
+background:#38bdf8;
+cursor:pointer;
+}
+
+.badge{
+padding:5px 10px;
+border-radius:10px;
+background:#22c55e;
+display:inline-block;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>🧑‍🏫 Teacher Dashboard</h2>
+
+<!-- CLASS SNAPSHOT -->
+<div class="card">
+<h3>📊 Class Snapshot</h3>
+<p>Students: 32</p>
+<p>Avg Accuracy: <span id="avg">68%</span></p>
+<p>Active Today: 21</p>
+<p>Weak Topic: <span id="weakTopic">Fractions</span></p>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="card">
+<h3>⚡ Quick Actions</h3>
+<button onclick="generateHW()">Generate Homework</button>
+<button onclick="printSheet()">Print</button>
+<button onclick="shareHW()">Share</button>
+<button onclick="newSet()">New Set</button>
+</div>
+
+<!-- ADAPTIVE INDICATOR -->
+<div class="card">
+<h3>🧠 Adaptive Status</h3>
+<p id="adaptive">Current Difficulty: Medium → Increasing</p>
+</div>
+
+<!-- HOMEWORK PANEL -->
+<div class="card">
+<h3>🧾 Homework</h3>
+<div id="hw"></div>
+</div>
+
+<!-- WEAK STUDENTS -->
+<div class="card">
+<h3>📉 Weak Students</h3>
+<p>Rahul → 40% ⚠️</p>
+<p>Priya → struggling in division</p>
+</div>
+
+<!-- SUGGESTION -->
+<div class="card">
+<h3>🎯 Smart Suggestion</h3>
+<p id="suggest">Practice Fractions (Medium)</p>
+</div>
+
+<!-- CLASS MODE -->
+<div class="card">
+<h3>🏫 Classroom Mode</h3>
+<button onclick="startClass()">Start Class Mode</button>
+<p id="classMode"></p>
+</div>
+
+<!-- STATUS -->
+<div class="card">
+<h3>📡 Status</h3>
+<span class="badge">Offline Ready</span>
+<p>Class improving this week 📈</p>
+</div>
+
+</div>
+
+<script>
+
+// RANDOM
+function rand(min,max){
+return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+// QUESTION GENERATOR
+function genQ(){
+let topics=["Fractions","Multiplication","Division","Algebra"];
+return `Solve: ${rand(2,20)} × ${rand(2,10)} (${topics[rand(0,3)]})`;
+}
+
+// GENERATE HOMEWORK
+function generateHW(){
+let list=[];
+for(let i=0;i<10;i++){
+list.push(genQ());
+}
+
+let html="";
+list.forEach((q,i)=>{
+html+=`${i+1}. ${q}<br>`;
+});
+
+document.getElementById("hw").innerHTML=html;
+
+// UPDATE AI STATUS
+let levels=["Easy","Medium","Hard"];
+let next=["Increasing","Stable","Decreasing"];
+
+document.getElementById("adaptive").innerText=
+`Current Difficulty: ${levels[rand(0,2)]} → ${next[rand(0,2)]}`;
+
+// UPDATE WEAK TOPIC
+let topics=["Fractions","Algebra","Division"];
+document.getElementById("weakTopic").innerText=
+topics[rand(0,2)];
+
+// SUGGESTION
+document.getElementById("suggest").innerText=
+`Practice ${topics[rand(0,2)]} (Medium)`;
+}
+
+// PRINT
+function printSheet(){
+let hw=document.getElementById("hw").innerHTML;
+let win=window.open("");
+win.document.write("<h2>Worksheet</h2>"+hw);
+win.print();
+}
+
+// SHARE
+function shareHW(){
+let hw=document.getElementById("hw").innerText;
+let link=btoa(hw);
+navigator.clipboard.writeText(link);
+alert("Copied Share Code!");
+}
+
+// NEW SET
+function newSet(){
+generateHW();
+}
+
+// CLASS MODE
+function startClass(){
+let q1=genQ();
+let q2=genQ();
+
+document.getElementById("classMode").innerHTML=
+`Warmup: ${q1}<br><br>Reset: ${q2}`;
+}
+
+</script>
+
+</body>
+</html>
