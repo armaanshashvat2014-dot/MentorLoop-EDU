@@ -1,237 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop | Create Quiz & Play</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentorLoop Live Quiz</title>
 
 <style>
 body{
-  margin:0;
-  font-family:'Segoe UI';
-  background:#020617;
-  color:#e2e8f0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+margin:0;
+font-family:'Segoe UI';
+background:#020617;
+color:#e2e8f0;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
 .card{
-  width:450px;
-  background:#020617;
-  padding:20px;
-  border-radius:20px;
-  text-align:center;
-  box-shadow:0 0 40px rgba(56,189,248,0.3);
+width:450px;
+padding:20px;
+border-radius:20px;
+box-shadow:0 0 40px rgba(56,189,248,0.3);
 }
 
 input{
-  width:90%;
-  margin:5px;
-  padding:8px;
-  border-radius:8px;
-  border:none;
+width:90%;
+margin:5px;
+padding:8px;
+border-radius:8px;
+border:none;
 }
 
 button{
-  margin:5px;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#38bdf8;
-  color:#020617;
-  font-weight:bold;
-  cursor:pointer;
+margin:5px;
+padding:10px;
+border:none;
+border-radius:10px;
+background:#38bdf8;
+cursor:pointer;
 }
 
 .option{
-  margin-top:10px;
-  padding:10px;
-  background:#1e293b;
-  border-radius:10px;
-  cursor:pointer;
+margin-top:10px;
+padding:10px;
+background:#1e293b;
+border-radius:10px;
+cursor:pointer;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="card">
 
-<h2>🧠 Create Your Quiz</h2>
+<h2>🌐 MentorLoop Live Quiz</h2>
 
-<input id="q" placeholder="Enter Question">
-
+<input id="q" placeholder="Question">
 <input id="o1" placeholder="Option 1">
 <input id="o2" placeholder="Option 2">
 <input id="o3" placeholder="Option 3">
 <input id="o4" placeholder="Option 4">
-
 <input id="ans" placeholder="Correct Answer">
 
-<button onclick="addQ()">➕ Add Question</button>
-<button onclick="saveQuiz()">💾 Save Quiz</button>
-<button onclick="startQuiz()">▶️ Play Quiz</button>
-<button onclick="generateCode()">🔗 Share Link</button>
+<button onclick="addQ()">➕ Add</button>
+<button onclick="saveQuiz()">💾 Save & Get Code</button>
+
+<hr>
+
+<input id="joinCode" placeholder="Enter Code">
+<button onclick="joinQuiz()">▶️ Join Quiz</button>
 
 <div id="status"></div>
 <div id="quizArea"></div>
 
 </div>
 
+<!-- 🔥 FIREBASE (IMPORTANT) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
 <script>
 
-let customQuiz = [];
+// 🔥 YOUR FIREBASE CONFIG (already filled)
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37",
+  storageBucket: "mentorloop-55a37.firebasestorage.app",
+  messagingSenderId: "322053863438",
+  appId: "1:322053863438:web:c05dcb365853e04573a45f",
+  measurementId: "G-PFT8KKBG4Q"
+};
+
+// INIT
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let quiz=[];
 let i=0, score=0, start;
 
-// ➕ ADD QUESTION
+// RANDOM CODE
+function genCode(){
+return Math.random().toString(36).substring(2,8).toUpperCase();
+}
+
+// ADD QUESTION
 function addQ(){
-  let q = document.getElementById("q").value;
-  let o1 = document.getElementById("o1").value;
-  let o2 = document.getElementById("o2").value;
-  let o3 = document.getElementById("o3").value;
-  let o4 = document.getElementById("o4").value;
-  let a = document.getElementById("ans").value;
 
-  if(!q || !o1 || !o2 || !o3 || !o4 || !a){
-    alert("Fill all fields!");
-    return;
-  }
+let q=document.getElementById("q").value;
+let o1=document.getElementById("o1").value;
+let o2=document.getElementById("o2").value;
+let o3=document.getElementById("o3").value;
+let o4=document.getElementById("o4").value;
+let a=document.getElementById("ans").value;
 
-  customQuiz.push({q:q, o:[o1,o2,o3,o4], a:a});
-
-  document.getElementById("status").innerText = "✅ Question Added";
-
-  // Clear inputs
-  document.getElementById("q").value="";
-  document.getElementById("o1").value="";
-  document.getElementById("o2").value="";
-  document.getElementById("o3").value="";
-  document.getElementById("o4").value="";
-  document.getElementById("ans").value="";
+if(!q||!o1||!o2||!o3||!o4||!a){
+alert("Fill all fields!");
+return;
 }
 
-// 💾 SAVE (FIXED 🔥)
-function saveQuiz(){
+quiz.push({q:q,o:[o1,o2,o3,o4],a:a});
 
-  if(customQuiz.length === 0){
-    alert("No quiz!");
-    return;
-  }
+document.getElementById("status").innerText="✅ Question Added";
 
-  // ❌ DELETE OLD QUIZ
-  localStorage.removeItem("custom_quiz");
-
-  // ✅ SAVE NEW QUIZ
-  localStorage.setItem("custom_quiz", JSON.stringify(customQuiz));
-
-  // 🔗 NEW UNIQUE URL
-  let encoded = btoa(JSON.stringify(customQuiz));
-  let newURL = window.location.origin + window.location.pathname + "?quiz=" + encoded;
-
-  // 🔄 REPLACE URL
-  window.history.replaceState({}, "", newURL);
-
-  document.getElementById("status").innerText = "💾 New quiz saved with new link!";
+// clear inputs
+["q","o1","o2","o3","o4","ans"].forEach(id=>{
+document.getElementById(id).value="";
+});
 }
 
-// ▶️ START QUIZ
+// SAVE QUIZ ONLINE
+async function saveQuiz(){
+
+if(quiz.length===0){
+alert("No quiz!");
+return;
+}
+
+let code=genCode();
+
+await db.collection("quizzes").doc(code).set({
+questions:quiz
+});
+
+document.getElementById("status").innerText=
+"🔥 Code: "+code;
+}
+
+// JOIN QUIZ
+async function joinQuiz(){
+
+let code=document.getElementById("joinCode").value;
+
+let doc=await db.collection("quizzes").doc(code).get();
+
+if(!doc.exists){
+alert("Invalid code!");
+return;
+}
+
+quiz=doc.data().questions;
+
+startQuiz();
+}
+
+// START QUIZ
 function startQuiz(){
-  if(customQuiz.length === 0){
-    alert("No questions!");
-    return;
-  }
-
-  i=0;
-  score=0;
-  showQ();
+i=0; score=0;
+showQ();
 }
 
 // SHOW QUESTION
 function showQ(){
-  start = Date.now();
 
-  let q = customQuiz[i];
+start=Date.now();
 
-  let html = `<b>${q.q}</b><br>`;
+let q=quiz[i];
+let html=`<b>${q.q}</b><br>`;
 
-  q.o.forEach(opt=>{
-    html += `<div class="option" onclick="check('${opt}')">${opt}</div>`;
-  });
+q.o.forEach(opt=>{
+html+=`<div class="option" onclick="check('${opt}')">${opt}</div>`;
+});
 
-  document.getElementById("quizArea").innerHTML = html;
+document.getElementById("quizArea").innerHTML=html;
 }
 
 // CHECK ANSWER
 function check(ans){
 
-  let t = (Date.now() - start)/1000;
+let t=(Date.now()-start)/1000;
 
-  if(ans === customQuiz[i].a){
-    score += (t < 8) ? 100 : 50;
-  }
-
-  i++;
-
-  if(i < customQuiz.length){
-    showQ();
-  } else {
-    finish();
-  }
+if(ans===quiz[i].a){
+score+=(t<8)?100:50;
 }
 
-// FINISH
-function finish(){
-  document.getElementById("quizArea").innerHTML =
-    `🏆 Finished!<br>Score: ${score}`;
+i++;
+
+if(i<quiz.length){
+showQ();
+}else{
+document.getElementById("quizArea").innerHTML=
+`🏆 Final Score: ${score}`;
 }
 
-// 🔗 SHARE LINK
-function generateCode(){
-
-  if(customQuiz.length === 0){
-    alert("No quiz to share!");
-    return;
-  }
-
-  let encoded = btoa(JSON.stringify(customQuiz));
-  let link = window.location.origin + window.location.pathname + "?quiz=" + encoded;
-
-  navigator.clipboard.writeText(link);
-
-  alert("🔗 Link copied!");
 }
-
-// 🌍 LOAD FROM URL
-function loadFromURL(){
-
-  let params = new URLSearchParams(window.location.search);
-  let code = params.get("quiz");
-
-  if(code){
-    try{
-      let decoded = atob(code);
-      customQuiz = JSON.parse(decoded);
-
-      localStorage.setItem("custom_quiz", JSON.stringify(customQuiz));
-
-      document.getElementById("status").innerText = "🔥 Shared quiz loaded!";
-      startQuiz();
-
-    }catch{
-      alert("Invalid quiz link!");
-    }
-  } else {
-    let saved = localStorage.getItem("custom_quiz");
-    if(saved){
-      customQuiz = JSON.parse(saved);
-    }
-  }
-}
-
-// INIT
-loadFromURL();
 
 </script>
 
