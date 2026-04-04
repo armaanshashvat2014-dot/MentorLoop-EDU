@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop EDU</title>
+<title>MentorLoop EDU - Advanced</title>
 
 <style>
 body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
@@ -10,7 +10,7 @@ body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
 .nav button{margin:5px;padding:8px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;}
 .page{display:none;padding:20px;}
 .active{display:block;}
-.card{background:#020617;padding:20px;border-radius:15px;max-width:650px;margin:auto;text-align:center;box-shadow:0 0 30px rgba(56,189,248,0.2);}
+.card{background:#020617;padding:20px;border-radius:15px;max-width:700px;margin:auto;text-align:center;box-shadow:0 0 30px rgba(56,189,248,0.2);}
 button{margin:4px;}
 </style>
 
@@ -24,14 +24,12 @@ button{margin:4px;}
 <button onclick="show('reset')">Reset</button>
 <button onclick="show('battle')">Battle</button>
 <button onclick="show('adaptive')">Adaptive</button>
-<button onclick="window.location.href='create.html';">Make and share quizzes</button>
 </div>
 
-<!-- HOMEWORK -->
 <div id="homework" class="page active">
 <div class="card">
 
-<h2>📚 Homework Generator</h2>
+<h2>📚 Advanced Homework Generator</h2>
 
 <select id="grade">
 <option value="1">G1</option><option value="2">G2</option>
@@ -72,44 +70,9 @@ Use AI Difficulty
 </div>
 </div>
 
-<!-- WORKSHEET -->
-<div id="worksheet" class="page">
-<div class="card">
-<h2>🧾 Worksheet</h2>
-<button onclick="printSheet()">Print</button>
-</div>
-</div>
-
-<!-- WARMUP -->
-<div id="warmup" class="page">
-<div class="card">
-<h2>🔥 Warmup</h2>
-<div id="warmQ"></div>
-</div>
-</div>
-
-<!-- RESET -->
-<div id="reset" class="page">
-<div class="card">
-<h2>🔄 Reset</h2>
-<div id="resetQ"></div>
-</div>
-</div>
-
-<!-- BATTLE -->
-<div id="battle" class="page">
-<div class="card">
-<h2>⚔️ Battle</h2>
-<p>A: <span id="a">0</span> | B: <span id="b">0</span></p>
-<button onclick="score('a')">A</button>
-<button onclick="score('b')">B</button>
-</div>
-</div>
-
-<!-- ADAPTIVE -->
 <div id="adaptive" class="page">
 <div class="card">
-<h2>🧠 Adaptive</h2>
+<h2>🧠 Adaptive Level</h2>
 <p id="level"></p>
 </div>
 </div>
@@ -127,7 +90,7 @@ function rand(min,max){
 return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-// AI DATA
+// AI STATS
 let studentStats = JSON.parse(localStorage.getItem("stats")) || {
 correct:0,
 wrong:0,
@@ -136,58 +99,129 @@ level:"easy"
 
 let history=new Set();
 
-// QUESTION ENGINE
+// 🧠 ADVANCED QUESTION ENGINE
 function genQuestion(grade, subject, difficulty){
 
 grade=parseInt(grade);
 
-// MATH
+// ================= MATH =================
 if(subject==="math"){
+
+// EASY
 if(difficulty==="easy"){
-if(grade<=3) return `${rand(1,20)} + ${rand(1,20)} = ?`;
-if(grade<=5) return `${rand(20,100)} - ${rand(1,50)} = ?`;
-if(grade<=7) return `${rand(2,12)} × ${rand(2,10)} = ?`;
+if(grade<=4) return `${rand(10,50)} + ${rand(10,50)} = ?`;
+if(grade<=6) return `${rand(20,100)} - ${rand(10,50)} = ?`;
+if(grade<=8){
+let a=rand(1,10), b=rand(1,10);
+return `${a}/${b} + ${rand(1,5)}/${rand(1,5)} = ?`;
 }
+if(grade<=11){
+let x=rand(1,10);
+return `${x}x + ${rand(1,10)} = ${rand(20,50)}, find x`;
+}
+}
+
+// MEDIUM
 if(difficulty==="medium"){
 if(grade<=6) return `${rand(2,20)} × ${rand(2,20)} = ?`;
-if(grade<=8) return `${rand(50,300)} ÷ ${rand(2,15)} = ?`;
+if(grade<=8){
+let a=rand(1,10), b=rand(1,10);
+return `${a}/${b} × ${rand(2,10)} = ?`;
+}
+if(grade<=10){
+let x=rand(1,10);
+return `Solve: ${x}x + ${rand(5,20)} = ${rand(30,80)}`;
+}
 if(grade<=11){
-let x=rand(1,20);
-return `x + ${x} = ${x*2}, find x`;
+let a=rand(1,5);
+return `Factorize: x² + ${a*2}x + ${a*a}`;
 }
 }
+
+// HARD
 if(difficulty==="hard"){
-if(grade<=8) return `${rand(10,25)}² = ?`;
+if(grade<=8){
+let a=rand(1,10), b=rand(1,10);
+return `Simplify: (${a}/${b}) ÷ ${rand(2,10)}`;
+}
+if(grade<=10){
+let a=rand(1,10);
+return `Solve quadratic: x² + ${a}x + ${rand(1,20)} = 0`;
+}
 if(grade<=11){
-let n=rand(10,30);
-return `√${n*n} = ?`;
+let a=rand(1,10);
+return `Find roots: x² - ${a}x + ${rand(1,20)} = 0`;
 }
 }
 }
 
-// SCIENCE (1000+)
+// ================= SCIENCE =================
 if(subject==="science"){
-let topics=["photosynthesis","gravity","friction","energy","atoms","cells","ecosystem","Newton’s laws","Ohm’s law"];
-let ask=["Explain","Define","Describe","Give example of","Why is"];
-let q = `${ask[rand(0,4)]} ${topics[rand(0,8)]}`;
-let extra=["with example","in daily life","step by step","for class "+grade];
-if(Math.random()>0.5) q+=" "+extra[rand(0,3)];
-return q;
+
+let qEasy=[
+"Define photosynthesis.",
+"What is gravity?",
+"What is friction?",
+"What is energy?"
+];
+
+let qMed=[
+"Explain Newton’s First Law with example.",
+"Why do objects fall to Earth?",
+"Explain types of energy with examples.",
+"Describe structure of an atom."
+];
+
+let qHard=[
+"Explain photosynthesis process step-by-step.",
+"Derive Ohm’s Law.",
+"Explain laws of motion with real-life application.",
+"Why is conservation of energy important?"
+];
+
+let set = difficulty==="easy"?qEasy: difficulty==="medium"?qMed:qHard;
+return set[rand(0,set.length-1)] + " (Grade " + grade + ")";
 }
 
-// ENGLISH
+// ================= ENGLISH =================
 if(subject==="english"){
-let words=["cat","dog","book","happy","fast"];
-if(difficulty==="easy") return `Plural of ${words[rand(0,4)]}?`;
-if(difficulty==="medium") return `Make sentence using "${words[rand(0,4)]}".`;
-if(difficulty==="hard") return `Define ${words[rand(0,4)]}.`;
+
+let easy=[
+"Plural of child?",
+"Opposite of fast?",
+"Make sentence with 'happy'."
+];
+
+let med=[
+"Write 2 sentences using 'because'.",
+"Identify verb in sentence: She runs fast.",
+"Convert to past tense: I go to school."
+];
+
+let hard=[
+"Write a short paragraph (50 words) on climate change.",
+"Explain noun, verb, adjective with examples.",
+"Write a formal letter to your teacher."
+];
+
+let set = difficulty==="easy"?easy: difficulty==="medium"?med:hard;
+return set[rand(0,set.length-1)];
 }
 
-// GK
+// ================= GK =================
 if(subject==="gk"){
-let items=["India","UN","democracy","GDP","climate change"];
-return `Explain ${items[rand(0,4)]}.`;
+
+let gk=[
+"Explain climate change impact.",
+"What is GDP and why is it important?",
+"Describe democracy with example.",
+"What is global warming?",
+"Explain importance of United Nations."
+];
+
+return gk[rand(0,gk.length-1)];
 }
+
 }
 
 // AI ADJUST
@@ -236,8 +270,6 @@ html+=`${i+1}. ${q}<br>
 
 document.getElementById("hw").innerHTML=html;
 
-updateWarmup(list);
-updateReset(list);
 updateAdaptive();
 }
 
@@ -246,7 +278,6 @@ function mark(correct){
 if(correct) studentStats.correct++;
 else studentStats.wrong++;
 adjustDifficulty();
-localStorage.setItem("stats",JSON.stringify(studentStats));
 updateAdaptive();
 }
 
@@ -258,48 +289,12 @@ navigator.clipboard.writeText(link);
 alert("Link copied!");
 }
 
-// LOAD SHARE
-window.onload=function(){
-let p=new URLSearchParams(location.search);
-let d=p.get("hw");
-if(d){
-let data=JSON.parse(atob(d));
-localStorage.setItem("lastHW",JSON.stringify(data));
-let html="<b>Shared Homework:</b><br><br>";
-data.forEach((q,i)=> html+=`${i+1}. ${q}<br>`);
-document.getElementById("hw").innerHTML=html;
-}
-updateAdaptive();
-}
-
-// CONNECT
-function updateWarmup(list){
-document.getElementById("warmQ").innerText="Warmup: "+list[0];
-}
-function updateReset(list){
-document.getElementById("resetQ").innerText="Reset: "+list[1];
-}
+// ADAPTIVE
 function updateAdaptive(){
 document.getElementById("level").innerText="Level: "+studentStats.level;
 }
 
-// BATTLE
-let A=0,B=0;
-function score(t){
-if(t==="a") A++; else B++;
-document.getElementById("a").innerText=A;
-document.getElementById("b").innerText=B;
-}
-
-// PRINT
-function printSheet(){
-let hw=JSON.parse(localStorage.getItem("lastHW"))||[];
-let html="<h2>Homework</h2><br>";
-hw.forEach((q,i)=> html+=`${i+1}. ${q}<br><br>`);
-let w=window.open("");
-w.document.write(html);
-w.print();
-}
+updateAdaptive();
 
 </script>
 
