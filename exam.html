@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop EDU - Adaptive Exam</title>
+
+<style>
+body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
+.nav{display:flex;background:#0f172a;padding:10px;}
+.nav button{margin:5px;padding:8px;border:none;border-radius:8px;background:#38bdf8;}
+.page{display:none;padding:20px;}
+.active{display:block;}
+.card{max-width:700px;margin:auto;padding:20px;border-radius:15px;box-shadow:0 0 30px rgba(56,189,248,0.2);}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+<button onclick="show('home')">Homework</button>
+<button onclick="show('exam')">Exam Prep</button>
+<button onclick="show('stats')">Stats</button>
+</div>
+
+<div id="home" class="page active">
+<div class="card">
+
+<h2>Homework</h2>
+
+<select id="subject">
+<option value="math">Math</option>
+<option value="science">Science</option>
+<option value="english">English</option>
+</select>
+
+<button onclick="generateHW()">Generate</button>
+
+<div id="hw"></div>
+
+</div>
+</div>
+
+<div id="exam" class="page">
+<div class="card">
+
+<h2>🎯 Adaptive Exam Prep</h2>
+
+<button onclick="generateExam()">Generate Based on Weakness</button>
+
+<div id="examQ"></div>
+
+</div>
+</div>
+
+<div id="stats" class="page">
+<div class="card">
+<h2>📊 Stats</h2>
+<div id="statsView"></div>
+</div>
+</div>
+
+<script>
+
+function show(id){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+function rand(min,max){
+return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+// 🔥 TOPIC PERFORMANCE TRACKING
+let topicStats = JSON.parse(localStorage.getItem("topics")) || {
+math:{correct:0,wrong:0},
+science:{correct:0,wrong:0},
+english:{correct:0,wrong:0}
+};
+
+// QUESTION GENERATOR
+function genQ(subject){
+
+if(subject==="math"){
+return `Solve: ${rand(1,10)}x + ${rand(1,10)} = ${rand(10,50)}`;
+}
+
+if(subject==="science"){
+return "Explain energy conservation.";
+}
+
+if(subject==="english"){
+return "Write a paragraph on education.";
+}
+
+}
+
+// GENERATE HOMEWORK
+function generateHW(){
+
+let subject=document.getElementById("subject").value;
+
+let html="";
+
+for(let i=0;i<5;i++){
+let q=genQ(subject);
+
+html+=`${q}<br>
+<button onclick="mark('${subject}',true)">✔</button>
+<button onclick="mark('${subject}',false)">❌</button><br><br>`;
+}
+
+document.getElementById("hw").innerHTML=html;
+}
+
+// MARK ANSWERS
+function mark(subject,correct){
+
+if(correct) topicStats[subject].correct++;
+else topicStats[subject].wrong++;
+
+localStorage.setItem("topics",JSON.stringify(topicStats));
+
+updateStats();
+}
+
+// FIND WEAKEST SUBJECT
+function weakest(){
+
+let worst="math";
+let maxWrong=0;
+
+for(let s in topicStats){
+if(topicStats[s].wrong > maxWrong){
+maxWrong = topicStats[s].wrong;
+worst = s;
+}
+}
+
+return worst;
+}
+
+// GENERATE EXAM BASED ON WEAKNESS
+function generateExam(){
+
+let weak = weakest();
+
+let html = `<b>Focused on: ${weak.toUpperCase()}</b><br><br>`;
+
+for(let i=0;i<5;i++){
+html += genQ(weak) + "<br><br>";
+}
+
+document.getElementById("examQ").innerHTML=html;
+}
+
+// SHOW STATS
+function updateStats(){
+
+let html="";
+
+for(let s in topicStats){
+html += `${s}: ✔ ${topicStats[s].correct} ❌ ${topicStats[s].wrong}<br>`;
+}
+
+document.getElementById("statsView").innerHTML=html;
+}
+
+updateStats();
+
+</script>
+
+</body>
+</html>
