@@ -21,12 +21,10 @@ canvas {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 0;
 }
 
 .center-box {
   position: relative;
-  z-index: 1;
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -39,40 +37,27 @@ canvas {
   border-radius: 25px;
   backdrop-filter: blur(15px);
   box-shadow: 0 0 50px rgba(0,0,0,0.35);
-
   width: 520px;
   max-width: 90%;
   text-align: center;
 }
 
-/* LOGO */
 .logo {
   width: 130px;
   margin-bottom: 15px;
 }
 
-/* HEADINGS */
-h2 {
-  font-size: 30px;
-  margin-bottom: 5px;
-}
+h2 { font-size: 30px; }
+h4 { margin-bottom: 20px; }
 
-h4 {
-  font-size: 18px;
-  margin-bottom: 25px;
-}
-
-/* INPUTS */
 input, select {
   width: 95%;
   padding: 12px;
   margin: 10px 0;
   border-radius: 10px;
   border: none;
-  font-size: 14px;
 }
 
-/* BUTTONS */
 button {
   padding: 12px 20px;
   margin: 8px;
@@ -80,19 +65,11 @@ button {
   border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 14px;
 }
 
-.login-btn {
-  background: #22c55e;
-  color: white;
-}
+.login-btn { background: #22c55e; color: white; }
+.guest-btn { background: #facc15; }
 
-.guest-btn {
-  background: #facc15;
-}
-
-/* PORTAL LINKS */
 .portal {
   display: block;
   margin: 12px 0;
@@ -102,13 +79,6 @@ button {
   text-decoration: none;
   color: white;
   font-weight: bold;
-  font-size: 16px;
-  transition: 0.3s;
-}
-
-.portal:hover {
-  transform: scale(1.05);
-  background: rgba(255,255,255,0.3);
 }
 </style>
 
@@ -121,7 +91,6 @@ button {
 <div class="center-box">
   <div class="portal-box">
 
-    <!-- LOGO -->
     <img src="logo.png" class="logo">
 
     <h2>🎓 MentorLoop EDU</h2>
@@ -140,16 +109,17 @@ button {
       <button class="guest-btn" onclick="guestLogin()">Continue as Guest</button>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- APP -->
     <div id="appBox" style="display:none;">
       <h3 id="welcomeText"></h3>
 
+      <p id="pointsText">Points: 0</p>
+
+      <!-- DEMO BUTTON -->
+      <button onclick="addPoints(10)">➕ Earn 10 Points</button>
+
       <a href="dashboard-v2.html" class="portal">📚 Do more</a>
-      <a href="https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz/" class="portal">❓ Post a doubt</a>
       <a href="games.html" class="portal">🎲 Try quizzes</a>
-      <a href="table.html" class="portal">📚 Why MentorLoop EDU</a>
-      <a href="profile.html" class="portal">👤 Your profile</a>
-      <a href="teacher.html" class="portal">👨‍🏫 Are you a teacher?</a>
 
       <button onclick="logout()">Logout</button>
     </div>
@@ -167,13 +137,13 @@ canvas.height = window.innerHeight;
 
 let particles = [];
 
-for (let i = 0; i < 70; i++) {
+for (let i = 0; i < 60; i++) {
   particles.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
     r: Math.random() * 3 + 1,
-    dx: (Math.random() - 0.5) * 0.6,
-    dy: (Math.random() - 0.5) * 0.6
+    dx: (Math.random() - 0.5) * 0.5,
+    dy: (Math.random() - 0.5) * 0.5
   });
 }
 
@@ -197,7 +167,7 @@ function animate() {
 }
 animate();
 
-// LOGIN SYSTEM
+// LOGIN
 function login() {
   let name = document.getElementById("nameInput").value;
   let role = document.getElementById("roleInput").value;
@@ -217,16 +187,41 @@ function guestLogin() {
   startApp("Guest", "Visitor");
 }
 
+// START APP
 function startApp(name, role) {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
 
+  let points = localStorage.getItem("ml_points_" + name);
+  if (!points) points = 0;
+
   document.getElementById("welcomeText").innerText =
     "Welcome, " + name + " (" + role + ")";
+    
+  updatePoints(points);
 }
 
+// UPDATE UI
+function updatePoints(points) {
+  document.getElementById("pointsText").innerText = "Points: " + points;
+}
+
+// ADD POINTS
+function addPoints(amount) {
+  let name = localStorage.getItem("ml_name");
+  if (!name) return;
+
+  let current = localStorage.getItem("ml_points_" + name) || 0;
+  current = parseInt(current) + amount;
+
+  localStorage.setItem("ml_points_" + name, current);
+  updatePoints(current);
+}
+
+// LOGOUT (FIXED)
 function logout() {
-  localStorage.clear();
+  localStorage.removeItem("ml_name");
+  localStorage.removeItem("ml_role");
   location.reload();
 }
 
