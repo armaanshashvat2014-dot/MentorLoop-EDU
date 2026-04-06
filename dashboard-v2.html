@@ -329,17 +329,6 @@ display:none;
 <p><strong>Average Performance:</strong> <span id="averageScore">0</span>%</p>
 <p><strong>Strongest Subject:</strong> <span id="strongest">-</span></p>
 <p><strong>Needs Improvement:</strong> <span id="weakest">-</span></p>
-
-<div class="mystery-card>
-<h2>🎁 Mystery Reward</h2>
-
-<p class="sub">Complete a battle to unlock your reward</p>
-
-<button id="openRewardBtn" onclick="openReward()">🎰 Open Reward</button>
-
-<div id="rewardBox" class="reward-box hidden">
-  <p id="rewardText"></p>
-</div>
   </div>
 <h2>🎯 Daily Missions</h2>
 
@@ -724,58 +713,6 @@ document.getElementById("refCode").innerText = code;
 generateReferralCode();
 
 </script>
-  <script>
-function openReward(){
-
-let rewards = [
-{type:"points", value:5, text:"🎁 +5 Points!"},
-{type:"points", value:10, text:"🎉 +10 Points!"},
-{type:"double", value:2, text:"⚡ DOUBLE POINTS!"},
-{type:"nothing", value:0, text:"😅 Nothing this time"},
-{type:"jackpot", value:50, text:"💎 JACKPOT +50!"}
-];
-
-// 🎲 pick random
-let reward = rewards[Math.floor(Math.random()*rewards.length)];
-
-let base = 5; // default reward base
-
-let final = base;
-
-// logic
-if(reward.type==="points"){
-final += reward.value;
-}
-
-if(reward.type==="double"){
-final *= 2;
-}
-
-if(reward.type==="jackpot"){
-final += reward.value;
-}
-
-if(reward.type==="nothing"){
-final = 0;
-}
-
-// 💾 update points
-let pts = parseInt(localStorage.getItem("ml_points") || 0);
-pts += final;
-localStorage.setItem("ml_points", pts);
-
-// 🎯 show result
-let box = document.getElementById("rewardBox");
-let text = document.getElementById("rewardText");
-
-box.classList.remove("hidden");
-
-text.innerText = reward.text + " (+"+final+" total)";
-
-// optional: disable spam
-document.getElementById("openRewardBtn").disabled = true;
-
-}</script>
 </body>
 </html>
 
