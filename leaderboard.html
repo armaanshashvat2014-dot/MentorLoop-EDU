@@ -38,27 +38,40 @@ body {
 }
 
 .avatar {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+  margin-right: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  margin-right: 10px;
 }
 
 .info { text-align: left; flex: 1; }
+
+.subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+}
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
+
 <h2>🌍 Weekly Leaderboard</h2>
+
 <p id="you"></p>
+<p id="insight" class="subtitle"></p>
+<p id="updateTime" class="subtitle"></p>
+
 <button onclick="location.reload()">🔄 Refresh</button>
+
 <div id="leaderboard"></div>
+
 </div>
 
 <script type="module">
@@ -73,7 +86,7 @@ import {
   query,
   orderBy,
   limit,
-  onSnapshot
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -86,7 +99,23 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-// 🧠 WEEK
+// 🎮 RANK SYSTEM
+function getRank(points) {
+  if (points >= 300) return "💎 Diamond";
+  if (points >= 150) return "🟡 Gold";
+  if (points >= 50) return "⚪ Silver";
+  return "🟫 Bronze";
+}
+
+
+// 🎭 AVATAR COLOR
+function getColor(name) {
+  let colors = ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa"];
+  return colors[name.charCodeAt(0)%colors.length];
+}
+
+
+// 📅 WEEK
 function getWeek() {
   let d = new Date();
   let onejan = new Date(d.getFullYear(),0,1);
@@ -95,39 +124,24 @@ function getWeek() {
 }
 
 
-// 🧠 USER
+// USER
 function getUser() {
   return {
     name: localStorage.getItem("ml_name") || "Guest",
     points: parseInt(localStorage.getItem("ml_points")) || 0,
-    week: getWeek(),
-    streak: parseInt(localStorage.getItem("ml_streak")) || 1
+    week: getWeek()
   };
 }
 
 
-// 🎮 RANK SYSTEM
-function getRank(points) {
-  if (points >= 1000) return "💎 Diamond";
-  if (points >= 500) return "🟡 Gold";
-  if (points >= 350) return "⚪ Silver";
-  return "🟫 Bronze";
-}
+// 📈 TREND
+function getTrend(current) {
+  let prev = parseInt(localStorage.getItem("ml_prev_points")) || 0;
+  localStorage.setItem("ml_prev_points", current);
 
-
-// 🏅 LEAGUE SYSTEM
-function getLeague(points) {
-  if (points >= 1000) return "Diamond League";
-  if (points >= 500) return "Gold League";
-  if (points >= 350) return "Silver League";
-  return "Bronze League";
-}
-
-
-// 🎭 AVATAR COLOR
-function getColor(name) {
-  let colors = ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa"];
-  return colors[name.charCodeAt(0)%colors.length];
+  if (current > prev) return "🔺 Improving";
+  if (current < prev) return "🔻 Dropped";
+  return "➖ Stable";
 }
 
 
@@ -149,66 +163,76 @@ async function syncUser() {
     await setDoc(ref, user);
   }
 
-  document.getElementById("you").innerText =
-    `You: ${user.name} — ${user.points} pts (${getRank(user.points)} | ${getLeague(user.points)})`;
+  return user;
 }
 
 
-// 🏆 LEADERBOARD
-function loadLeaderboard() {
+// 🏆 LOAD LEADERBOARD
+async function loadLeaderboard() {
   const q = query(collection(db,"leaderboard"), orderBy("points","desc"), limit(20));
+  const snapshot = await getDocs(q);
 
-  onSnapshot(q, (snapshot) => {
-    let board = document.getElementById("leaderboard");
-    board.innerHTML = "";
+  let board = document.getElementById("leaderboard");
+  board.innerHTML = "";
 
-    let current = getUser().name;
-    let yourRank = null;
+  let current = getUser().name;
+  let yourRank = null;
+  let totalUsers = snapshot.size;
 
-    let i = 0;
+  let i = 0;
 
-    snapshot.forEach(docSnap => {
-      let u = docSnap.data();
+  snapshot.forEach(docSnap => {
+    let u = docSnap.data();
 
-      let div = document.createElement("div");
-      div.className = "card";
+    let div = document.createElement("div");
+    div.className = "card";
 
-      if (u.name === current) {
-        div.classList.add("me");
-        yourRank = i + 1;
-      }
-
-      if (i === 0) div.classList.add("top1");
-
-      let medal = i === 0 ? "👑🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
-
-      div.innerHTML = `
-        <div class="avatar" style="background:${getColor(u.name)}">
-          ${u.name[0].toUpperCase()}
-        </div>
-        <div class="info">
-          ${medal} #${i+1} ${u.name}
-          <br>${u.points} pts • ${getRank(u.points)}
-        </div>
-      `;
-
-      board.appendChild(div);
-      i++;
-    });
-
-    if (yourRank) {
-      document.getElementById("you").innerText += ` | Rank #${yourRank}`;
-    } else {
-      document.getElementById("you").innerText += " | Outside Top 20";
+    if (u.name === current) {
+      div.classList.add("me");
+      yourRank = i + 1;
     }
+
+    if (i === 0) div.classList.add("top1");
+
+    let medal = i === 0 ? "👑🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
+
+    div.innerHTML = `
+      <div class="avatar" style="background:${getColor(u.name)}">
+        ${u.name[0].toUpperCase()}
+      </div>
+      <div class="info">
+        ${medal} #${i+1} ${u.name}
+        <br>${u.points} pts • ${getRank(u.points)}
+      </div>
+    `;
+
+    board.appendChild(div);
+    i++;
   });
+
+  return { yourRank, totalUsers };
 }
 
 
 // 🚀 START
 window.onload = async () => {
-  await syncUser();
-  loadLeaderboard();
+
+  let user = await syncUser();
+  let data = await loadLeaderboard();
+
+  let trend = getTrend(user.points);
+
+  document.getElementById("you").innerText =
+    `You: ${user.name} — ${user.points} pts (${getRank(user.points)}) | Rank #${data.yourRank || "20+"}`;
+
+  if (data.yourRank) {
+    let percent = Math.round((1 - data.yourRank / data.totalUsers) * 100);
+    document.getElementById("insight").innerText =
+      `Ahead of ${percent}% of students • ${trend}`;
+  }
+
+  document.getElementById("updateTime").innerText =
+    "Last updated: " + new Date().toLocaleString();
 };
 
 </script>
