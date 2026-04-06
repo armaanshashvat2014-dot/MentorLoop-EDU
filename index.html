@@ -4,27 +4,18 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>MentorLoop EDU</title>
 
 <style>
 body {
   margin: 0;
   height: 100vh;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
+  font-family: Arial;
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
   color: white;
 }
 
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
 .center-box {
-  position: relative;
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -33,92 +24,81 @@ canvas {
 
 .portal-box {
   background: rgba(255,255,255,0.08);
-  padding: 60px 50px;
-  border-radius: 25px;
-  backdrop-filter: blur(15px);
-  box-shadow: 0 0 50px rgba(0,0,0,0.35);
-  width: 520px;
-  max-width: 90%;
+  padding: 50px;
+  border-radius: 20px;
+  width: 420px;
   text-align: center;
 }
 
 .logo {
-  width: 130px;
-  margin-bottom: 15px;
+  width: 120px;
+  margin-bottom: 10px;
 }
 
-h2 { font-size: 30px; }
-h4 { margin-bottom: 20px; }
-
 input, select {
-  width: 95%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 10px;
+  width: 90%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
   border: none;
 }
 
 button {
-  padding: 12px 20px;
-  margin: 8px;
+  padding: 10px 15px;
+  margin: 5px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
 }
 
-.login-btn { background: #22c55e; color: white; }
-.guest-btn { background: #facc15; }
+.signup { background: #22c55e; color: white; }
+.login { background: #3b82f6; color: white; }
+.guest { background: #facc15; }
 
-.portal {
-  display: block;
-  margin: 12px 0;
-  padding: 14px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 12px;
-  text-decoration: none;
+.profile-btn {
+  width: 100%;
+  margin: 5px 0;
+  background: rgba(255,255,255,0.2);
   color: white;
-  font-weight: bold;
 }
+
 </style>
 
 </head>
 
 <body>
 
-<canvas id="bg"></canvas>
-
 <div class="center-box">
   <div class="portal-box">
 
+    <!-- LOGO -->
     <img src="logo.png" class="logo">
 
-    <h2>🎓 MentorLoop EDU</h2>
-    <h4>Together, we get smarter.</h4>
+    <h2>MentorLoop EDU</h2>
 
-    <!-- LOGIN -->
-    <div id="loginBox">
-      <input type="text" id="nameInput" placeholder="Enter your name">
-      
-      <select id="roleInput">
-        <option>Student</option>
-        <option>Mentor</option>
-      </select>
+    <!-- AUTH -->
+    <div id="authBox">
+      <input type="text" id="nameInput" placeholder="Username">
+      <input type="password" id="passInput" placeholder="Password">
 
-      <button class="login-btn" onclick="login()">Login & Save Progress</button>
-      <button class="guest-btn" onclick="guestLogin()">Continue as Guest</button>
+      <button class="signup" onclick="signup()">Sign Up</button>
+      <button class="login" onclick="login()">Login</button>
+      <button class="guest" onclick="guestLogin()">Guest</button>
+
+      <h3>Profiles</h3>
+      <div id="profilesList"></div>
     </div>
 
     <!-- APP -->
     <div id="appBox" style="display:none;">
       <h3 id="welcomeText"></h3>
-       <a href="https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz/" class="portal">📚 Ask doubts</a>
-      <a href="speed.html" class="portal">📚 Speed challenge</a>
-      <a href="test.html" class="portal">📚 IQ teller</a>
-      <a href="dashboard-v2.html" class="portal">📚 Do more</a>
-      <a href="games.html" class="portal">🎲 Try quizzes</a>
-      <a href="teacher.html" class="portal">📚 Teacher Zone</a>
-     <a href="profile.html" class="portal">📚 Look at your profile</a>
+      <button onclick="window.location.href='https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz/'">Ask doubts</button>
+      <button onclick="window.location.href='games.html'">Try quizzes</button>
+      <button onclick="window.location.href='dasboard-v2.html'">See your dashboard</button>
+      <button onclick="window.location.href='profile.html'">See your profile</button>
+       <button onclick="window.location.href='teacher.html'">Teacher Zone</button>
+      <button onclick="window.location.href='speed.html'">Compare speed</button>
+      <button onclick="window.location.href='test.html'">Compare IQ</button>
       <button onclick="logout()">Logout</button>
     </div>
 
@@ -126,112 +106,139 @@ button {
 </div>
 
 <script>
-// PARTICLES
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-
-for (let i = 0; i < 60; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 3 + 1,
-    dx: (Math.random() - 0.5) * 0.5,
-    dy: (Math.random() - 0.5) * 0.5
-  });
+// STORAGE
+function getUsers() {
+  return JSON.parse(localStorage.getItem("ml_users") || "[]");
 }
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach(p => {
-    p.x += p.dx;
-    p.y += p.dy;
-
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
-    ctx.fill();
-  });
-
-  requestAnimationFrame(animate);
+function saveUsers(users) {
+  localStorage.setItem("ml_users", JSON.stringify(users));
 }
-animate();
 
-// LOGIN
-function login() {
-  let name = document.getElementById("nameInput").value;
-  let role = document.getElementById("roleInput").value;
+// SIGN UP
+function signup() {
+  let name = document.getElementById("nameInput").value.trim();
+  let pass = document.getElementById("passInput").value;
 
-  if (!name) {
-    alert("Enter your name!");
+  if (!name || !pass) {
+    alert("Fill all fields!");
     return;
   }
 
-  localStorage.setItem("ml_name", name);
-  localStorage.setItem("ml_role", role);
+  let users = getUsers();
 
-  startApp(name, role);
+  if (users.find(u => u.name === name)) {
+    alert("Username already exists!");
+    return;
+  }
+
+  users.push({
+    name: name,
+    password: pass,
+    points: 0
+  });
+
+  saveUsers(users);
+
+  alert("Account created! Now login.");
+  loadProfiles();
 }
 
-function guestLogin() {
-  startApp("Guest", "Visitor");
+// LOGIN
+function login() {
+  let name = document.getElementById("nameInput").value.trim();
+  let pass = document.getElementById("passInput").value;
+
+  let users = getUsers();
+  let user = users.find(u => u.name === name && u.password === pass);
+
+  if (!user) {
+    alert("Wrong username or password!");
+    return;
+  }
+
+  localStorage.setItem("ml_current_user", name);
+  startApp();
+}
+
+// PROFILE LIST
+function loadProfiles() {
+  let users = getUsers();
+  let container = document.getElementById("profilesList");
+
+  container.innerHTML = "";
+
+  users.forEach(u => {
+    let btn = document.createElement("button");
+    btn.className = "profile-btn";
+    btn.innerText = u.name + " (" + u.points + " pts)";
+    btn.onclick = () => {
+      alert("Use login with password for security.");
+    };
+    container.appendChild(btn);
+  });
 }
 
 // START APP
-function startApp(name, role) {
-  document.getElementById("loginBox").style.display = "none";
+function startApp() {
+  let name = localStorage.getItem("ml_current_user");
+  let users = getUsers();
+  let user = users.find(u => u.name === name);
+
+  if (!user) return;
+
+  document.getElementById("authBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
 
-  let points = localStorage.getItem("ml_points_" + name);
-  if (!points) points = 0;
-
   document.getElementById("welcomeText").innerText =
-    "Welcome, " + name + " (" + role + ")";
-    
-  updatePoints(points);
+    "Welcome, " + user.name;
+
+  updatePoints(user.points);
 }
 
-// UPDATE UI
+// POINTS
 function updatePoints(points) {
   document.getElementById("pointsText").innerText = "Points: " + points;
 }
 
-// ADD POINTS
 function addPoints(amount) {
-  let name = localStorage.getItem("ml_name");
-  if (!name) return;
+  let name = localStorage.getItem("ml_current_user");
+  let users = getUsers();
 
-  let current = localStorage.getItem("ml_points_" + name) || 0;
-  current = parseInt(current) + amount;
+  let user = users.find(u => u.name === name);
+  if (!user) return;
 
-  localStorage.setItem("ml_points_" + name, current);
-  updatePoints(current);
+  user.points += amount;
+
+  saveUsers(users);
+  updatePoints(user.points);
+  loadProfiles();
 }
 
-// LOGOUT (FIXED)
+// LOGOUT
 function logout() {
-  localStorage.removeItem("ml_name");
-  localStorage.removeItem("ml_role");
+  localStorage.removeItem("ml_current_user");
   location.reload();
 }
 
-// AUTO LOGIN
-window.onload = function () {
-  let name = localStorage.getItem("ml_name");
-  let role = localStorage.getItem("ml_role");
+// GUEST
+function guestLogin() {
+  document.getElementById("authBox").style.display = "none";
+  document.getElementById("appBox").style.display = "block";
 
-  if (name && role) {
-    startApp(name, role);
-  }
+  document.getElementById("welcomeText").innerText = "Guest Mode";
+  updatePoints(0);
+}
+
+// INIT
+window.onload = function () {
+  loadProfiles();
+
+  let current = localStorage.getItem("ml_current_user");
+  if (current) startApp();
 };
+
 </script>
 
 </body>
