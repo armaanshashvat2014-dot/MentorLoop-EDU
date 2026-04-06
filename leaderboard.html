@@ -35,30 +35,28 @@ body {
 .top3 { box-shadow: 0 0 10px #cd7f32; }
 
 </style>
-
 </head>
+
 <body>
 
 <div class="container">
-
 <h2>🌍 Global Leaderboard</h2>
 <p id="you"></p>
-
 <div id="leaderboard"></div>
-
 </div>
 
 <script type="module">
 
-// 🔥 Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getFirestore,
   doc,
   setDoc,
+  getDoc,
   collection,
   query,
   orderBy,
+  limit,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -83,20 +81,37 @@ function getUser() {
 }
 
 
-// ☁️ SYNC USER TO FIREBASE
+// 🔥 SYNC USER (ONLY IF HIGHER SCORE)
 async function syncUser() {
   let user = getUser();
+  const userRef = doc(db, "leaderboard", user.name);
 
-  await setDoc(doc(db, "leaderboard", user.name), user);
+  const snap = await getDoc(userRef);
+
+  if (snap.exists()) {
+    let oldPoints = snap.data().points || 0;
+
+    if (user.points > oldPoints) {
+      await setDoc(userRef, user);
+    } else {
+      user.points = oldPoints;
+    }
+  } else {
+    await setDoc(userRef, user);
+  }
 
   document.getElementById("you").innerText =
     "You: " + user.name + " — " + user.points + " pts";
 }
 
 
-// 🏆 LOAD LEADERBOARD (FIXED)
+// 🏆 LOAD TOP 20 LEADERBOARD
 function loadLeaderboard() {
-  const q = query(collection(db, "leaderboard"), orderBy("points", "desc"));
+  const q = query(
+    collection(db, "leaderboard"),
+    orderBy("points", "desc"),
+    limit(20) // 🔥 TOP 20 ONLY
+  );
 
   onSnapshot(q, (snapshot) => {
     let board = document.getElementById("leaderboard");
@@ -104,7 +119,7 @@ function loadLeaderboard() {
 
     let current = getUser().name;
 
-    let i = 0; // ✅ FIX: manual index
+    let i = 0;
 
     snapshot.forEach((docSnap) => {
       let u = docSnap.data();
@@ -112,16 +127,13 @@ function loadLeaderboard() {
       let div = document.createElement("div");
       div.className = "card";
 
-      // medals
       let medal =
         i === 0 ? "🥇" :
         i === 1 ? "🥈" :
         i === 2 ? "🥉" : "";
 
-      // highlight YOU
       if (u.name === current) div.classList.add("me");
 
-      // top styling
       if (i === 0) div.classList.add("top1");
       if (i === 1) div.classList.add("top2");
       if (i === 2) div.classList.add("top3");
@@ -131,7 +143,7 @@ function loadLeaderboard() {
 
       board.appendChild(div);
 
-      i++; // ✅ FIXED increment
+      i++;
     });
   });
 }
@@ -139,8 +151,8 @@ function loadLeaderboard() {
 
 // 🚀 START
 window.onload = async () => {
-  await syncUser();     // send your score
-  loadLeaderboard();    // load global leaderboard
+  await syncUser();     // safe sync
+  loadLeaderboard();    // top 20 display
 };
 
 </script>
