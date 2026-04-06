@@ -1,207 +1,39 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>MentorLoop EDU | Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>MentorLoop EDU | Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-/* ===== RESET ===== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
 
-/* ===== BODY ===== */
-body {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: #e2e8f0;
-  min-height: 100vh;
-}
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 
-/* ===== HEADER ===== */
-header {
-  background: #111827;
-  padding: 20px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-}
-
-header h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  background: linear-gradient(90deg, #22d3ee, #10b981);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-header a {
-  text-decoration: none;
-  color: #94a3b8;
-  font-weight: 600;
-  transition: 0.3s;
-}
-
-header a:hover {
-  color: #22d3ee;
-}
-
-/* ===== CONTAINER ===== */
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 40px 25px;
-}
-
-/* ===== GRID ===== */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-}
-
-/* ===== CARD ===== */
-.card {
-  background: #1e293b;
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-  transition: 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at top left, rgba(34,211,238,0.15), transparent);
-  top: -50%;
-  left: -50%;
-  pointer-events: none;
-}
-
-h2 {
-  margin-bottom: 15px;
-  font-size: 18px;
-  color: #22d3ee;
-}
-
-.card p {
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: #cbd5e1;
-}
-
-.btn {
-  display: block;
-  margin-top: 12px;
-  padding: 12px;
-  width: 100%;
-  border-radius: 12px;
-  text-align: center;
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.3s ease;
-  background: linear-gradient(90deg, #10b981, #22d3ee);
-  color: white;
-}
-
-.btn:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-.btn.report {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
-}
-
-.badge {
-  display: inline-block;
-  padding: 8px 14px;
-  margin: 6px 6px 0 0;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  background: #334155;
-  color: #94a3b8;
-  transition: 0.3s;
-}
-
-.badge.unlocked {
-  background: linear-gradient(90deg, #10b981, #22d3ee);
-  color: white;
-  box-shadow: 0 0 12px rgba(34,211,238,0.6);
-}
-
-iframe {
-  border: none;
-  border-radius: 14px;
-  margin-top: 10px;
-}
-
-.small {
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-  
-@media (max-width: 600px) {
-  header h1 {
-    font-size: 1.1rem;
-  }
-  :root{
---bg1:#0f172a;
---bg2:#1e293b;
---card:#1e293b;
---text:white;
---accent:#22d3ee;
-}
-
+/* BODY */
 body{
-background:linear-gradient(135deg,var(--bg1),var(--bg2));
-color:var(--text);
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:#e2e8f0;
+min-height:100vh;
 }
 
-.fact-card{
-background:var(--card);
-}
-
-.study-helper{
-background:#1e293b;
-padding:20px;
-border-radius:14px;
-margin-top:25px;
-box-shadow:0 10px 25px rgba(0,0,0,0.5);
-border-left:4px solid #22d3ee;
-}
-
-.study-helper h3{
-margin-bottom:8px;
-color:#22d3ee;
-}
-
-.study-helper p{
-font-size:15px;
-line-height:1.4;
-}
-.navbar{
+/* HEADER */
+header{
+background:rgba(17,24,39,0.85);
+backdrop-filter:blur(12px);
+padding:20px 30px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:15px 25px;
-background:#020617;
-border-bottom:1px solid #334155;
+border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+header h2{
+background:linear-gradient(90deg,#22d3ee,#10b981);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
 .nav-links a{
@@ -210,559 +42,279 @@ color:#94a3b8;
 text-decoration:none;
 font-weight:600;
 }
+.nav-links a:hover{color:#22d3ee;}
 
-.nav-links a:hover{
-color:#22d3ee;
+/* LAYOUT */
+.container{max-width:1200px;margin:auto;padding:40px 25px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:25px;}
 
-.mystery-card{
-background:#1e293b;
-padding:20px;
-border-radius:16px;
-margin-top:20px;
-text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
-}
-
-.mystery-card h2{
-color:#22d3ee;
-}
-
-.sub{
-color:#94a3b8;
-font-size:14px;
-margin-bottom:15px;
-}
-
-#openRewardBtn{
-padding:12px;
-width:100%;
-border:none;
-border-radius:10px;
-background:linear-gradient(90deg,#facc15,#f97316);
-color:black;
-font-weight:bold;
-cursor:pointer;
+/* CARD */
+.card{
+background:rgba(30,41,59,0.75);
+backdrop-filter:blur(12px);
+padding:25px;
+border-radius:20px;
+box-shadow:0 10px 40px rgba(0,0,0,0.6);
+border:1px solid rgba(255,255,255,0.05);
 transition:0.3s;
 }
+.card:hover{transform:translateY(-6px);}
 
-#openRewardBtn:hover{
-transform:scale(1.05);
+/* TEXT */
+h2{color:#22d3ee;margin-bottom:15px;}
+.card p{margin-bottom:10px;font-size:14px;}
+
+/* BUTTON */
+.btn{
+display:block;
+margin-top:10px;
+padding:12px;
+border-radius:14px;
+text-align:center;
+background:linear-gradient(135deg,#10b981,#22d3ee);
+color:white;
+text-decoration:none;
+font-weight:600;
 }
 
-.reward-box{
-margin-top:15px;
+/* BADGE */
+.badge{
+display:inline-block;
+padding:8px 14px;
+margin:6px;
+border-radius:999px;
+background:#334155;
+}
+.badge.unlocked{
+background:linear-gradient(135deg,#10b981,#22d3ee);
+}
+
+/* PROGRESS */
+.progress-bar{height:10px;background:#0f172a;border-radius:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#22d3ee,#10b981);}
+
+/* INPUT */
+input,button{
+width:100%;
+padding:10px;
+margin-top:8px;
+border-radius:10px;
+border:none;
+}
+button{
+background:linear-gradient(135deg,#22d3ee,#10b981);
+color:white;
+cursor:pointer;
+}
+
+/* STUDY HELPER */
+.study-helper{
+background:#1e293b;
 padding:15px;
 border-radius:12px;
-background:#0f172a;
-font-size:18px;
-font-weight:bold;
-animation:pop 0.4s ease;
+margin-top:15px;
+border-left:4px solid #22d3ee;
 }
 
-.hidden{
-display:none;
-}
+.hidden{display:none;}
 
-@keyframes pop{
-0%{transform:scale(0.7);opacity:0;}
-100%{transform:scale(1);opacity:1;}
-}
-}
 </style>
 </head>
 
 <body>
 
 <header class="navbar">
-<a href="index.html"><h2>MentorLoop EDU</h2></a>
-
+<h2>MentorLoop EDU</h2>
 <div class="nav-links">
-  <a href="fair-play.html">Flag people/</a>
-  <a href="best.html">Learn more/</a>
-  <a href="control.html">Track progress/</a>
-  <a href="https://mentorloop-edu-explorer-0td.caffeine.xyz/#caffeineAdminToken=72571c9e3067d726db453e589b0c47651b866cf7232d125b98b24bc98310b273">Learn behind textbooks/</a>
-  <a href="league.html">Play seasonal battles/</a>
-  <a href="notifications.html">Notifications/</a>
-<a href="knowledge.html">Knowledge vault/</a>
+<a href="fair-play.html">Flag/</a>
+<a href="best.html">Learn/</a>
+<a href="control.html">Track/</a>
+<a href="league.html"> Seasonal Battles/</a>
+<a href="notifications.html">Notifications/</a>
+<a href="knowledge.html">Vault/</a>
 <a href="games.html">Quizzes/</a>
-  <a href="hard-challenge.html">Harder quizzes/</a>
-  
+<a href="hard-challenge.html">Hard/</a>
+<a href="leaderboard.html">Leaderboard/</a>
 </div>
 </header>
 
 <div class="container">
-  <div class="grid">
+<div class="grid">
 
-    <!-- PROFILE -->
-    <div class="card">
-      <h2>Your Profile</h2>
-      <p><strong>Name:</strong> <span id="userName"></span></p>
-      <p><strong>Role:</strong> Student</p>
-      <p><strong>Points:</strong> <span id="points">0</span></p>
-<p><strong>🔥 Streak:</strong> <span id="streak">0</span> days</p> 
-      <a href="acheivement-card.html" class="btn" style="background:#22c55e;">
-         Download and SHARE your badges!
-      </a>
-      
-       <a href="fact.html" class="btn" style="background:#22c55e;">
-        ✍️ Know fun facts
-         <a href="exam.html" class="btn" style="background:#22c55e;">
-        ✍️ Practise for exams
-      </a>
-          <a href="https://mentorloop-extension.lovable.app/" class="btn" style="background:#22c55e;">
-        ✍️ QuizQuest-for learning
-      </a>
-      <p>Your Invite Code: <b id="refCode"></b></p>
-      <h3>Invite Code</h3>
-<input id="inviteCode" placeholder="Enter friend's code">
-
-<button onclick="applyInvite()">Apply</button>
-      <h2 style="margin-top:20px;">🏅 Your Badges</h2>
-      <div id="badges"></div>
-    </div>
-<!-- ACADEMIC SUMMARY (NEW PROFESSIONAL CARD) -->
+<!-- PROFILE -->
 <div class="card">
-<h2>📊 Academic Summary</h2>
+<h2>Your Profile</h2>
+<p>Name: <span id="userName"></span></p>
+<p>Points: <span id="points">0</span></p>
+<p>🔥 Streak: <span id="streak">0</span></p>
 
-<p><strong>Total Tests Taken:</strong> <span id="testsTaken">0</span></p>
-<p><strong>Total Questions Solved:</strong> <span id="totalQuestions">0</span></p>
-<p><strong>Average Performance:</strong> <span id="averageScore">0</span>%</p>
-<p><strong>Strongest Subject:</strong> <span id="strongest">-</span></p>
-<p><strong>Needs Improvement:</strong> <span id="weakest">-</span></p>
-  </div>
-<h2>🎯 Daily Missions</h2>
+<a href="acheivement-card.html" class="btn">Share badges</a>
+<a href="fact.html" class="btn">Fun facts</a>
+<a href="exam.html" class="btn">Exam practice</a>
 
-<ul id="missionsList"></ul>
+<p>Your Invite Code: <b id="refCode"></b></p>
+<input id="inviteCode">
+<button onclick="applyInvite()">Apply</button>
 
-<p class="small">Complete and earn points.</p>
+<h2>Badges</h2>
+<div id="badges"></div>
+</div>
 
- <a href="friend.html" class="btn" style="background:#22c45e;">
-         Track friends
-      </a>
-<p style="margin-top:15px;"><strong>Certificate Progress (100 Tests)</strong></p>
+<!-- SUMMARY -->
+<div class="card">
+<h2>Academic Summary</h2>
+<p>Tests: <span id="testsTaken"></span></p>
+<p>Questions: <span id="totalQuestions"></span></p>
+<p>Average: <span id="averageScore"></span>%</p>
+<p>Strongest: <span id="strongest"></span></p>
+<p>Weakest: <span id="weakest"></span></p>
+
 <div class="progress-bar">
-  <div class="progress-fill" id="certProgress"></div>
+<div class="progress-fill" id="certProgress"></div>
 </div>
-<p class="small"><span id="certText"></span></p>
+
+<p id="certText"></p>
+
 <div class="study-helper">
-<h3>💡 Study Helper:Only tells quiz, not test performance</h3>
-<p id="studyTip">Analyzing your progress...</p>
+<p id="studyTip"></p>
 </div>
 </div>
-    <!-- ACTIONS -->
-    <div class="card">
-      <h2>Actions</h2>
-<a href="dashboard-v3.html"class="btn">Learn more</a>
-  <a href="https://mentorloopedu.lovable.app/" class="btn" style="background:#22c55e;">
-        🎮 Practise for olympiads
-      </a>    
-<a href="battle-mode.html" class="btn" style="background:#22c55e;">
-        🎮 Play a battle
-      </a>
-    <a href="certificate.html" class="btn" style="background:#22c55e;">
-        See your certificate
-      </a>
-      <!-- NEW GRADE TEST BUTTONS -->
-      <a href="primary-quiz.html" class="btn">
-        🏫 Primary Grade Test
-      </a>
 
-      <a href="lowersecondary-quiz.html" class="btn">
-        📘 Lower Secondary Test
-      </a>
- <a href="higher-college-quiz.html" class="btn">
-        📘 Higher secondary+ quizzes
-      </a>
-    
-<a href="blog.html" class="btn" style="background:#22c55e;">
-        Know Us
-      </a>
-      <a href="https://chatbot-njl5sn4ev59.streamlit.app/" class="btn" style="background:#22c55e;">
-        AI Tutor(good for gk/math)
-      </a>
-      <a href="https://complex-buddy-ai.lovable.app/" class="btn" style="background:#22c55e;">
-        AI Tutor For Higher grades
-      </a>
-    </div>
-
-  </div>
+<!-- MISSIONS -->
+<div class="card">
+<h2>Daily Missions</h2>
+<ul id="missionsList"></ul>
 </div>
 
-<!-- KEEPING ALL YOUR SCRIPTS BELOW EXACTLY AS IS -->
+<!-- ACTIONS -->
+<div class="card">
+<h2>Actions</h2>
+
+<a href="friend.html" class="btn">Track friends</a>
+<a href="battle-mode.html" class="btn">Battle</a>
+<a href="primary-quiz.html" class="btn">Primary Test</a>
+<a href="lowersecondary-quiz.html" class="btn">Secondary Test</a>
+<a href="higher-college-quiz.html" class="btn">Advanced Test</a>
+
+<a href="blog.html" class="btn">Know us</a>
+<a href="https://chatbot-njl5sn4ev59.streamlit.app/" class="btn">AI Tutor</a>
+<a href="https://complex-buddy-ai.lovable.app/" class="btn">Advanced AI Tutor</a>
+
+</div>
+
+</div>
+</div>
 
 <script>
+
+/* USER */
 document.getElementById("userName").innerText =
-  localStorage.getItem("ml_user_name") || "Learner";
+localStorage.getItem("ml_user_name") || "Learner";
 
 let points = localStorage.getItem("ml_points") || 0;
 document.getElementById("points").innerText = points;
 
-function renderBadges() {
-  const points = parseInt(localStorage.getItem("ml_points") || "0");
+/* BADGES */
+function renderBadges(){
+const points=parseInt(localStorage.getItem("ml_points")||"0");
 
-  const badgeList = [
-    { name: " Starter", min: 110 },
-    { name: "🤔 Starter", min: 110 },
-    { name: "💡 Learner", min: 299 },
-    { name: "🧠 Helper", min: 590 },
-    { name: "👑 Mentor Champ", min: 1000},
-    {name: "👑👑👑 The best", min: 14000}
-  ];
-
-  const box = document.getElementById("badges");
-  box.innerHTML = "";
-
-  badgeList.forEach(badge => {
-    const span = document.createElement("span");
-    span.className = "badge";
-
-    if (points >= badge.min) {
-      span.classList.add("unlocked");
-    }
-
-    span.textContent = badge.name;
-    box.appendChild(span);
-  });
-}
-
-renderBadges();
-</script>
-<script>
-function updateStreak() {
-
-  const today = new Date().toDateString();
-  const lastVisit = localStorage.getItem("ml_last_visit");
-  let streak = parseInt(localStorage.getItem("ml_streak") || "0");
-
-  if (!lastVisit) {
-    // First time user
-    streak = 1;
-  } else {
-
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (lastVisit === today) {
-      // Same day → no change
-    }
-    else if (lastVisit === yesterday.toDateString()) {
-      // Came next day → increase streak
-      streak += 1;
-    }
-    else {
-      // Missed a day → reset streak
-      streak = 1;
-    }
-  }
-
-  localStorage.setItem("ml_streak", streak);
-  localStorage.setItem("ml_last_visit", today);
-
-  document.getElementById("streak").innerText = streak;
-}
-
-updateStreak();
-</script>
-  <script>
-
-function protectStreak(){
-
-const today = new Date().toDateString();
-const lastVisit = localStorage.getItem("ml_last_visit");
-
-let shields = parseInt(localStorage.getItem("ml_streak_shields") || "0");
-
-if(!lastVisit) return;
-
-const yesterday = new Date();
-yesterday.setDate(yesterday.getDate() - 1);
-
-/* If a day was missed */
-
-if(lastVisit !== today && lastVisit !== yesterday.toDateString()){
-
-if(shields > 0){
-
-shields -= 1;
-
-localStorage.setItem("ml_streak_shields", shields);
-
-/* Pretend user visited yesterday so streak continues */
-localStorage.setItem("ml_last_visit", yesterday.toDateString());
-
-alert("🛡️ Streak protected using a shield!");
-
-}
-
-}
-
-}
-
-protectStreak();
-
-</script>
-  <script>
-// Academic Summary Logic
-let testsTaken=parseInt(localStorage.getItem("ml_tests_taken")||"0");
-let totalScore=parseInt(localStorage.getItem("ml_total_score")||"0");
-let totalQuestions=parseInt(localStorage.getItem("ml_total_questions")||"0");
-
-document.getElementById("testsTaken").innerText=testsTaken;
-document.getElementById("totalQuestions").innerText=totalQuestions;
-
-let average=0;
-if(totalQuestions>0){
-average=((totalScore/totalQuestions)*100).toFixed(1);
-}
-document.getElementById("averageScore").innerText=average;
-
-let progress=Math.min((testsTaken/100)*100,100);
-document.getElementById("certProgress").style.width=progress+"%";
-document.getElementById("certText").innerText=
-testsTaken+"/100 tests completed";  
-    // SUBJECT ANALYSIS
-let stats = JSON.parse(localStorage.getItem("ml_subject_stats") || "{}");
-
-let strongest = "-";
-let weakest = "-";
-
-let highest = -1;
-let lowest = 101;
-
-for(let subject in stats){
-
-  if(stats[subject].total > 0){
-
-    let avg = (stats[subject].score / stats[subject].total) * 100;
-
-    if(avg > highest){
-      highest = avg;
-      strongest = subject;
-    }
-
-    if(avg < lowest){
-      lowest = avg;
-      weakest = subject;
-    }
-  }
-}
-
-document.getElementById("strongest").innerText = strongest;
-document.getElementById("weakest").innerText = weakest;
-    
-</script>
-<script>
-
-function studyHelper(){
-
-let lastScore = parseInt(localStorage.getItem("ml_last_quiz_score") || 0);
-
-let tip = "Try completing a quiz to start improving your knowledge.";
-
-if(lastScore > 0 && lastScore < 50){
-tip = "Your last quiz score was low. Review the topic and try again.";
-}
-
-else if(lastScore >= 50 && lastScore < 80){
-tip = "You're doing okay. Try practicing a few more quizzes to improve your score.";
-}
-
-else if(lastScore >= 80){
-tip = "Great job on your last quiz! Try the harder quiz above to improve more.You may even challenge your friends at the end of game with the given code at the end of game.";
-}
-
-document.getElementById("studyTip").innerText = tip;
-
-}
-
-studyHelper();
-
-</script>
- <script>
-
-const missions = [
-"Complete a Math Quiz",
-"Complete a Science Quiz",
-"Play a Battle"
+const badgeList=[
+{name:"Starter",min:110},
+{name:"Learner",min:299},
+{name:"Helper",min:590},
+{name:"Mentor",min:1000},
+{name:"Legend",min:14000}
 ];
 
+const box=document.getElementById("badges");
+box.innerHTML="";
+
+badgeList.forEach(b=>{
+const span=document.createElement("span");
+span.className="badge";
+
+if(points>=b.min) span.classList.add("unlocked");
+
+span.textContent=b.name;
+box.appendChild(span);
+});
+}
+renderBadges();
+
+/* STREAK */
+function updateStreak(){
+const today=new Date().toDateString();
+const last=localStorage.getItem("ml_last_visit");
+let streak=parseInt(localStorage.getItem("ml_streak")||"0");
+
+if(!last) streak=1;
+else if(last!==today){
+const y=new Date(); y.setDate(y.getDate()-1);
+if(last===y.toDateString()) streak++;
+else streak=1;
+}
+
+localStorage.setItem("ml_streak",streak);
+localStorage.setItem("ml_last_visit",today);
+
+document.getElementById("streak").innerText=streak;
+}
+updateStreak();
+
+/* MISSIONS */
+const missions=["Math Quiz","Science Quiz","Battle"];
 function loadMissions(){
+let today=new Date().toDateString();
+let saved=localStorage.getItem("ml_mission_date");
 
-const today = new Date().toDateString();
-const savedDate = localStorage.getItem("ml_mission_date");
+let list;
 
-let todaysMissions;
-
-if(savedDate === today){
-
-todaysMissions = JSON.parse(localStorage.getItem("ml_missions"));
-
+if(saved===today){
+list=JSON.parse(localStorage.getItem("ml_missions"));
 }else{
-
-// pick ONLY 2 missions
-todaysMissions = missions.sort(()=>0.5-Math.random()).slice(0,2);
-
-localStorage.setItem("ml_missions",JSON.stringify(todaysMissions));
+list=missions.sort(()=>0.5-Math.random()).slice(0,2);
+localStorage.setItem("ml_missions",JSON.stringify(list));
 localStorage.setItem("ml_mission_date",today);
-
 }
-
-renderMissions(todaysMissions);
-
-}
-
-function renderMissions(list){
 
 const box=document.getElementById("missionsList");
 box.innerHTML="";
 
-list.forEach(task=>{
-
-const li=document.createElement("li");
-
-const done=localStorage.getItem("ml_mission_done_"+task);
-
-li.innerText = done ? "✅ "+task : "⬜ "+task;
-
+list.forEach(m=>{
+let li=document.createElement("li");
+li.innerText="⬜ "+m;
 box.appendChild(li);
-
 });
-
 }
-
 loadMissions();
 
-</script>
-  <script>
+/* STUDY TIP */
+function studyHelper(){
+let last=parseInt(localStorage.getItem("ml_last_quiz_score")||0);
+let tip="Start a quiz.";
 
-function progressFeedback(){
+if(last<50) tip="Revise basics.";
+else if(last<80) tip="Practice more.";
+else tip="Great! Try harder.";
 
-let todayPoints = parseInt(localStorage.getItem("ml_my_points") || 0);
-let yesterdayPoints = parseInt(localStorage.getItem("ml_yesterday_points") || 0);
-
-let todayQuestions = parseInt(localStorage.getItem("ml_all_questions") || 0);
-let yesterdayQuestions = parseInt(localStorage.getItem("ml_yesterday_questions") || 0);
-
-let streak = parseInt(localStorage.getItem("ml_streak") || 0);
-let bestStreak = parseInt(localStorage.getItem("ml_best_streak") || 0);
-
-let message = "Keep learning! Every step improves your knowledge.";
-
-
-// points improvement
-if(todayPoints > yesterdayPoints){
-
-let diff = todayPoints - yesterdayPoints;
-
-message = "📈 You earned " + diff + " more points since yesterday!";
+document.getElementById("studyTip").innerText=tip;
 }
+studyHelper();
 
-
-// questions improvement
-if(todayQuestions > yesterdayQuestions){
-
-let diff = todayQuestions - yesterdayQuestions;
-
-message = "🧠 You solved " + diff + " more questions today. Great progress!";
-}
-
-
-// new streak record
-if(streak > bestStreak){
-
-localStorage.setItem("ml_best_streak", streak);
-
-message = "🔥 New personal best streak: " + streak + " days!";
-}
-
-
-// update yesterday values for next visit
-localStorage.setItem("ml_yesterday_points", todayPoints);
-localStorage.setItem("ml_yesterday_questions", todayQuestions);
-
-
-// display message
-let box = document.createElement("div");
-
-box.className = "study-helper";
-
-box.innerHTML = "<h3>📊 Progress Insight</h3><p>"+message+"</p>";
-
-document.querySelector(".container").prepend(box);
-
-}
-
-progressFeedback();
-
-</script>
-  <script>
-
+/* REF CODE */
 function generateReferralCode(){
-
-let code = localStorage.getItem("ml_ref_code");
+let code=localStorage.getItem("ml_ref_code");
 
 if(!code){
-code = "ML"+Math.floor(Math.random()*90000+10000);
+code="ML"+Math.floor(Math.random()*90000+10000);
 localStorage.setItem("ml_ref_code",code);
 }
 
-document.getElementById("refCode").innerText = code;
-
+document.getElementById("refCode").innerText=code;
 }
-
 generateReferralCode();
 
 </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
