@@ -84,8 +84,10 @@ header a:hover {
   transition: 0.3s;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
+/* SAFE VISUAL EFFECT (NO CLICK BLOCKING) */
 .card::before {
   content: "";
   position: absolute;
@@ -94,6 +96,13 @@ header a:hover {
   background: radial-gradient(circle at top left, rgba(34,211,238,0.12), transparent);
   top: -50%;
   left: -50%;
+  pointer-events: none; /* 🔥 FIX */
+}
+
+/* Ensure content stays above */
+.card * {
+  position: relative;
+  z-index: 2;
 }
 
 .card:hover {
@@ -243,8 +252,12 @@ button {
 
 /* ===== MOBILE ===== */
 @media (max-width: 600px) {
-  header h1 { font-size: 1.1rem; }
-  .nav-links { display: none; }
+  header h1 {
+    font-size: 1.1rem;
+  }
+  .nav-links {
+    display: none;
+  }
 }
 
 </style>
