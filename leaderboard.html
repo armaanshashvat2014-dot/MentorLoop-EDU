@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: white;
+  text-align: center;
+}
+
+.container {
+  padding: 20px;
+}
+
+.card {
+  margin: 10px auto;
+  padding: 12px;
+  width: 320px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  transition: 0.3s;
+}
+
+.me {
+  background: rgba(34,197,94,0.4);
+  font-weight: bold;
+}
+
+.top1 { box-shadow: 0 0 15px gold; }
+.top2 { box-shadow: 0 0 10px silver; }
+.top3 { box-shadow: 0 0 10px #cd7f32; }
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>🌍 Global Leaderboard</h2>
+<p id="you"></p>
+
+<div id="leaderboard"></div>
+
+</div>
+
+<script type="module">
+
+// 🔥 Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+// 🔥 YOUR CONFIG (already correct)
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// 🧠 GET USER FROM LOCAL STORAGE
+function getUser() {
+  return {
+    name: localStorage.getItem("ml_name") || "Guest",
+    points: parseInt(localStorage.getItem("ml_points")) || 0
+  };
+}
+
+
+// ☁️ SEND USER TO FIREBASE
+async function syncUser() {
+  let user = getUser();
+
+  // Save/update user in Firestore
+  await setDoc(doc(db, "leaderboard", user.name), user);
+
+  document.getElementById("you").innerText =
+    "You: " + user.name + " — " + user.points + " pts";
+}
+
+
+// 🏆 LOAD LIVE LEADERBOARD
+function loadLeaderboard() {
+  const q = query(collection(db, "leaderboard"), orderBy("points", "desc"));
+
+  onSnapshot(q, (snapshot) => {
+    let board = document.getElementById("leaderboard");
+    board.innerHTML = "";
+
+    let current = getUser().name;
+
+    snapshot.forEach((docSnap, index) => {
+      let u = docSnap.data();
+
+      let div = document.createElement("div");
+      div.className = "card";
+
+      // medals
+      let medal =
+        index === 0 ? "🥇" :
+        index === 1 ? "🥈" :
+        index === 2 ? "🥉" : "";
+
+      // highlight YOU
+      if (u.name === current) div.classList.add("me");
+
+      // top styles
+      if (index === 0) div.classList.add("top1");
+      if (index === 1) div.classList.add("top2");
+      if (index === 2) div.classList.add("top3");
+
+      div.innerText =
+        medal + " #" + (index + 1) + " " + u.name + " — " + u.points + " pts";
+
+      board.appendChild(div);
+    });
+  });
+}
+
+
+// 🚀 START
+window.onload = async () => {
+  await syncUser();     // send your score
+  loadLeaderboard();    // show leaderboard
+};
+
+</script>
+
+</body>
+</html>
