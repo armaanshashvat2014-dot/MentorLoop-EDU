@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -12,121 +11,117 @@
 <style>
 body {
   margin: 0;
-  height: 100vh;
   font-family: 'Poppins', sans-serif;
-  overflow: hidden;
-  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  background: radial-gradient(circle at top, #0f172a, #020617);
   color: white;
 }
 
-/* PARTICLE CANVAS */
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-/* CENTER */
-.center-box {
-  position: relative;
+/* HERO */
+.hero {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-/* MAIN CARD */
-.portal-box {
-  background: rgba(255,255,255,0.06);
-  padding: 60px 50px;
-  border-radius: 25px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 0 60px rgba(0,0,0,0.5);
-  width: 520px;
-  max-width: 90%;
   text-align: center;
-  transition: 0.3s;
+  padding: 20px;
 }
 
-.portal-box:hover {
-  transform: scale(1.01);
+.hero-box {
+  max-width: 500px;
+  width: 100%;
 }
 
-/* LOGO */
-.logo {
-  width: 120px;
+/* TITLE */
+h1 {
+  font-size: 40px;
   margin-bottom: 10px;
+  background: linear-gradient(90deg, #22d3ee, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* TEXT */
-h2 {
-  font-size: 32px;
-  margin: 5px 0;
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 30px;
 }
 
-h4 {
-  margin-bottom: 25px;
-  color: #cbd5f5;
-  font-weight: 300;
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 15px 50px rgba(0,0,0,0.6);
 }
 
 /* INPUTS */
 input, select {
-  width: 95%;
-  padding: 13px;
+  width: 100%;
+  padding: 12px;
   margin: 10px 0;
   border-radius: 12px;
   border: none;
-  outline: none;
-  font-size: 15px;
+  background: #020617;
+  color: white;
 }
 
 /* BUTTONS */
 button {
-  padding: 13px 20px;
-  margin: 8px;
-  border: none;
+  width: 100%;
+  padding: 13px;
   border-radius: 12px;
-  cursor: pointer;
+  border: none;
+  margin-top: 10px;
   font-weight: 600;
+  cursor: pointer;
   transition: 0.2s;
 }
 
 .login-btn {
-  background: linear-gradient(90deg, #22c55e, #16a34a);
+  background: linear-gradient(90deg, #22d3ee, #10b981);
   color: white;
 }
 
 .guest-btn {
-  background: linear-gradient(90deg, #facc15, #eab308);
+  background: #1e293b;
+  color: #94a3b8;
 }
 
 button:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
+  transform: scale(1.03);
 }
 
-/* PORTAL LINKS */
+/* FEATURES */
+.features {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* APP LINKS */
 .portal {
   display: block;
   margin: 10px 0;
-  padding: 15px;
-  background: rgba(255,255,255,0.12);
-  border-radius: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
   text-decoration: none;
   color: white;
-  font-weight: 500;
   transition: 0.2s;
 }
 
 .portal:hover {
-  background: rgba(255,255,255,0.25);
-  transform: translateY(-2px);
+  background: rgba(255,255,255,0.2);
 }
 
-/* WELCOME TEXT */
-#welcomeText {
-  margin-bottom: 15px;
+/* ANIMATION */
+.hero-box {
+  animation: fadeUp 0.7s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 
@@ -134,37 +129,39 @@ button:hover {
 
 <body>
 
-<canvas id="bg"></canvas>
+<div class="hero">
+  <div class="hero-box">
 
-<div class="center-box">
-  <div class="portal-box">
-
-    <img src="logo.png" class="logo">
-
-    <h2>🚀 MentorLoop EDU</h2>
-    <h4>Learn smarter. Together.</h4>
+    <h1>🚀 MentorLoop EDU</h1>
+    <p class="subtitle">AI-powered learning system for students</p>
 
     <!-- LOGIN -->
-    <div id="loginBox">
+    <div class="card" id="loginBox">
+
       <input type="text" id="nameInput" placeholder="Enter your name">
-      
+
       <select id="roleInput">
         <option>🎓 Student</option>
         <option>🧑‍🏫 Mentor</option>
       </select>
 
-      <button class="login-btn" onclick="login()">Login & Save Progress</button>
+      <button class="login-btn" onclick="login()">Login & Continue</button>
       <button class="guest-btn" onclick="guestLogin()">Continue as Guest</button>
+
+      <div class="features">
+        ✔ Smart quizzes  
+        ✔ AI learning  
+        ✔ Track progress 
+        ✔ Student-friendly
+        ✔ Teacher-friendly
+      </div>
     </div>
 
     <!-- APP -->
-    <div id="appBox" style="display:none;">
+    <div id="appBox" style="display:none; margin-top:20px;">
       <h3 id="welcomeText"></h3>
 
-      <a href="https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz/" class="portal">🧠 Ask Doubts</a>
-      <a href="speed.html" class="portal">⚡ Speed Challenge</a>
-      <a href="test.html" class="portal">🧪 IQ Tester</a>
-      <a href="dashboard-v2.html" class="portal">📊 Dashboard</a>
+      <a href="dashboard.html" class="portal">📊 Dashboard</a>
       <a href="games.html" class="portal">🎮 Quizzes</a>
       <a href="teacher.html" class="portal">🧑‍🏫 Teacher Zone</a>
       <a href="profile.html" class="portal">👤 Profile</a>
@@ -176,46 +173,6 @@ button:hover {
 </div>
 
 <script>
-// PARTICLES (same but smoother)
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-
-for (let i = 0; i < 80; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2 + 1,
-    dx: (Math.random() - 0.5) * 0.3,
-    dy: (Math.random() - 0.5) * 0.3
-  });
-}
-
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach(p => {
-    p.x += p.dx;
-    p.y += p.dy;
-
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.fill();
-  });
-
-  requestAnimationFrame(animate);
-}
-animate();
-
-// LOGIN SYSTEM
 function login() {
   let name = document.getElementById("nameInput").value;
   let role = document.getElementById("roleInput").value;
