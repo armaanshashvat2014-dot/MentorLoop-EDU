@@ -33,171 +33,215 @@
 <meta name="twitter:image" content="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/logo.png">
 
 <meta name="theme-color" content="#2563eb">
-
-<style>
+  <style>
 body {
   margin: 0;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
-  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
   color: white;
 }
 
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
-}
-
-.center-box {
-  position: relative;
-  z-index: 1;
+/* HERO */
+.hero {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
+  padding: 20px;
 }
 
-.portal-box {
-  background: rgba(255,255,255,0.08);
-  padding: 50px;
-  border-radius: 20px;
-  backdrop-filter: blur(15px);
-  box-shadow: 0 0 40px rgba(0,0,0,0.3);
-  animation: floatBox 4s ease-in-out infinite;
+.hero-box {
+  max-width: 500px;
+  width: 100%;
 }
 
-@keyframes floatBox {
-  0%,100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
+/* TITLE */
 h1 {
-  margin-bottom: 30px;
-  font-size: 2rem;
+  font-size: 40px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #22d3ee, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 30px;
+}
+
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+}
+
+/* INPUTS */
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 12px;
+  border: none;
+  background: #020617;
+  color: white;
+}
+
+/* BUTTONS */
+button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  margin-top: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.login-btn {
+  background: linear-gradient(90deg, #22d3ee, #10b981);
+  color: white;
+}
+
+.guest-btn {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+button:hover {
+  transform: scale(1.03);
+}
+
+/* FEATURES */
+.features {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* APP LINKS */
 .portal {
   display: block;
-  margin: 15px 0;
-  padding: 15px 25px;
-  background: rgba(255,255,255,0.15);
+  margin: 10px 0;
+  padding: 14px;
   border-radius: 12px;
+  background: rgba(255,255,255,0.08);
   text-decoration: none;
   color: white;
-  font-weight: bold;
-  transition: 0.3s;
+  transition: 0.2s;
 }
 
 .portal:hover {
-  transform: scale(1.08);
-  background: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.2);
+}
+
+/* ANIMATION */
+.hero-box {
+  animation: fadeUp 0.7s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
-
-<!-- Structured Data for Google -->
-<script> 
-{
- "@context": "https://schema.org",
- "@type": "EducationalOrganization",
- "name": "MentorLoop EDU",
- "url": "https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/",
- "description": "A student doubt solving and peer learning platform.",
- "sameAs": []
-}
-</script>
 
 </head>
 
 <body>
 
-<canvas id="bg"></canvas>
+<div class="hero">
+  <div class="hero-box">
 
-<div class="center-box">
-  <div class="portal-box">
-    <h1>🎓 Welcome to MentorLoop EDU</h1>
-    <h2 id="welcomeText"></h2>
+    <h1>🚀 MentorLoop EDU</h1>
+    <p class="subtitle">AI-powered learning system for students</p>
 
-    <a href="dashboard-v2.html" class="portal">📚 Enter Dashboard</a>
-    <a href="https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz/" class="portal">❓ Ask a Doubt or answer them</a>
-    <a href="fair-play.html" class="portal">🛡 Fair Play Zone</a>
-    <a href="games.html" class="portal">🎲 Fun Quizzes</a>
-    <a href="table.html" class="portal">📚 Why MentorLoop EDU</a>
-    <a href="teacher.html" class="portal">Are you a teacher</a>
+    <!-- LOGIN -->
+    <div class="card" id="loginBox">
+
+      <input type="text" id="nameInput" placeholder="Enter your name">
+
+      <select id="roleInput">
+        <option>🎓 Student</option>
+        <option>🧑‍🏫 Mentor</option>
+      </select>
+
+      <button class="login-btn" onclick="login()">Login & Continue</button>
+      <button class="guest-btn" onclick="guestLogin()">Continue as Guest</button>
+
+      <div class="features">
+        ✔ Smart quizzes  
+        ✔ AI learning  
+        ✔ Track progress 
+        ✔ Student-friendly
+        ✔ Teacher-friendly
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div id="appBox" style="display:none; margin-top:20px;">
+      <h3 id="welcomeText"></h3>
+
+      <a href="dashboard-v2.html" class="portal">📊 Dashboard</a>
+      <a href="games.html" class="portal">🎮 Quizzes</a>
+      <a href="teacher.html" class="portal">🧑‍🏫 Teacher Zone</a>
+      <a href="profile.html" class="portal">👤 Profile</a>
+      <a href="speed.html" class="portal">Try your speed</a>
+     <a href="test.html" class="portal">Test IQ</a>
+      <a href="profile.html" class="portal">Look at your profile</a>
+      <button onclick="logout()">Logout</button>
+    </div>
+
   </div>
 </div>
 
 <script>
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
+function login() {
+  let name = document.getElementById("nameInput").value;
+  let role = document.getElementById("roleInput").value;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-
-for (let i = 0; i < 60; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    radius: Math.random() * 3 + 1,
-    dx: (Math.random() - 0.5) * 0.5,
-    dy: (Math.random() - 0.5) * 0.5
-  });
-}
-
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach(p => {
-    p.x += p.dx;
-    p.y += p.dy;
-
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.fill();
-  });
-
-  requestAnimationFrame(animate);
-}
-
-animate();
-
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
-</script>
-
-<script>
-function setupUser() {
-  let name = localStorage.getItem("ml_user_name");
-  let role = localStorage.getItem("ml_user_role");
-
-  if (!name || !role) {
-    name = prompt("Enter your name:");
-    role = prompt("Enter your role (Student/Mentor):");
-
-    if (!name) name = "Learner";
-    if (!role) role = "Student";
-
-    localStorage.setItem("ml_user_name", name);
-    localStorage.setItem("ml_user_role", role);
+  if (!name) {
+    alert("Enter your name!");
+    return;
   }
 
-  document.getElementById("welcomeText").innerText =
-    "Welcome back, " + name + " (" + role + ")";
+  localStorage.setItem("ml_name", name);
+  localStorage.setItem("ml_role", role);
+
+  startApp(name, role);
 }
 
-setupUser();
+function guestLogin() {
+  startApp("Guest", "Visitor");
+}
+
+function startApp(name, role) {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("appBox").style.display = "block";
+
+  document.getElementById("welcomeText").innerText =
+    `Welcome, ${name} (${role})`;
+}
+
+function logout() {
+  localStorage.clear();
+  location.reload();
+}
+
+window.onload = function () {
+  let name = localStorage.getItem("ml_name");
+  let role = localStorage.getItem("ml_role");
+
+  if (name && role) {
+    startApp(name, role);
+  }
+};
 </script>
 
 </body>
 </html>
+
