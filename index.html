@@ -7,22 +7,26 @@
 
 <title>MentorLoop EDU</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin: 0;
   height: 100vh;
-  font-family: Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
   overflow: hidden;
-  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
   color: white;
 }
 
+/* PARTICLE CANVAS */
 canvas {
   position: absolute;
   top: 0;
   left: 0;
 }
 
+/* CENTER */
 .center-box {
   position: relative;
   height: 100vh;
@@ -31,54 +35,98 @@ canvas {
   align-items: center;
 }
 
+/* MAIN CARD */
 .portal-box {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
   padding: 60px 50px;
   border-radius: 25px;
-  backdrop-filter: blur(15px);
-  box-shadow: 0 0 50px rgba(0,0,0,0.35);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 60px rgba(0,0,0,0.5);
   width: 520px;
   max-width: 90%;
   text-align: center;
+  transition: 0.3s;
 }
 
+.portal-box:hover {
+  transform: scale(1.01);
+}
+
+/* LOGO */
 .logo {
-  width: 130px;
-  margin-bottom: 15px;
+  width: 120px;
+  margin-bottom: 10px;
 }
 
-h2 { font-size: 30px; }
-h4 { margin-bottom: 20px; }
+/* TEXT */
+h2 {
+  font-size: 32px;
+  margin: 5px 0;
+}
 
+h4 {
+  margin-bottom: 25px;
+  color: #cbd5f5;
+  font-weight: 300;
+}
+
+/* INPUTS */
 input, select {
   width: 95%;
-  padding: 12px;
+  padding: 13px;
   margin: 10px 0;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
+  outline: none;
+  font-size: 15px;
 }
 
+/* BUTTONS */
 button {
-  padding: 12px 20px;
+  padding: 13px 20px;
   margin: 8px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
-.login-btn { background: #22c55e; color: white; }
-.guest-btn { background: #facc15; }
+.login-btn {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  color: white;
+}
 
+.guest-btn {
+  background: linear-gradient(90deg, #facc15, #eab308);
+}
+
+button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* PORTAL LINKS */
 .portal {
   display: block;
-  margin: 12px 0;
-  padding: 14px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 12px;
+  margin: 10px 0;
+  padding: 15px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 14px;
   text-decoration: none;
   color: white;
-  font-weight: bold;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.portal:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-2px);
+}
+
+/* WELCOME TEXT */
+#welcomeText {
+  margin-bottom: 15px;
 }
 </style>
 
@@ -93,16 +141,16 @@ button {
 
     <img src="logo.png" class="logo">
 
-    <h2>🎓 MentorLoop EDU</h2>
-    <h4>Together, we get smarter.</h4>
+    <h2>🚀 MentorLoop EDU</h2>
+    <h4>Learn smarter. Together.</h4>
 
     <!-- LOGIN -->
     <div id="loginBox">
       <input type="text" id="nameInput" placeholder="Enter your name">
       
       <select id="roleInput">
-        <option>Student</option>
-        <option>Mentor</option>
+        <option>🎓 Student</option>
+        <option>🧑‍🏫 Mentor</option>
       </select>
 
       <button class="login-btn" onclick="login()">Login & Save Progress</button>
@@ -112,13 +160,15 @@ button {
     <!-- APP -->
     <div id="appBox" style="display:none;">
       <h3 id="welcomeText"></h3>
-       <a href="https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz/" class="portal">📚 Ask doubts</a>
-      <a href="speed.html" class="portal">📚 Speed challenge</a>
-      <a href="test.html" class="portal">📚 IQ teller</a>
-      <a href="dashboard-v2.html" class="portal">📚 Do more</a>
-      <a href="games.html" class="portal">🎲 Try quizzes</a>
-      <a href="teacher.html" class="portal">📚 Teacher Zone</a>
-     <a href="profile.html" class="portal">📚 Look at your profile</a>
+
+      <a href="https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz/" class="portal">🧠 Ask Doubts</a>
+      <a href="speed.html" class="portal">⚡ Speed Challenge</a>
+      <a href="test.html" class="portal">🧪 IQ Tester</a>
+      <a href="dashboard-v2.html" class="portal">📊 Dashboard</a>
+      <a href="games.html" class="portal">🎮 Quizzes</a>
+      <a href="teacher.html" class="portal">🧑‍🏫 Teacher Zone</a>
+      <a href="profile.html" class="portal">👤 Profile</a>
+
       <button onclick="logout()">Logout</button>
     </div>
 
@@ -126,7 +176,7 @@ button {
 </div>
 
 <script>
-// PARTICLES
+// PARTICLES (same but smoother)
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
@@ -135,13 +185,13 @@ canvas.height = window.innerHeight;
 
 let particles = [];
 
-for (let i = 0; i < 60; i++) {
+for (let i = 0; i < 80; i++) {
   particles.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
-    r: Math.random() * 3 + 1,
-    dx: (Math.random() - 0.5) * 0.5,
-    dy: (Math.random() - 0.5) * 0.5
+    r: Math.random() * 2 + 1,
+    dx: (Math.random() - 0.5) * 0.3,
+    dy: (Math.random() - 0.5) * 0.3
   });
 }
 
@@ -157,7 +207,7 @@ function animate() {
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
     ctx.fill();
   });
 
@@ -165,7 +215,7 @@ function animate() {
 }
 animate();
 
-// LOGIN
+// LOGIN SYSTEM
 function login() {
   let name = document.getElementById("nameInput").value;
   let role = document.getElementById("roleInput").value;
@@ -185,45 +235,19 @@ function guestLogin() {
   startApp("Guest", "Visitor");
 }
 
-// START APP
 function startApp(name, role) {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
 
-  let points = localStorage.getItem("ml_points_" + name);
-  if (!points) points = 0;
-
   document.getElementById("welcomeText").innerText =
-    "Welcome, " + name + " (" + role + ")";
-    
-  updatePoints(points);
+    `Welcome, ${name} (${role})`;
 }
 
-// UPDATE UI
-function updatePoints(points) {
-  document.getElementById("pointsText").innerText = "Points: " + points;
-}
-
-// ADD POINTS
-function addPoints(amount) {
-  let name = localStorage.getItem("ml_name");
-  if (!name) return;
-
-  let current = localStorage.getItem("ml_points_" + name) || 0;
-  current = parseInt(current) + amount;
-
-  localStorage.setItem("ml_points_" + name, current);
-  updatePoints(current);
-}
-
-// LOGOUT (FIXED)
 function logout() {
-  localStorage.removeItem("ml_name");
-  localStorage.removeItem("ml_role");
+  localStorage.clear();
   location.reload();
 }
 
-// AUTO LOGIN
 window.onload = function () {
   let name = localStorage.getItem("ml_name");
   let role = localStorage.getItem("ml_role");
