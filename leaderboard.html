@@ -81,12 +81,12 @@ import {
   getFirestore,
   doc,
   setDoc,
-  getDoc,
   collection,
   query,
   orderBy,
   limit,
-  getDocs
+  getDocs,
+  where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -99,7 +99,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-// 🎮 RANK SYSTEM
+// 🎮 RANK
 function getRank(points) {
   if (points >= 300) return "💎 Diamond";
   if (points >= 150) return "🟡 Gold";
@@ -107,13 +107,11 @@ function getRank(points) {
   return "🟫 Bronze";
 }
 
-
-// 🎭 AVATAR COLOR
+// 🎨 COLOR
 function getColor(name) {
   let colors = ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa"];
   return colors[name.charCodeAt(0)%colors.length];
 }
-
 
 // 📅 WEEK
 function getWeek() {
@@ -123,8 +121,7 @@ function getWeek() {
   return d.getFullYear()+"-W"+week;
 }
 
-
-// USER
+// 👤 USER
 function getUser() {
   return {
     name: localStorage.getItem("ml_name") || "Guest",
@@ -132,7 +129,6 @@ function getUser() {
     week: getWeek()
   };
 }
-
 
 // 📈 TREND
 function getTrend(current) {
@@ -145,31 +141,33 @@ function getTrend(current) {
 }
 
 
-// 🔥 SYNC USER
+// 🔥 SYNC (FORCED UPDATE)
 async function syncUser() {
+
   let user = getUser();
-  const ref = doc(db, "leaderboard", user.name);
 
-  const snap = await getDoc(ref);
+  // UNIQUE ID PER WEEK
+  const id = user.week + "_" + user.name;
 
-  if (snap.exists()) {
-    let old = snap.data();
-    if (user.points > old.points) {
-      await setDoc(ref, user);
-    } else {
-      user.points = old.points;
-    }
-  } else {
-    await setDoc(ref, user);
-  }
+  // ALWAYS overwrite (fixes EVERYTHING)
+  await setDoc(doc(db,"leaderboard",id), user);
 
   return user;
 }
 
 
-// 🏆 LOAD LEADERBOARD
+// 🏆 LOAD (ONLY CURRENT WEEK)
 async function loadLeaderboard() {
-  const q = query(collection(db,"leaderboard"), orderBy("points","desc"), limit(20));
+
+  const currentWeek = getWeek();
+
+  const q = query(
+    collection(db,"leaderboard"),
+    where("week","==",currentWeek), // 💀 CRITICAL FIX
+    orderBy("points","desc"),
+    limit(20)
+  );
+
   const snapshot = await getDocs(q);
 
   let board = document.getElementById("leaderboard");
@@ -182,6 +180,7 @@ async function loadLeaderboard() {
   let i = 0;
 
   snapshot.forEach(docSnap => {
+
     let u = docSnap.data();
 
     let div = document.createElement("div");
