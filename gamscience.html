@@ -105,7 +105,54 @@ Score: <span id="score">0</span>
 
 </div>
 
-<script>
+<script type="module">
+
+// 🔥 FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔐 UID
+if (!localStorage.getItem("ml_uid")) {
+  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+}
+
+// 📅 WEEK
+function getWeek(){
+  let d=new Date();
+  let onejan=new Date(d.getFullYear(),0,1);
+  let week=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear()+"-W"+week;
+}
+
+// 🔥 SYNC
+async function syncToFirebase(points){
+  const uid = localStorage.getItem("ml_uid");
+
+  await setDoc(doc(db,"leaderboard",uid),{
+    name: localStorage.getItem("ml_name") || "Guest",
+    points: points,
+    week: getWeek()
+  });
+}
+
+// 💎 POINT SYSTEM
+function addPoints(amount){
+  let current=parseInt(localStorage.getItem("ml_points"))||0;
+  let newPoints=current+amount;
+
+  localStorage.setItem("ml_points",newPoints);
+
+  syncToFirebase(newPoints);
+}
 
 // ---------- SHUFFLE ----------
 function shuffle(a){
@@ -128,50 +175,30 @@ const scienceQuestions=[
 {q:"What organ pumps blood?",a:["Heart","Brain","Lungs"],c:0},
 {q:"Speed of light is?",a:["300,000 km/s","150,000 km/s","1,000 km/s"],c:0},
 {q:"Largest planet?",a:["Earth","Saturn","Jupiter"],c:2},
-{q:"What gas do humans breathe?",a:["Oxygen","Helium","Nitrogen"],c:0},
-
-{q:"Boiling point of water?",a:["100°C","90°C","50°C"],c:0},
-{q:"Earth revolves around?",a:["Moon","Sun","Mars"],c:1},
-{q:"Unit of force?",a:["Newton","Watt","Joule"],c:0},
-{q:"Chemical symbol for Sodium?",a:["Na","So","Sn"],c:0},
-{q:"Photosynthesis occurs in?",a:["Roots","Leaves","Stem"],c:1},
-{q:"Hardest natural substance?",a:["Diamond","Iron","Gold"],c:0},
-{q:"Human body temperature?",a:["37°C","40°C","35°C"],c:0},
-{q:"Center of atom?",a:["Electron","Nucleus","Proton"],c:1},
-{q:"Energy stored in food?",a:["Chemical","Kinetic","Sound"],c:0},
-{q:"Smallest unit of life?",a:["Atom","Cell","Tissue"],c:1}
+{q:"What gas do humans breathe?",a:["Oxygen","Helium","Nitrogen"],c:0}
 
 ];
 
 let questions=shuffle([...scienceQuestions]).slice(0,10);
-
 let index=0;
 let score=0;
 
+// ---------- LOAD ----------
 function loadQuestion(){
 
 if(index>=questions.length){
 
 let percent=Math.round((score/questions.length)*100);
 
-// ⭐ SAVE LAST QUIZ SCORE
 localStorage.setItem("ml_last_quiz_score",percent);
 
-// 🔥 DAILY REWARD
-if(percent>=80){
-
+// 🎯 BONUS FIXED
 const today=new Date().toDateString();
+const key="ml_science_reward";
 
-if(localStorage.getItem("quizDailyDate")!==today){
-
-let pts=parseInt(localStorage.getItem("ml_points")||0);
-pts+=5;
-
-localStorage.setItem("ml_points",pts);
-localStorage.setItem("quizDailyDate",today);
-
-}
-
+if(percent>=80 && localStorage.getItem(key)!==today){
+addPoints(5);
+localStorage.setItem(key,today);
 }
 
 document.querySelector(".card").innerHTML=
@@ -181,7 +208,6 @@ document.querySelector(".card").innerHTML=
 <button onclick="location.reload()">Play Again</button>`;
 
 return;
-
 }
 
 const q=questions[index];
@@ -194,11 +220,13 @@ options.innerHTML="";
 q.a.forEach((opt,i)=>{
 
 const btn=document.createElement("button");
-
 btn.textContent=opt;
 
 btn.onclick=()=>{
-if(i===q.c) score++;
+if(i===q.c){
+score++;
+addPoints(2); // 🔥 per question reward
+}
 
 index++;
 
@@ -219,28 +247,6 @@ options.appendChild(btn);
 loadQuestion();
 
 </script>
-<script>
 
-// DAILY ACTIVITY REWARD FOR SCIENCE QUIZ
-
-(function(){
-
-const today = new Date().toDateString();
-const key = "ml_daily_science_quiz";
-
-if(localStorage.getItem(key) !== today){
-
-let pts = parseInt(localStorage.getItem("ml_points") || 0);
-
-pts += 5;
-
-localStorage.setItem("ml_points", pts);
-localStorage.setItem(key, today);
-
-}
-
-})();
-
-</script>
 </body>
 </html>
