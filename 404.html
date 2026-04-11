@@ -17,26 +17,62 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  text-align: center;
+  overflow: hidden;
+}
+
+/* FLOATING GLOW BACKGROUND */
+body::before {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #22d3ee33, transparent);
+  top: 10%;
+  left: 10%;
+  animation: float 6s infinite ease-in-out;
+}
+
+body::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #10b98133, transparent);
+  bottom: 10%;
+  right: 10%;
+  animation: float 8s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
 }
 
 /* CARD */
 .container {
+  position: relative;
   max-width: 500px;
-  padding: 30px;
+  padding: 40px;
   background: rgba(15, 23, 42, 0.9);
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  text-align: center;
   animation: fadeIn 0.8s ease;
 }
 
-/* TITLE */
+/* 404 TEXT */
 h1 {
-  font-size: 80px;
+  font-size: 90px;
   margin: 0;
   background: linear-gradient(90deg,#22d3ee,#10b981);
   -webkit-background-clip: text;
   color: transparent;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { filter: drop-shadow(0 0 5px #22d3ee); }
+  to { filter: drop-shadow(0 0 20px #10b981); }
 }
 
 /* TEXT */
@@ -48,30 +84,32 @@ p {
 /* BUTTON */
 .btn {
   display: inline-block;
-  margin-top: 15px;
-  padding: 12px 20px;
-  border-radius: 10px;
+  margin-top: 20px;
+  padding: 14px 24px;
+  border-radius: 12px;
   background: linear-gradient(90deg,#22d3ee,#10b981);
   color: white;
   text-decoration: none;
-  font-weight: 500;
-  transition: 0.2s;
+  font-weight: 600;
+  transition: 0.25s;
+  box-shadow: 0 0 15px rgba(34,211,238,0.3);
 }
 
 .btn:hover {
-  transform: scale(1.05);
+  transform: scale(1.08);
+  box-shadow: 0 0 25px rgba(16,185,129,0.6);
 }
 
-/* SMALL TEXT */
+/* COUNTDOWN */
 .small {
-  font-size: 12px;
-  margin-top: 10px;
+  font-size: 13px;
+  margin-top: 12px;
   color: #64748b;
 }
 
 /* ANIMATION */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(25px); }
   to { opacity: 1; transform: translateY(0); }
 }
 </style>
@@ -81,18 +119,35 @@ p {
 
 <div class="container">
   <h1>404</h1>
-  <p>Oops! The page you’re looking for doesn’t exist.</p>
 
-  <a href="/MentorLoop-EDU/index.html" class="btn">🏠 Go to Dashboard</a>
+  <p>🚫 This page took a wrong turn.</p>
+  <p>Let’s get you back on track.</p>
 
-  <p class="small">Redirecting automatically in 3 seconds...</p>
+  <!-- MANUAL BUTTON -->
+  <a href="dashboard-v2.html" class="btn">🏠 Go to Dashboard</a>
+
+  <!-- COUNTDOWN -->
+  <p class="small">
+    Redirecting in <span id="count">10</span> seconds...
+  </p>
 </div>
 
 <script>
-// Auto redirect
-setTimeout(()=>{
-  window.location.href = "dashboard-v2.html";
-},3000);
+
+// ⏳ COUNTDOWN
+let time = 10;
+const el = document.getElementById("count");
+
+const timer = setInterval(()=>{
+  time--;
+  el.innerText = time;
+
+  if(time <= 0){
+    clearInterval(timer);
+    window.location.href = "dashboard-v2.html";
+  }
+},1000);
+
 </script>
 
 </body>
