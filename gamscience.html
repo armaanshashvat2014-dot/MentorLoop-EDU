@@ -120,6 +120,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+
 // 🔐 UID
 if (!localStorage.getItem("ml_uid")) {
   localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
@@ -150,9 +151,42 @@ function addPoints(amount){
   let newPoints=current+amount;
 
   localStorage.setItem("ml_points",newPoints);
-
   syncToFirebase(newPoints);
 }
+
+
+// 🧠 SUBJECT SYSTEM (NEW)
+const SUBJECT = "science";
+
+function ensureSubject(){
+  let key = "ml_history_" + SUBJECT;
+  if(!localStorage.getItem(key)){
+    localStorage.setItem(key, JSON.stringify([]));
+  }
+}
+
+function saveScoreToHistory(){
+
+  let score = parseInt(localStorage.getItem("ml_last_quiz_score")) || 0;
+  if(score <= 0) return;
+
+  ensureSubject();
+
+  let key = "ml_history_" + SUBJECT;
+  let history = JSON.parse(localStorage.getItem(key));
+
+  history.push({
+    score: score,
+    date: new Date().toLocaleDateString()
+  });
+
+  if(history.length > 10){
+    history.shift();
+  }
+
+  localStorage.setItem(key, JSON.stringify(history));
+}
+
 
 // ---------- SHUFFLE ----------
 function shuffle(a){
@@ -183,6 +217,7 @@ let questions=shuffle([...scienceQuestions]).slice(0,10);
 let index=0;
 let score=0;
 
+
 // ---------- LOAD ----------
 function loadQuestion(){
 
@@ -190,9 +225,13 @@ if(index>=questions.length){
 
 let percent=Math.round((score/questions.length)*100);
 
+// 💎 SAVE SCORE
 localStorage.setItem("ml_last_quiz_score",percent);
 
-// 🎯 BONUS FIXED
+// 💎 SAVE HISTORY
+saveScoreToHistory();
+
+// 🎯 BONUS
 const today=new Date().toDateString();
 const key="ml_science_reward";
 
@@ -225,7 +264,7 @@ btn.textContent=opt;
 btn.onclick=()=>{
 if(i===q.c){
 score++;
-addPoints(2); // 🔥 per question reward
+addPoints(2);
 }
 
 index++;
