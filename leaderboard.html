@@ -98,6 +98,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
+// 🔐 UID (CRITICAL FIX)
+if (!localStorage.getItem("ml_uid")) {
+  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+}
+
+
 // 🎮 RANK
 function getRank(points) {
   if (points >= 300) return "💎 Diamond";
@@ -140,20 +146,19 @@ function getTrend(current) {
 }
 
 
-// 🔥 SYNC (ALWAYS UPDATE)
+// 🔥 SYNC (FIXED - NO DUPLICATES)
 async function syncUser() {
 
+  const uid = localStorage.getItem("ml_uid");
   let user = getUser();
 
-  const id = user.name; // simple ID (no duplicates confusion)
+  await setDoc(doc(db,"leaderboard", uid), user);
 
-  await setDoc(doc(db,"leaderboard",id), user);
-
-  return user;
+  return { ...user, id: uid };
 }
 
 
-// 🏆 LOAD (FILTER IN JS = NO FIREBASE ERRORS)
+// 🏆 LOAD LEADERBOARD
 async function loadLeaderboard() {
 
   const snapshot = await getDocs(
@@ -164,14 +169,15 @@ async function loadLeaderboard() {
   board.innerHTML = "";
 
   let currentWeek = getWeek();
+  let currentUID = localStorage.getItem("ml_uid");
+
   let users = [];
 
   snapshot.forEach(docSnap => {
     let u = docSnap.data();
 
-    // 🔥 ONLY CURRENT WEEK
     if(u.week === currentWeek){
-      users.push(u);
+      users.push({ ...u, id: docSnap.id });
     }
   });
 
@@ -180,7 +186,6 @@ async function loadLeaderboard() {
     return { yourRank:null, totalUsers:0 };
   }
 
-  let current = getUser().name;
   let yourRank = null;
 
   users.forEach((u,i)=>{
@@ -188,7 +193,8 @@ async function loadLeaderboard() {
     let div = document.createElement("div");
     div.className = "card";
 
-    if (u.name === current) {
+    // ✅ FIXED: compare UID
+    if (u.id === currentUID) {
       div.classList.add("me");
       yourRank = i + 1;
     }
