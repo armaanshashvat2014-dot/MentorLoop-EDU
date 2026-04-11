@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -92,9 +91,90 @@
   <div class="score">Score: <span id="score">0</span></div>
 </div>
 
-<script>
+<script type="module">
 
-// ---------- SHUFFLE ----------
+// 🔥 FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// 🔐 UID
+if (!localStorage.getItem("ml_uid")) {
+  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+}
+
+// 📅 WEEK
+function getWeek() {
+  let d = new Date();
+  let onejan = new Date(d.getFullYear(),0,1);
+  let week = Math.ceil((((d - onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear()+"-W"+week;
+}
+
+// 🔥 FIREBASE SYNC
+async function syncToFirebase(points){
+  const uid = localStorage.getItem("ml_uid");
+
+  await setDoc(doc(db, "leaderboard", uid), {
+    name: localStorage.getItem("ml_name") || "Guest",
+    points: points,
+    week: getWeek()
+  });
+}
+
+// 💎 POINT SYSTEM
+function addPoints(amount){
+  let current = parseInt(localStorage.getItem("ml_points")) || 0;
+  let newPoints = current + amount;
+
+  localStorage.setItem("ml_points", newPoints);
+  syncToFirebase(newPoints);
+}
+
+
+// 🧠 SUBJECT SYSTEM
+const SUBJECT = "gk";
+
+function ensureSubject(){
+  let key = "ml_history_" + SUBJECT;
+  if(!localStorage.getItem(key)){
+    localStorage.setItem(key, JSON.stringify([]));
+  }
+}
+
+function saveScoreToHistory(){
+
+  let score = parseInt(localStorage.getItem("ml_last_quiz_score")) || 0;
+  if(score <= 0) return;
+
+  ensureSubject();
+
+  let key = "ml_history_" + SUBJECT;
+  let history = JSON.parse(localStorage.getItem(key));
+
+  history.push({
+    score: score,
+    date: new Date().toLocaleDateString()
+  });
+
+  if(history.length > 10){
+    history.shift();
+  }
+
+  localStorage.setItem(key, JSON.stringify(history));
+}
+
+
+// ---------- QUIZ DATA ----------
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -103,7 +183,6 @@ function shuffle(array) {
   return array;
 }
 
-// ---------- 100 GK QUESTIONS ----------
 const questions = [
 {q:"Capital of France?",a:["Paris","Rome","Berlin"],c:0},
 {q:"Largest ocean?",a:["Atlantic","Indian","Pacific"],c:2},
@@ -115,46 +194,14 @@ const questions = [
 {q:"Fastest land animal?",a:["Lion","Cheetah","Horse"],c:1},
 {q:"Largest desert?",a:["Sahara","Gobi","Arctic"],c:0},
 {q:"National sport of Japan?",a:["Karate","Sumo","Judo"],c:1},
-
-{q:"Author of Harry Potter?",a:["Rowling","Tolkien","Lewis"],c:0},
-{q:"Planet closest to Sun?",a:["Mercury","Venus","Earth"],c:0},
-{q:"World War II ended in?",a:["1945","1939","1918"],c:0},
-{q:"Longest river?",a:["Amazon","Nile","Yangtze"],c:1},
-{q:"Capital of Canada?",a:["Toronto","Ottawa","Vancouver"],c:1},
-{q:"Largest continent?",a:["Africa","Asia","Europe"],c:1},
-{q:"Who painted Mona Lisa?",a:["Van Gogh","Da Vinci","Picasso"],c:1},
-{q:"Currency of UK?",a:["Euro","Dollar","Pound"],c:2},
-{q:"Tallest building?",a:["Shanghai Tower","Burj Khalifa","One WTC"],c:1},
-{q:"Olympics held every?",a:["2 years","4 years","6 years"],c:1},
-
-{q:"Capital of India?",a:["Mumbai","Delhi","Kolkata"],c:1},
-{q:"Who invented telephone?",a:["Bell","Edison","Tesla"],c:0},
-{q:"Largest animal?",a:["Elephant","Blue Whale","Giraffe"],c:1},
-{q:"Which country has pyramids?",a:["Mexico","Egypt","Peru"],c:1},
-{q:"First man on Moon?",a:["Buzz Aldrin","Neil Armstrong","Yuri Gagarin"],c:1},
-{q:"Currency of USA?",a:["Dollar","Euro","Peso"],c:0},
-{q:"Capital of Australia?",a:["Sydney","Melbourne","Canberra"],c:2},
-{q:"Fastest bird?",a:["Eagle","Falcon","Ostrich"],c:1},
-{q:"Smallest planet?",a:["Mercury","Mars","Venus"],c:0},
-{q:"Great Wall located in?",a:["China","Japan","Korea"],c:0},
-
-{q:"Largest rainforest?",a:["Amazon","Congo","Daintree"],c:0},
-{q:"Who developed theory of relativity?",a:["Newton","Einstein","Bohr"],c:1},
-{q:"Capital of Italy?",a:["Rome","Venice","Milan"],c:0},
-{q:"Hardest natural substance?",a:["Gold","Iron","Diamond"],c:2},
-{q:"Currency of China?",a:["Yuan","Yen","Won"],c:0},
-{q:"Who was first US President?",a:["Lincoln","Washington","Jefferson"],c:1},
-{q:"Which planet has rings?",a:["Mars","Saturn","Venus"],c:1},
-{q:"Largest island?",a:["Greenland","Madagascar","Iceland"],c:0},
-{q:"Capital of Germany?",a:["Berlin","Munich","Hamburg"],c:0},
-{q:"Inventor of light bulb?",a:["Edison","Bell","Tesla"],c:0},
 ];
 
-// Duplicate until 100 safely with variation removed
+// expand safely
 while (questions.length < 100) {
-  questions.push(...questions.slice(0,40));
+  questions.push(...questions.slice(0,10));
 }
 questions.length = 100;
+
 
 // ---------- GAME ----------
 let used = [];
@@ -163,7 +210,6 @@ let count = 0;
 const total = 10;
 
 function getQuestion() {
-  if (used.length === questions.length) return null;
   let index;
   do {
     index = Math.floor(Math.random()*questions.length);
@@ -175,9 +221,28 @@ function getQuestion() {
 function loadQuestion() {
 
   if (count >= total) {
+
+    let percent = Math.round((score/total)*100);
+
+    // 💎 SAVE SCORE
+    localStorage.setItem("ml_last_quiz_score", percent);
+
+    // 💎 SAVE HISTORY
+    saveScoreToHistory();
+
+    // 🎯 BONUS
+    const today = new Date().toDateString();
+    const key = "ml_quiz_reward";
+
+    if(percent >= 80 && localStorage.getItem(key) !== today){
+      addPoints(5);
+      localStorage.setItem(key, today);
+    }
+
     document.querySelector(".card").innerHTML =
       `<h1>Quiz Finished!</h1>
        <p>Your Score: <strong>${score} / ${total}</strong></p>
+       <p>Percentage: <strong>${percent}%</strong></p>
        <button onclick="location.reload()">Play Again</button>`;
     return;
   }
@@ -192,12 +257,17 @@ function loadQuestion() {
   q.a.forEach((opt,i)=>{
     const btn = document.createElement("button");
     btn.textContent = opt;
+
     btn.onclick = ()=>{
-      if(i===q.c) score++;
+      if(i===q.c){
+        score++;
+        addPoints(2);
+      }
       document.getElementById("score").textContent = score;
       updateProgress();
       loadQuestion();
     };
+
     options.appendChild(btn);
   });
 }
