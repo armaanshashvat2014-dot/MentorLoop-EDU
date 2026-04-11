@@ -96,5 +96,43 @@ optDiv.appendChild(btn);
 loadQuestion();
 
 </script>
+  <script>
+
+// 🔐 Ensure history exists
+if(!localStorage.getItem("ml_score_history")){
+  localStorage.setItem("ml_score_history", JSON.stringify([]));
+}
+
+
+// 💎 SAVE SCORE TO HISTORY (CALL THIS AFTER TEST ENDS)
+function saveScoreToHistory(){
+
+  let score = parseInt(localStorage.getItem("ml_total_score")) || 0;
+
+  // 🚫 prevent invalid saves
+  if(score <= 0){
+    console.warn("Invalid score, not saved");
+    return;
+  }
+
+  let history = JSON.parse(localStorage.getItem("ml_score_history"));
+
+  history.push({
+    score: score,
+    date: new Date().toLocaleDateString(),
+    time: new Date().toLocaleTimeString()
+  });
+
+  // 🧠 keep last 12 records only
+  if(history.length > 12){
+    history.shift();
+  }
+
+  localStorage.setItem("ml_score_history", JSON.stringify(history));
+
+  console.log("Saved to history:", score);
+}
+
+</script>
 </body>
 </html>
