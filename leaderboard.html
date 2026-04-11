@@ -62,13 +62,11 @@ body {
 
 <div class="container">
 
-<h2>🌍 Weekly Leaderboard</h2>
+<h2>🌍 Weekly Leaderboard (Live)</h2>
 
 <p id="you"></p>
 <p id="insight" class="subtitle"></p>
 <p id="updateTime" class="subtitle"></p>
-
-<button onclick="location.reload()">🔄 Refresh</button>
 
 <div id="leaderboard"></div>
 
@@ -85,7 +83,7 @@ import {
   query,
   orderBy,
   limit,
-  getDocs
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -98,7 +96,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-// 🔐 UID (CRITICAL FIX)
+// 🔐 UID SYSTEM (NO DUPLICATES EVER)
 if (!localStorage.getItem("ml_uid")) {
   localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
 }
@@ -146,7 +144,7 @@ function getTrend(current) {
 }
 
 
-// 🔥 SYNC (FIXED - NO DUPLICATES)
+// 🔥 SYNC USER (ALWAYS SAME DOC)
 async function syncUser() {
 
   const uid = localStorage.getItem("ml_uid");
@@ -158,87 +156,92 @@ async function syncUser() {
 }
 
 
-// 🏆 LOAD LEADERBOARD
-async function loadLeaderboard() {
+// 🚀 LIVE LEADERBOARD
+function loadLeaderboardLive(){
 
-  const snapshot = await getDocs(
-    query(collection(db,"leaderboard"), orderBy("points","desc"), limit(50))
+  const board = document.getElementById("leaderboard");
+  const currentUID = localStorage.getItem("ml_uid");
+
+  const q = query(
+    collection(db,"leaderboard"),
+    orderBy("points","desc"),
+    limit(50)
   );
 
-  let board = document.getElementById("leaderboard");
-  board.innerHTML = "";
+  onSnapshot(q, (snapshot)=>{
 
-  let currentWeek = getWeek();
-  let currentUID = localStorage.getItem("ml_uid");
+    board.innerHTML = "";
 
-  let users = [];
+    let currentWeek = getWeek();
+    let users = [];
+    let yourRank = null;
 
-  snapshot.forEach(docSnap => {
-    let u = docSnap.data();
+    snapshot.forEach(docSnap => {
+      let u = docSnap.data();
 
-    if(u.week === currentWeek){
-      users.push({ ...u, id: docSnap.id });
-    }
-  });
+      if(u.week === currentWeek){
+        users.push({ ...u, id: docSnap.id });
+      }
+    });
 
-  if(users.length === 0){
-    board.innerHTML = "<p>No data yet 🚀</p>";
-    return { yourRank:null, totalUsers:0 };
-  }
-
-  let yourRank = null;
-
-  users.forEach((u,i)=>{
-
-    let div = document.createElement("div");
-    div.className = "card";
-
-    // ✅ FIXED: compare UID
-    if (u.id === currentUID) {
-      div.classList.add("me");
-      yourRank = i + 1;
+    if(users.length === 0){
+      board.innerHTML = "<p>No data yet 🚀</p>";
+      return;
     }
 
-    if (i === 0) div.classList.add("top1");
+    users.forEach((u,i)=>{
 
-    let medal = i === 0 ? "👑🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
+      let div = document.createElement("div");
+      div.className = "card";
 
-    div.innerHTML = `
-      <div class="avatar" style="background:${getColor(u.name)}">
-        ${u.name[0].toUpperCase()}
-      </div>
-      <div class="info">
-        ${medal} #${i+1} ${u.name}
-        <br>${u.points} pts • ${getRank(u.points)}
-      </div>
-    `;
+      if (u.id === currentUID) {
+        div.classList.add("me");
+        yourRank = i + 1;
+      }
 
-    board.appendChild(div);
+      if (i === 0) div.classList.add("top1");
+
+      let medal = i === 0 ? "👑🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
+
+      div.innerHTML = `
+        <div class="avatar" style="background:${getColor(u.name)}">
+          ${u.name[0].toUpperCase()}
+        </div>
+        <div class="info">
+          ${medal} #${i+1} ${u.name}
+          <br>${u.points} pts • ${getRank(u.points)}
+        </div>
+      `;
+
+      board.appendChild(div);
+    });
+
+    // 🔥 UPDATE USER INFO LIVE
+    let user = getUser();
+
+    document.getElementById("you").innerText =
+      `You: ${user.name} — ${user.points} pts (${getRank(user.points)})`;
+
+    if (yourRank) {
+      let percent = Math.round((1 - yourRank / users.length) * 100);
+      document.getElementById("insight").innerText =
+        `Ahead of ${percent}% of students`;
+    }
+
+    document.getElementById("updateTime").innerText =
+      "Live update: " + new Date().toLocaleTimeString();
+
   });
 
-  return { yourRank, totalUsers: users.length };
 }
 
 
 // 🚀 START
 window.onload = async () => {
 
-  let user = await syncUser();
-  let data = await loadLeaderboard();
+  await syncUser();      // ensure user exists
+  loadLeaderboardLive(); // start live updates
 
-  let trend = getTrend(user.points);
-
-  document.getElementById("you").innerText =
-    `You: ${user.name} — ${user.points} pts (${getRank(user.points)}) | Rank #${data.yourRank || "-"}`;
-
-  if (data.yourRank) {
-    let percent = Math.round((1 - data.yourRank / data.totalUsers) * 100);
-    document.getElementById("insight").innerText =
-      `Ahead of ${percent}% of students • ${trend}`;
-  }
-
-  document.getElementById("updateTime").innerText =
-    "Last updated: " + new Date().toLocaleString();
 };
 
 </script>
