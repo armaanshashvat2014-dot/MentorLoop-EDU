@@ -175,8 +175,15 @@ button:hover {
 </div>
 
 <script>
+
+// 🔐 UID (CREATE ON FIRST VISIT)
+if (!localStorage.getItem("ml_uid")) {
+  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+}
+
+// LOGIN
 function login() {
-  let name = document.getElementById("nameInput").value;
+  let name = document.getElementById("nameInput").value.trim();
   let role = document.getElementById("roleInput").value;
 
   if (!name) {
@@ -190,11 +197,18 @@ function login() {
   startApp(name, role);
 }
 
+// GUEST LOGIN (FIXED)
 function guestLogin() {
+
+  localStorage.setItem("ml_name", "Guest");
+  localStorage.setItem("ml_role", "Visitor");
+
   startApp("Guest", "Visitor");
 }
 
+// START APP
 function startApp(name, role) {
+
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
 
@@ -202,12 +216,21 @@ function startApp(name, role) {
     `Welcome, ${name} (${role})`;
 }
 
+// LOGOUT (SAFE RESET)
 function logout() {
-  localStorage.clear();
+
+  // ❗ Don't delete UID (important)
+  localStorage.removeItem("ml_name");
+  localStorage.removeItem("ml_role");
+  localStorage.removeItem("ml_points");
+  localStorage.removeItem("ml_streak");
+
   location.reload();
 }
 
+// AUTO LOGIN
 window.onload = function () {
+
   let name = localStorage.getItem("ml_name");
   let role = localStorage.getItem("ml_role");
 
@@ -215,6 +238,7 @@ window.onload = function () {
     startApp(name, role);
   }
 };
+
 </script>
 
 </body>
