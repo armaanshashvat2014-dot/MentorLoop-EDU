@@ -468,68 +468,95 @@ function closeSidebar(){
 }
 
 </script>
-  <script>
+ <script>
 
-// 🎡 SPIN WHEEL (GLOBAL FIX)
+// 🛡 prevent double clicks
+let spinning = false;
 
 function spin(){
 
-  const today = new Date().toDateString();
-  let lastSpin = localStorage.getItem("ml_last_spin");
+  if(spinning) return;
+  spinning = true;
 
-  if(lastSpin === today){
-    alert("Come back tomorrow!");
-    return;
+  try {
+
+    const today = new Date().toDateString();
+    let lastSpin = localStorage.getItem("ml_last_spin");
+
+    if(lastSpin === today){
+      alert("Come back tomorrow!");
+      spinning = false;
+      return;
+    }
+
+    const canvas = document.getElementById("wheel");
+    if(!canvas){
+      alert("Wheel not found!");
+      spinning = false;
+      return;
+    }
+
+    let spins = Number(localStorage.getItem("ml_spins")) || 0;
+    spins++;
+
+    const rewards = [10,20,30,"streak",15,25,5,"RARE"];
+
+    const index = (spins % 10 === 0)
+      ? 7
+      : Math.floor(Math.random() * 7);
+
+    const deg = 360 * 5 + index * 45;
+
+    // smooth spin
+    canvas.style.transition = "transform 3s ease-out";
+    canvas.style.transform = `rotate(${deg}deg)`;
+
+    setTimeout(()=>{
+
+      try {
+
+        let reward = rewards[index];
+        let pts = parseInt(localStorage.getItem("ml_points")) || 0;
+        let streak = Number(localStorage.getItem("ml_streak")) || 0;
+
+        if(reward === "RARE"){
+          pts += 200;
+          alert("🔥 RARE 200 POINTS!");
+        }
+        else if(reward === "streak"){
+          streak++;
+          localStorage.setItem("ml_streak", streak);
+          alert("+1 streak!");
+        }
+        else {
+          pts += reward;
+          alert("+" + reward + " points!");
+        }
+
+        // 💎 SAVE LOCALLY
+        localStorage.setItem("ml_points", pts);
+        localStorage.setItem("ml_spins", spins);
+        localStorage.setItem("ml_last_spin", today);
+
+        // 🔥 UPDATE UI SAFELY
+        const p = document.getElementById("points");
+        if(p) p.innerText = pts;
+
+        const s = document.getElementById("streak");
+        if(s) s.innerText = streak;
+
+      } catch(e){
+        console.warn("Spin reward error:", e);
+      }
+
+      spinning = false;
+
+    }, 3000);
+
+  } catch(e){
+    console.warn("Spin error:", e);
+    spinning = false;
   }
-
-  let canvas = document.getElementById("wheel");
-
-  if(!canvas){
-    alert("Wheel not found!");
-    return;
-  }
-
-  let spins = Number(localStorage.getItem("ml_spins")) || 0;
-  spins++;
-
-  let rewards = [10,20,30,"streak",15,25,5,"RARE"];
-
-  let index = (spins % 10 === 0)
-    ? 7
-    : Math.floor(Math.random() * 7);
-
-  let deg = 360 * 5 + index * 45;
-
-  canvas.style.transition = "transform 3s ease-out";
-  canvas.style.transform = `rotate(${deg}deg)`;
-
-  setTimeout(()=>{
-
-    let reward = rewards[index];
-    let pts = parseInt(localStorage.getItem("ml_points")) || 0;
-
-    if(reward === "RARE"){
-      pts += 200;
-      alert("🔥 RARE 200 POINTS!");
-    }
-    else if(reward === "streak"){
-      let streak = Number(localStorage.getItem("ml_streak")) || 0;
-      streak++;
-      localStorage.setItem("ml_streak", streak);
-      alert("+1 streak!");
-    }
-    else {
-      pts += reward;
-      alert("+" + reward + " points!");
-    }
-
-    localStorage.setItem("ml_points", pts);
-    localStorage.setItem("ml_spins", spins);
-    localStorage.setItem("ml_last_spin", today);
-
-    location.reload();
-
-  }, 3000);
 }
 
 </script>
