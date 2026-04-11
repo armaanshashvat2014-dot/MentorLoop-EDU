@@ -446,6 +446,27 @@ function spin(){
 }
 
 </script>
+<script>
 
+// SIDEBAR CONTROL (GLOBAL)
+function toggleSidebar(){
+  if(window.innerWidth <= 768){
+    openSidebar();
+  } else {
+    document.getElementById("sidebar").classList.toggle("expanded");
+  }
+}
+
+function openSidebar(){
+  document.getElementById("sidebar").classList.add("expanded");
+  document.getElementById("overlay").classList.add("active");
+}
+
+function closeSidebar(){
+  document.getElementById("sidebar").classList.remove("expanded");
+  document.getElementById("overlay").classList.remove("active");
+}
+
+</script>
 </body>
 </html>
