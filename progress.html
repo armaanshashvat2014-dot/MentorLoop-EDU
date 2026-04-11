@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Growth Analytics | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:radial-gradient(circle at top,#0f172a,#020617);
+color:#e2e8f0;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.card{
+width:95%;
+max-width:900px;
+background:rgba(15,23,42,.95);
+padding:30px;
+border-radius:20px;
+box-shadow:0 0 40px rgba(34,211,238,.15);
+border:1px solid rgba(34,211,238,.2);
+}
+
+h1{
+text-align:center;
+color:#22d3ee;
+margin-bottom:20px;
+}
+
+.legend{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:15px;
+margin-top:10px;
+font-size:14px;
+}
+
+.legend-item{
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.legend-color{
+width:12px;
+height:12px;
+border-radius:50%;
+}
+
+canvas{
+margin-top:20px;
+}
+
+#trendText{
+text-align:center;
+margin-top:15px;
+color:#94a3b8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>📈 Growth Analytics</h1>
+
+<!-- 🎨 COLOR LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div>Math</div>
+  <div class="legend-item"><div class="legend-color" style="background:#3b82f6"></div>Science</div>
+  <div class="legend-item"><div class="legend-color" style="background:#eab308"></div>GK</div>
+  <div class="legend-item"><div class="legend-color" style="background:#a855f7"></div>Geography</div>
+  <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div>Tests</div>
+</div>
+
+<canvas id="growthChart" height="250"></canvas>
+
+<p id="trendText"></p>
+
+</div>
+
+<script>
+
+// 🎨 COLORS
+const subjectColors = {
+  math: "#22c55e",
+  science: "#3b82f6",
+  gk: "#eab308",
+  geography: "#a855f7",
+  test: "#ef4444"
+};
+
+// 📦 GET DATA
+function getHistory(subject){
+  return JSON.parse(localStorage.getItem("ml_history_" + subject) || "[]");
+}
+
+// 📊 BUILD DATA
+function buildDatasets(){
+
+  let datasets = [];
+
+  for(let subject in subjectColors){
+
+    let history = getHistory(subject);
+    if(history.length === 0) continue;
+
+    datasets.push({
+      label: subject.toUpperCase(),
+      data: history.map(h=>h.score),
+      borderColor: subjectColors[subject],
+      backgroundColor: subjectColors[subject]+"22",
+      tension: 0.4,
+      fill: false,
+      pointRadius: 4,
+      pointBackgroundColor: subjectColors[subject]
+    });
+  }
+
+  return datasets;
+}
+
+// 📈 TREND
+function getTrend(){
+
+  let values = [];
+
+  Object.keys(subjectColors).forEach(sub=>{
+    let h = getHistory(sub);
+    if(h.length>0) values.push(h[h.length-1].score);
+  });
+
+  if(values.length < 2) return "Not enough data";
+
+  let last = values[values.length-1];
+  let prev = values[values.length-2];
+
+  if(last > prev) return "📈 Improving";
+  if(last < prev) return "📉 Declining";
+  return "➖ Stable";
+}
+
+// 🚀 LOAD GRAPH
+function loadGraph(){
+
+  const ctx = document.getElementById("growthChart").getContext("2d");
+
+  let datasets = buildDatasets();
+
+  if(datasets.length === 0){
+    document.getElementById("trendText").innerText = "No data yet";
+    return;
+  }
+
+  let labels = Array.from({length: 12}, (_,i)=> "Test " + (i+1));
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
+    options: {
+      plugins: {
+        legend: { display: false } // we use custom legend
+      },
+      scales: {
+        x: {
+          ticks: { color: "#94a3b8" },
+          grid: { color: "#1e293b" }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: { color: "#94a3b8" },
+          grid: { color: "#1e293b" }
+        }
+      }
+    }
+  });
+
+  document.getElementById("trendText").innerText =
+    "Overall Trend: " + getTrend();
+}
+
+// 🚀 INIT
+window.onload = loadGraph;
+
+</script>
+
+</body>
+</html>
