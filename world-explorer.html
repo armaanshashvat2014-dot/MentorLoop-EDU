@@ -95,7 +95,88 @@
   <div class="score">Score: <span id="score">0</span></div>
 </div>
 
-<script>
+<script type="module">
+
+// 🔥 FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// 🔐 UID
+if (!localStorage.getItem("ml_uid")) {
+  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+}
+
+// 📅 WEEK
+function getWeek(){
+  let d=new Date();
+  let onejan=new Date(d.getFullYear(),0,1);
+  let week=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear()+"-W"+week;
+}
+
+// 🔥 SYNC
+async function syncToFirebase(points){
+  const uid = localStorage.getItem("ml_uid");
+
+  await setDoc(doc(db,"leaderboard",uid),{
+    name: localStorage.getItem("ml_name") || "Guest",
+    points: points,
+    week: getWeek()
+  });
+}
+
+// 💎 POINT SYSTEM
+function addPoints(amount){
+  let current=parseInt(localStorage.getItem("ml_points"))||0;
+  let newPoints=current+amount;
+
+  localStorage.setItem("ml_points",newPoints);
+  syncToFirebase(newPoints);
+}
+
+
+// 🧠 SUBJECT SYSTEM
+const SUBJECT = "geography";
+
+function ensureSubject(){
+  let key = "ml_history_" + SUBJECT;
+  if(!localStorage.getItem(key)){
+    localStorage.setItem(key, JSON.stringify([]));
+  }
+}
+
+function saveScoreToHistory(){
+
+  let score = parseInt(localStorage.getItem("ml_last_quiz_score")) || 0;
+  if(score <= 0) return;
+
+  ensureSubject();
+
+  let key = "ml_history_" + SUBJECT;
+  let history = JSON.parse(localStorage.getItem(key));
+
+  history.push({
+    score: score,
+    date: new Date().toLocaleDateString()
+  });
+
+  if(history.length > 10){
+    history.shift();
+  }
+
+  localStorage.setItem(key, JSON.stringify(history));
+}
+
 
 // -------- SHUFFLE ----------
 function shuffle(array) {
@@ -106,7 +187,8 @@ function shuffle(array) {
   return array;
 }
 
-// -------- 40 COUNTRY CLUES ----------
+
+// -------- DATA ----------
 const locations = [
 {country:"France",clue:"Home of the Eiffel Tower and famous for croissants."},
 {country:"Japan",clue:"Land of the rising sun and Mount Fuji."},
@@ -117,46 +199,16 @@ const locations = [
 {country:"China",clue:"The Great Wall stretches across this nation."},
 {country:"Australia",clue:"Sydney Opera House is here."},
 {country:"Canada",clue:"Niagara Falls borders this country and the USA."},
-{country:"Germany",clue:"Berlin is its capital."},
-{country:"Spain",clue:"Home of La Sagrada Familia in Barcelona."},
-{country:"Mexico",clue:"Chichen Itza is located here."},
-{country:"South Africa",clue:"Table Mountain overlooks Cape Town."},
-{country:"Argentina",clue:"Famous for Patagonia and tango."},
-{country:"Turkey",clue:"Hagia Sophia is in Istanbul."},
-{country:"Thailand",clue:"Bangkok is its capital city."},
-{country:"UAE",clue:"Burj Khalifa stands here."},
-{country:"Switzerland",clue:"Famous for the Matterhorn and chocolate."},
-{country:"Greece",clue:"The Acropolis is located here."},
-{country:"Peru",clue:"Machu Picchu is found here."},
-{country:"Netherlands",clue:"Known for windmills and tulips."},
-{country:"Norway",clue:"Famous for its fjords."},
-{country:"Sweden",clue:"Stockholm is its capital."},
-{country:"South Korea",clue:"Seoul is its capital."},
-{country:"Singapore",clue:"Marina Bay Sands is located here."},
-{country:"Indonesia",clue:"The island of Bali belongs to this country."},
-{country:"Vietnam",clue:"Ha Long Bay is here."},
-{country:"Kenya",clue:"Known for safaris and Mount Kenya."},
-{country:"Chile",clue:"Torres del Paine National Park is here."},
-{country:"Iceland",clue:"Famous for geysers and volcanoes."},
-{country:"Portugal",clue:"Lisbon is its capital."},
-{country:"Malaysia",clue:"Petronas Towers are here."},
-{country:"Philippines",clue:"An archipelago in Southeast Asia with Chocolate Hills."},
-{country:"Colombia",clue:"Cartagena is a historic city here."},
-{country:"Saudi Arabia",clue:"Mecca is located here."},
-{country:"New Zealand",clue:"Known for Milford Sound."},
-{country:"Russia",clue:"The Kremlin is in its capital."},
-{country:"UK",clue:"Big Ben is located in its capital."},
-{country:"USA",clue:"The Statue of Liberty stands here."},
-{country:"Nepal",clue:"Mount Everest lies within this country."}
+{country:"Germany",clue:"Berlin is its capital."}
 ];
 
-// -------- GAME SETTINGS ----------
+
+// -------- GAME ----------
 let used = [];
 let score = 0;
 let round = 0;
 const totalRounds = 5;
 
-// -------- GAME LOGIC ----------
 function getLocation() {
   let index;
   do {
@@ -169,9 +221,28 @@ function getLocation() {
 function loadRound() {
 
   if (round >= totalRounds) {
+
+    let percent = Math.round((score/totalRounds)*100);
+
+    // 💎 SAVE SCORE
+    localStorage.setItem("ml_last_quiz_score", percent);
+
+    // 💎 SAVE HISTORY
+    saveScoreToHistory();
+
+    // 🎯 BONUS
+    const today = new Date().toDateString();
+    const key = "ml_geo_reward";
+
+    if(percent >= 80 && localStorage.getItem(key) !== today){
+      addPoints(5);
+      localStorage.setItem(key, today);
+    }
+
     document.querySelector(".card").innerHTML =
       `<h1>Game Complete!</h1>
        <p>Your Score: <strong>${score} / ${totalRounds}</strong></p>
+       <p>Percentage: <strong>${percent}%</strong></p>
        <button onclick="location.reload()">Play Again</button>`;
     return;
   }
@@ -189,9 +260,7 @@ function loadRound() {
 
   while (options.length < 4) {
     let randomCountry = locations[Math.floor(Math.random()*locations.length)].country;
-    if (!options.includes(randomCountry)) {
-      options.push(randomCountry);
-    }
+    if (!options.includes(randomCountry)) options.push(randomCountry);
   }
 
   shuffle(options);
@@ -199,11 +268,17 @@ function loadRound() {
   options.forEach(option=>{
     const btn = document.createElement("button");
     btn.textContent = option;
+
     btn.onclick = ()=>{
-      if(option === current.country) score++;
+      if(option === current.country){
+        score++;
+        addPoints(2);
+      }
+
       document.getElementById("score").textContent = score;
       loadRound();
     };
+
     optionsDiv.appendChild(btn);
   });
 }
