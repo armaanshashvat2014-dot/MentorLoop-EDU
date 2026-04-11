@@ -3,6 +3,7 @@
 <head>
   <title>Quiz Sprint | MentorLoop EDU</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -13,6 +14,7 @@
       min-height: 100vh;
       color: #e2e8f0;
     }
+
     .card {
       background: #1e293b;
       padding: 30px;
@@ -21,7 +23,9 @@
       max-width: 600px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
+
     h1 { color:#22d3ee; }
+
     button {
       width:100%;
       padding:12px;
@@ -32,11 +36,13 @@
       border-radius:8px;
       cursor:pointer;
     }
+
     button:hover { background:#10b981; }
   </style>
 </head>
 
 <body>
+
 <div class="card">
   <h1>🧠 Quiz Sprint</h1>
   <p id="question"></p>
@@ -44,7 +50,63 @@
   <p><strong>Score:</strong> <span id="score">0</span></p>
 </div>
 
-<script>
+<script type="module">
+
+// 🔥 FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// 🔐 UID SYSTEM (CRITICAL)
+if (!localStorage.getItem("ml_uid")) {
+  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+}
+
+
+// 📅 WEEK
+function getWeek() {
+  let d = new Date();
+  let onejan = new Date(d.getFullYear(),0,1);
+  let week = Math.ceil((((d - onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear()+"-W"+week;
+}
+
+
+// 🔥 FIREBASE SYNC
+async function syncToFirebase(points){
+
+  const uid = localStorage.getItem("ml_uid");
+
+  await setDoc(doc(db, "leaderboard", uid), {
+    name: localStorage.getItem("ml_name") || "Guest",
+    points: points,
+    week: getWeek()
+  });
+}
+
+
+// 💎 POINT SYSTEM (MASTER FUNCTION)
+function addPoints(amount){
+
+  let current = parseInt(localStorage.getItem("ml_points")) || 0;
+  let newPoints = current + amount;
+
+  localStorage.setItem("ml_points", newPoints);
+
+  syncToFirebase(newPoints);
+}
+
+
+// ---------------- QUIZ LOGIC ----------------
 
 function shuffle(a){
   for(let i=a.length-1;i>0;i--){
@@ -62,6 +124,7 @@ const questionBank=[];
 const ops=["+","-","*","/"];
 
 for(let i=0;i<100;i++){
+
   let a=randomInt(5,50);
   let b=randomInt(2,20);
   let op=ops[randomInt(0,3)];
@@ -70,6 +133,7 @@ for(let i=0;i<100;i++){
   if(op==="+") correct=a+b;
   if(op==="-") correct=a-b;
   if(op==="*") correct=a*b;
+
   if(op==="/"){
     correct=randomInt(2,20);
     b=randomInt(2,10);
@@ -77,6 +141,7 @@ for(let i=0;i<100;i++){
   }
 
   let options=[correct];
+
   while(options.length<3){
     let wrong=correct+randomInt(-15,15);
     if(!options.includes(wrong)) options.push(wrong);
@@ -95,28 +160,24 @@ let questions=shuffle([...questionBank]).slice(0,10);
 let index=0;
 let score=0;
 
+
+// 🚀 LOAD QUESTION
 function loadQuestion(){
 
   if(index>=questions.length){
 
     let percent=Math.round((score/questions.length)*100);
 
-    // ⭐ SAVE LAST QUIZ SCORE FOR STUDY HELPER
+    // 🧠 AI HELPER SCORE
     localStorage.setItem("ml_last_quiz_score",percent);
 
-    // 🔥 DAILY REWARD LOGIC
-    if(percent>=80){
+    // 🎯 DAILY BONUS (FIXED)
+    const today=new Date().toDateString();
+    const key="ml_quiz_reward";
 
-      const today=new Date().toDateString();
-
-      if(localStorage.getItem("quizDailyDate")!==today){
-
-        let pts=parseInt(localStorage.getItem("ml_points")||0);
-        pts+=5;
-        localStorage.setItem("ml_points",pts);
-
-        localStorage.setItem("quizDailyDate",today);
-      }
+    if(percent>=80 && localStorage.getItem(key)!==today){
+      addPoints(5);
+      localStorage.setItem(key,today);
     }
 
     document.querySelector(".card").innerHTML=
@@ -135,13 +196,19 @@ function loadQuestion(){
   options.innerHTML="";
 
   q.a.forEach((opt,i)=>{
+
     const btn=document.createElement("button");
     btn.textContent=opt;
+
     btn.onclick=()=>{
-      if(i===q.c) score++;
+      if(i===q.c){
+        score++;
+        addPoints(2); // 🔥 reward per correct answer
+      }
       index++;
       loadQuestion();
     };
+
     options.appendChild(btn);
   });
 
@@ -151,28 +218,6 @@ function loadQuestion(){
 loadQuestion();
 
 </script>
-  <script>
 
-// DAILY ACTIVITY REWARD FOR MATH QUIZ
-
-(function(){
-
-const today = new Date().toDateString();
-const key = "ml_daily_math_quiz";
-
-if(localStorage.getItem(key) !== today){
-
-let pts = parseInt(localStorage.getItem("ml_points") || 0);
-
-pts += 5;
-
-localStorage.setItem("ml_points", pts);
-localStorage.setItem(key, today);
-
-}
-
-})();
-
-</script>
 </body>
 </html>
