@@ -59,9 +59,9 @@ canvas{
 margin-top:20px;
 }
 
-#trendText{
+#trendText, #weakText{
 text-align:center;
-margin-top:15px;
+margin-top:10px;
 color:#94a3b8;
 }
 </style>
@@ -73,7 +73,6 @@ color:#94a3b8;
 
 <h1>📈 Growth Analytics</h1>
 
-<!-- 🎨 COLOR LEGEND -->
 <div class="legend">
   <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div>Math</div>
   <div class="legend-item"><div class="legend-color" style="background:#3b82f6"></div>Science</div>
@@ -85,6 +84,7 @@ color:#94a3b8;
 <canvas id="growthChart" height="250"></canvas>
 
 <p id="trendText"></p>
+<p id="weakText"></p>
 
 </div>
 
@@ -104,7 +104,7 @@ function getHistory(subject){
   return JSON.parse(localStorage.getItem("ml_history_" + subject) || "[]");
 }
 
-// 📊 BUILD DATA
+// 📊 BUILD DATASETS
 function buildDatasets(){
 
   let datasets = [];
@@ -118,7 +118,6 @@ function buildDatasets(){
       label: subject.toUpperCase(),
       data: history.map(h=>h.score),
       borderColor: subjectColors[subject],
-      backgroundColor: subjectColors[subject]+"22",
       tension: 0.4,
       fill: false,
       pointRadius: 4,
@@ -149,6 +148,30 @@ function getTrend(){
   return "➖ Stable";
 }
 
+
+// 🔥 WEAK SUBJECT DETECTION
+function getWeakSubject(){
+
+  let result = [];
+
+  Object.keys(subjectColors).forEach(sub=>{
+    let h = getHistory(sub);
+
+    if(h.length === 0) return;
+
+    let avg = h.reduce((a,b)=>a+b.score,0)/h.length;
+
+    result.push({sub, avg});
+  });
+
+  if(result.length === 0) return null;
+
+  result.sort((a,b)=>a.avg - b.avg);
+
+  return result[0];
+}
+
+
 // 🚀 LOAD GRAPH
 function loadGraph(){
 
@@ -171,7 +194,7 @@ function loadGraph(){
     },
     options: {
       plugins: {
-        legend: { display: false } // we use custom legend
+        legend: { display: false }
       },
       scales: {
         x: {
@@ -188,9 +211,19 @@ function loadGraph(){
     }
   });
 
+  // 📈 TREND
   document.getElementById("trendText").innerText =
     "Overall Trend: " + getTrend();
+
+  // ⚠️ WEAK AREA
+  let weak = getWeakSubject();
+
+  if(weak){
+    document.getElementById("weakText").innerText =
+      `⚠️ Focus more on ${weak.sub.toUpperCase()} (Avg: ${weak.avg.toFixed(1)}%)`;
+  }
 }
+
 
 // 🚀 INIT
 window.onload = loadGraph;
