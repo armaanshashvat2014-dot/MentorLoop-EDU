@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MentorLoop EDU - Offline Suite</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+margin:0;
+font-family:'Segoe UI';
+background:radial-gradient(circle at top,#0f172a,#020617);
+color:#e2e8f0;
+}
+
+.header{
+padding:15px;
+text-align:center;
+background:#020617;
+border-bottom:1px solid #1e293b;
+}
+
+.header h1{
+color:#22d3ee;
+margin:0;
+}
+
+.container{
+padding:20px;
+max-width:900px;
+margin:auto;
+}
+
+.section{
+margin-bottom:25px;
+}
+
+.section h2{
+color:#22d3ee;
+margin-bottom:10px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.card-btn{
+padding:15px;
+background:#1e293b;
+border-radius:12px;
+cursor:pointer;
+text-align:center;
+transition:.2s;
+}
+
+.card-btn:hover{
+background:#22d3ee;
+color:#020617;
+}
+
+.app{
+margin-top:20px;
+padding:20px;
+background:#1e293b;
+border-radius:15px;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:5px 0;
+border:none;
+border-radius:8px;
+background:#020617;
+color:white;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#334155;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#22d3ee;
+color:black;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>📚 MentorLoop EDU - Offline</h1>
+</div>
+
+<div class="container">
+
+<!-- STUDENT -->
+<div class="section">
+<h2>👨‍🎓 Student Tools</h2>
+<div class="grid">
+<div class="card-btn" onclick="quiz()">Quick Quiz</div>
+<div class="card-btn" onclick="calculator()">Calculator</div>
+<div class="card-btn" onclick="notes()">Notes</div>
+<div class="card-btn" onclick="growth()">Growth</div>
+</div>
+</div>
+
+<!-- TEACHER -->
+<div class="section">
+<h2>🧑‍🏫 Teacher Tools</h2>
+<div class="grid">
+<div class="card-btn" onclick="attendance()">Attendance</div>
+<div class="card-btn" onclick="marks()">Marks Entry</div>
+<div class="card-btn" onclick="insights()">Insights</div>
+</div>
+</div>
+
+<div id="app" class="app"></div>
+
+</div>
+
+<script>
+
+// NAV
+function show(html){
+document.getElementById("app").innerHTML=html;
+}
+
+// QUIZ
+function quiz(){
+let score=0,i=0;
+let q=[
+{q:"5+5?",a:["8","10","12"],c:1},
+{q:"Earth is a?",a:["Planet","Star","Moon"],c:0}
+];
+
+function load(){
+if(i>=q.length){
+let percent=Math.round(score/q.length*100);
+
+let h=JSON.parse(localStorage.getItem("ml_hist")||"[]");
+h.push(percent);
+localStorage.setItem("ml_hist",JSON.stringify(h));
+
+show(`<h2>Score ${percent}%</h2>
+<button onclick="home()">Back</button>`);
+return;
+}
+
+let qq=q[i];
+let html=`<h3>${qq.q}</h3>`;
+
+qq.a.forEach((opt,j)=>{
+html+=`<button onclick="ans(${j})">${opt}</button>`;
+});
+
+show(html);
+}
+
+window.ans=(j)=>{
+if(j===q[i].c) score++;
+i++;
+load();
+};
+
+load();
+}
+
+// CALCULATOR
+function calculator(){
+show(`
+<h2>Calculator</h2>
+<input id="calc" placeholder="2+2">
+<button onclick="calc()">Solve</button>
+<p id="res"></p>
+<button onclick="home()">Back</button>
+`);
+}
+function calc(){
+document.getElementById("res").innerText=
+eval(document.getElementById("calc").value);
+}
+
+// NOTES
+function notes(){
+let saved=localStorage.getItem("ml_notes")||"";
+show(`
+<h2>Notes</h2>
+<textarea id="note">${saved}</textarea>
+<button onclick="saveNote()">Save</button>
+<button onclick="home()">Back</button>
+`);
+}
+function saveNote(){
+localStorage.setItem("ml_notes",document.getElementById("note").value);
+alert("Saved!");
+}
+
+// GROWTH
+function growth(){
+let h=JSON.parse(localStorage.getItem("ml_hist")||"[]");
+
+let html="<h2>Growth</h2>";
+h.forEach((v,i)=>{
+html+=`<p>Test ${i+1}: ${v}%</p>`;
+});
+
+html+=`<button onclick="home()">Back</button>`;
+show(html);
+}
+
+// ATTENDANCE
+function attendance(){
+show(`
+<h2>Attendance</h2>
+<input id="name" placeholder="Student name">
+<button onclick="mark()">Mark Present</button>
+<div id="list"></div>
+<button onclick="home()">Back</button>
+`);
+}
+function mark(){
+let list=JSON.parse(localStorage.getItem("ml_att")||"[]");
+list.push(document.getElementById("name").value);
+localStorage.setItem("ml_att",JSON.stringify(list));
+document.getElementById("list").innerHTML=list.join("<br>");
+}
+
+// MARKS
+function marks(){
+show(`
+<h2>Marks Entry</h2>
+<input id="student" placeholder="Name">
+<input id="marks" placeholder="Marks">
+<button onclick="saveMarks()">Save</button>
+<div id="data"></div>
+<button onclick="home()">Back</button>
+`);
+}
+function saveMarks(){
+let data=JSON.parse(localStorage.getItem("ml_marks")||"[]");
+data.push({
+s:document.getElementById("student").value,
+m:Number(document.getElementById("marks").value)
+});
+localStorage.setItem("ml_marks",JSON.stringify(data));
+document.getElementById("data").innerHTML=
+data.map(d=>d.s+" : "+d.m).join("<br>");
+}
+
+// INSIGHTS
+function insights(){
+let data=JSON.parse(localStorage.getItem("ml_marks")||"[]");
+
+if(data.length===0){
+show(`<h2>No Data</h2><button onclick="home()">Back</button>`);
+return;
+}
+
+let avg=data.reduce((a,b)=>a+b.m,0)/data.length;
+
+show(`
+<h2>Class Insights</h2>
+<p>Average: ${avg.toFixed(1)}</p>
+<p>Total Students: ${data.length}</p>
+<button onclick="home()">Back</button>
+`);
+}
+
+// HOME
+function home(){
+document.getElementById("app").innerHTML="";
+}
+
+</script>
+
+</body>
+</html>
