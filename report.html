@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Report Card | MentorLoop EDU</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+margin:0;
+font-family:'Segoe UI';
+background:#020617;
+color:#e2e8f0;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.card{
+width:95%;
+max-width:600px;
+background:#1e293b;
+padding:25px;
+border-radius:15px;
+box-shadow:0 0 40px rgba(34,211,238,.2);
+}
+
+h1{
+text-align:center;
+color:#22d3ee;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+border-bottom:1px solid #334155;
+}
+
+.label{
+color:#94a3b8;
+}
+
+.value{
+font-weight:bold;
+}
+
+.summary{
+margin-top:15px;
+padding:10px;
+background:#020617;
+border-radius:10px;
+text-align:center;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#334155;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#22d3ee;
+color:black;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>📄 Report Card</h1>
+
+<div id="report"></div>
+
+<div class="summary" id="summary"></div>
+
+<button onclick="downloadReport()">📥 Download Report</button>
+<button onclick="window.print()">🖨 Print</button>
+
+</div>
+
+<script>
+
+// 📊 SUBJECTS
+const subjects = ["math","science","gk","geography","test"];
+
+// 📦 GET DATA
+function getHistory(sub){
+  return JSON.parse(localStorage.getItem("ml_history_"+sub) || "[]");
+}
+
+// 📊 GENERATE REPORT
+function generateReport(){
+
+let reportHTML = "";
+let data = [];
+let total = 0;
+
+subjects.forEach(sub=>{
+
+  let h = getHistory(sub);
+
+  if(h.length === 0) return;
+
+  let avg = h.reduce((a,b)=>a+b.score,0)/h.length;
+
+  total += avg;
+
+  data.push({sub,avg});
+
+  reportHTML += `
+  <div class="row">
+    <span class="label">${sub.toUpperCase()}</span>
+    <span class="value">${avg.toFixed(1)}%</span>
+  </div>`;
+});
+
+// 📈 OVERALL
+let overall = data.length ? total / data.length : 0;
+
+// 🏆 PERFORMANCE
+let performance = "Needs Improvement";
+if(overall >= 80) performance = "Excellent";
+else if(overall >= 60) performance = "Good";
+
+// ⚠️ WEAK SUBJECT
+data.sort((a,b)=>a.avg - b.avg);
+let weak = data.length ? data[0].sub.toUpperCase() : "-";
+
+// 🧾 RENDER
+document.getElementById("report").innerHTML = reportHTML;
+
+document.getElementById("summary").innerHTML = `
+<p><strong>Overall:</strong> ${overall.toFixed(1)}%</p>
+<p><strong>Performance:</strong> ${performance}</p>
+<p><strong>Focus Area:</strong> ${weak}</p>
+`;
+
+}
+
+// 📥 DOWNLOAD
+function downloadReport(){
+
+let text = "MentorLoop EDU Report Card\n\n";
+
+subjects.forEach(sub=>{
+let h = getHistory(sub);
+
+if(h.length>0){
+let avg = h.reduce((a,b)=>a+b.score,0)/h.length;
+text += `${sub.toUpperCase()}: ${avg.toFixed(1)}%\n`;
+}
+});
+
+let blob = new Blob([text], {type:"text/plain"});
+let a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "report.txt";
+a.click();
+
+}
+
+// 🚀 INIT
+generateReport();
+
+</script>
+
+</body>
+</html>
