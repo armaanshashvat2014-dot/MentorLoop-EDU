@@ -66,7 +66,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-// 🔐 UID SYSTEM (CRITICAL)
+// 🔐 UID SYSTEM
 if (!localStorage.getItem("ml_uid")) {
   localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
 }
@@ -83,7 +83,6 @@ function getWeek() {
 
 // 🔥 FIREBASE SYNC
 async function syncToFirebase(points){
-
   const uid = localStorage.getItem("ml_uid");
 
   await setDoc(doc(db, "leaderboard", uid), {
@@ -94,15 +93,48 @@ async function syncToFirebase(points){
 }
 
 
-// 💎 POINT SYSTEM (MASTER FUNCTION)
+// 💎 POINT SYSTEM
 function addPoints(amount){
-
   let current = parseInt(localStorage.getItem("ml_points")) || 0;
   let newPoints = current + amount;
 
   localStorage.setItem("ml_points", newPoints);
-
   syncToFirebase(newPoints);
+}
+
+
+// 🧠 SUBJECT SYSTEM (NEW)
+const SUBJECT = "math";
+
+function ensureSubject(){
+  let key = "ml_history_" + SUBJECT;
+  if(!localStorage.getItem(key)){
+    localStorage.setItem(key, JSON.stringify([]));
+  }
+}
+
+function saveScoreToHistory(){
+
+  let score = parseInt(localStorage.getItem("ml_last_quiz_score")) || 0;
+  if(score <= 0) return;
+
+  ensureSubject();
+
+  let key = "ml_history_" + SUBJECT;
+  let history = JSON.parse(localStorage.getItem(key));
+
+  history.push({
+    score: score,
+    date: new Date().toLocaleDateString()
+  });
+
+  if(history.length > 10){
+    history.shift();
+  }
+
+  localStorage.setItem(key, JSON.stringify(history));
+
+  console.log("Saved math history:", score);
 }
 
 
@@ -123,7 +155,7 @@ function randomInt(min,max){
 const questionBank=[];
 const ops=["+","-","*","/"];
 
-for(let i=0;i<100;i++){
+for(let i=0;i<50;i++){
 
   let a=randomInt(5,50);
   let b=randomInt(2,20);
@@ -168,10 +200,13 @@ function loadQuestion(){
 
     let percent=Math.round((score/questions.length)*100);
 
-    // 🧠 AI HELPER SCORE
+    // 💎 SAVE SCORE
     localStorage.setItem("ml_last_quiz_score",percent);
 
-    // 🎯 DAILY BONUS (FIXED)
+    // 💎 SAVE HISTORY
+    saveScoreToHistory();
+
+    // 🎯 DAILY BONUS
     const today=new Date().toDateString();
     const key="ml_quiz_reward";
 
@@ -203,7 +238,7 @@ function loadQuestion(){
     btn.onclick=()=>{
       if(i===q.c){
         score++;
-        addPoints(2); // 🔥 reward per correct answer
+        addPoints(2);
       }
       index++;
       loadQuestion();
