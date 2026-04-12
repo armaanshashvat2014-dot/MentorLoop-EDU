@@ -5,47 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{
-margin:0;
-font-family:'Segoe UI',sans-serif;
-background:#f1f3f4;
-}
+body{font-family:'Segoe UI',sans-serif;background:#f1f3f4;margin:0}
 
-/* HEADER */
 .header{
 background:#1a73e8;
 color:white;
 padding:20px;
 text-align:center;
 font-size:22px;
-font-weight:bold;
 }
 
-/* BANNER */
-.banner{
-background:#1a73e8;
-color:white;
-padding:30px;
-border-radius:10px;
-margin:20px;
-}
-
-/* NAV */
 .nav{
 display:flex;
 justify-content:center;
-gap:25px;
+gap:20px;
 background:white;
-padding:12px;
+padding:10px;
 border-bottom:1px solid #ddd;
 }
 
 .nav button{
-border:none;
 background:none;
+border:none;
 font-size:16px;
 cursor:pointer;
-color:#5f6368;
+color:#555;
 }
 
 .nav .active{
@@ -53,24 +37,29 @@ color:#1a73e8;
 border-bottom:2px solid #1a73e8;
 }
 
-/* CONTAINER */
 .container{
 max-width:900px;
 margin:auto;
 padding:10px;
 }
 
-/* CARDS */
 .card{
 background:white;
 padding:15px;
 margin-bottom:15px;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
+border-radius:12px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* BUTTON */
-.primary{
+textarea,input{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button.primary{
 background:#1a73e8;
 color:white;
 border:none;
@@ -80,41 +69,20 @@ border-radius:6px;
 cursor:pointer;
 }
 
-/* INPUT */
-input,textarea{
-width:100%;
+.chat{
+background:#eef3fd;
 padding:10px;
-margin-top:10px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-/* FLOAT BUTTON */
-.fab{
-position:fixed;
-bottom:20px;
-right:20px;
-background:#1a73e8;
-color:white;
-width:55px;
-height:55px;
-border-radius:50%;
-font-size:28px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-}
-
-/* STATUS */
-.status{
-font-size:13px;
-color:#5f6368;
-margin-top:5px;
+border-radius:8px;
+margin-top:8px;
 }
 
 .hidden{display:none;}
 
+.status{
+font-size:13px;
+margin-top:5px;
+color:#555;
+}
 </style>
 </head>
 
@@ -122,15 +90,9 @@ margin-top:5px;
 
 <div class="header">📘 MentorLoop Classroom</div>
 
-<div class="banner">
-<h2 id="classTitle">Classroom</h2>
-<p>Welcome to your class</p>
-</div>
-
 <div class="nav">
 <button class="tab active" onclick="showTab('stream')">Stream</button>
-<button class="tab" onclick="showTab('classwork')">Classwork</button>
-<button class="tab" onclick="showTab('people')">People</button>
+<button class="tab" onclick="showTab('homework')">Homework</button>
 </div>
 
 <div class="container">
@@ -139,42 +101,49 @@ margin-top:5px;
 <div id="stream">
 
 <div class="card">
-<textarea id="msg" placeholder="Share something with your class..."></textarea>
-<button class="primary" id="postBtn">Post</button>
+<textarea id="msg" placeholder="Share something..."></textarea>
+<button class="primary" id="sendBtn">Post</button>
 </div>
 
 <div id="feed"></div>
 
 </div>
 
-<!-- CLASSWORK -->
-<div id="classwork" class="hidden">
+<!-- HOMEWORK (TEACHER PANEL) -->
+<div id="homework" class="hidden">
 
-<div id="works"></div>
+<div id="teacherPanel" class="card hidden">
+
+<h3>Create Homework</h3>
+<input id="hwTitle" placeholder="Title">
+<textarea id="hwDesc" placeholder="Instructions"></textarea>
+<input id="hwMarks" placeholder="Marks">
+<input type="datetime-local" id="hwDeadline">
+
+<button class="primary" id="createHW">Assign</button>
+
+<hr>
+
+<h3>📊 Leaderboard</h3>
+<ul id="leaderboard"></ul>
+
+<hr>
+
+<h3>📥 Submissions</h3>
+<div id="submissions"></div>
 
 </div>
 
-<!-- PEOPLE -->
-<div id="people" class="hidden">
-
-<div class="card">
-<h3>Students</h3>
-<ul id="students"></ul>
 </div>
 
 </div>
-
-</div>
-
-<!-- FLOAT BUTTON -->
-<div id="fab" class="fab hidden">+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
 getFirestore, collection, addDoc, onSnapshot,
-doc, getDoc, setDoc, updateDoc
+doc, setDoc, getDocs, getDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const app = initializeApp({
@@ -185,12 +154,25 @@ projectId:"mentorloop-55a37"
 
 const db = getFirestore(app);
 
-const uid=localStorage.getItem("ml_uid");
-const name=localStorage.getItem("ml_name");
-const role=localStorage.getItem("ml_role");
-const classId=localStorage.getItem("ml_class");
+// USER
+const uid = localStorage.getItem("ml_uid");
+const name = localStorage.getItem("ml_name");
+const role = localStorage.getItem("ml_role");
+const classId = localStorage.getItem("ml_class");
 
-if(role==="Mentor") fab.classList.remove("hidden");
+// DOM
+const sendBtn = document.getElementById("sendBtn");
+const msg = document.getElementById("msg");
+const feed = document.getElementById("feed");
+
+const teacherPanel = document.getElementById("teacherPanel");
+const leaderboard = document.getElementById("leaderboard");
+const submissions = document.getElementById("submissions");
+
+// SHOW TEACHER PANEL
+if(role==="Mentor"){
+teacherPanel.classList.remove("hidden");
+}
 
 // -------- TABS --------
 window.showTab=(id)=>{
@@ -201,12 +183,15 @@ document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
 event.target.classList.add("active");
 };
 
-// -------- STREAM --------
-postBtn.onclick=async()=>{
-if(!msg.value) return;
+// -------- STREAM (INFINITE FEED) --------
+sendBtn.onclick=async()=>{
+if(!msg.value.trim()) return;
 
 await addDoc(collection(db,"classrooms",classId,"stream"),{
-name,text:msg.value,type:"post"
+name,
+type:"message",
+text:msg.value,
+time:Date.now()
 });
 
 msg.value="";
@@ -215,81 +200,92 @@ msg.value="";
 onSnapshot(collection(db,"classrooms",classId,"stream"),snap=>{
 feed.innerHTML="";
 
-snap.forEach(d=>{
-let p=d.data();
+snap.forEach(docSnap=>{
+let p=docSnap.data();
 
+if(p.type==="message"){
+feed.innerHTML+=`<div class="card"><b>${p.name}</b><p>${p.text}</p></div>`;
+}
+
+if(p.type==="homework"){
 feed.innerHTML+=`
 <div class="card">
-<b>${p.name}</b>
-<p>${p.text}</p>
-</div>
-`;
-});
-});
-
-// -------- FAB (CREATE ASSIGNMENT) --------
-fab.onclick=async()=>{
-
-let title=prompt("Assignment title:");
-let marks=prompt("Marks:");
-let deadline=prompt("Deadline (YYYY-MM-DD):");
-
-if(!title) return;
-
-await addDoc(collection(db,"classrooms",classId,"worksheets"),{
-title,marks:parseInt(marks),deadline
-});
-
-await addDoc(collection(db,"classrooms",classId,"stream"),{
-name:"SYSTEM",
-text:"New assignment: "+title,
-type:"assignment"
-});
-};
-
-// -------- CLASSWORK --------
-onSnapshot(collection(db,"classrooms",classId,"worksheets"),snap=>{
-works.innerHTML="";
-
-snap.forEach(docSnap=>{
-let ws=docSnap.data();
-
-works.innerHTML+=`
-<div class="card">
-<b>${ws.title}</b>
+<h4>${p.title}</h4>
+<p>${p.desc}</p>
+<p>Marks: ${p.marks}</p>
 
 <textarea id="ans_${docSnap.id}" placeholder="Your answer"></textarea>
-<input type="file" id="file_${docSnap.id}" accept=".pptx">
+<button class="primary" onclick="submitHW('${docSnap.id}')">Turn In</button>
+</div>`;
+}
+});
+});
 
-<button class="primary" onclick="submit('${docSnap.id}')">Turn In</button>
-<p class="status" id="status_${docSnap.id}">Not submitted</p>
+// -------- CREATE HOMEWORK --------
+document.getElementById("createHW").onclick=async()=>{
+
+await addDoc(collection(db,"classrooms",classId,"stream"),{
+type:"homework",
+title:hwTitle.value,
+desc:hwDesc.value,
+marks:parseInt(hwMarks.value),
+deadline:hwDeadline.value,
+time:Date.now()
+});
+
+hwTitle.value="";
+hwDesc.value="";
+hwMarks.value="";
+hwDeadline.value="";
+};
+
+// -------- SUBMIT --------
+window.submitHW=async(id)=>{
+
+let ans=document.getElementById("ans_"+id).value;
+if(!ans) return alert("Write answer");
+
+await setDoc(doc(db,"classrooms",classId,"submissions",uid+"_"+id),{
+name,
+answer:ans,
+hwId:id
+});
+
+// notify teacher
+await addDoc(collection(db,"classrooms",classId,"stream"),{
+type:"notify",
+text:`${name} submitted homework`
+});
+};
+
+// -------- LEADERBOARD --------
+onSnapshot(collection(db,"classrooms",classId,"students"),snap=>{
+leaderboard.innerHTML="";
+snap.forEach(d=>{
+let s=d.data();
+leaderboard.innerHTML+=`<li>${s.name} - ${s.points}</li>`;
+});
+});
+
+// -------- SUBMISSIONS --------
+async function loadSubs(){
+
+let snap=await getDocs(collection(db,"classrooms",classId,"submissions"));
+
+submissions.innerHTML="";
+
+snap.forEach(d=>{
+let s=d.data();
+submissions.innerHTML+=`
+<div class="card">
+<b>${s.name}</b>
+<p>${s.answer}</p>
 </div>
 `;
 });
-});
+}
 
-// -------- SUBMIT --------
-window.submit=async(id)=>{
-
-let ans=document.getElementById("ans_"+id).value;
-let file=document.getElementById("file_"+id).files[0];
-
-if(!ans && !file){alert("Submit something");return;}
-
-await setDoc(doc(db,"classrooms",classId,"worksheets",id,"submissions",uid),{
-answer:ans,file:file?file.name:null
-});
-
-document.getElementById("status_"+id).innerText="Turned in";
-};
-
-// -------- STUDENTS --------
-onSnapshot(collection(db,"classrooms",classId,"students"),snap=>{
-students.innerHTML="";
-snap.forEach(d=>{
-students.innerHTML+=`<li>${d.data().name}</li>`;
-});
-});
+if(role==="Mentor") loadSubs();
 
 </script>
 
