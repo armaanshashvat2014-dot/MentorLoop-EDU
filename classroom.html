@@ -1,366 +1,270 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MentorLoop EDU Ultimate Classroom</title>
+<title>MentorLoop EDU Classroom</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{
-  font-family:'Segoe UI';
-  background:#0f172a;
-  color:white;
-  text-align:center;
-}
-.card{
-  background:#1e293b;
-  padding:20px;
-  margin:15px auto;
-  max-width:650px;
-  border-radius:12px;
-}
-input,button,textarea,select{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:8px;
-  border:none;
-}
-button{
-  background:#22c55e;
-  color:white;
-}
-.danger{
-  background:#ef4444;
-}
+body{font-family:sans-serif;background:#0f172a;color:white;text-align:center}
+.card{background:#1e293b;padding:20px;margin:15px auto;max-width:700px;border-radius:10px}
+input,button,textarea{width:100%;padding:10px;margin-top:10px;border:none;border-radius:6px}
+button{background:#22c55e;color:white}
+.chat{background:#020617;padding:10px;border-radius:6px;margin-top:10px}
+.danger{background:red}
 </style>
 </head>
 
 <body>
 
-<h1>🚀 MentorLoop EDU</h1>
+<h1>🏫 Classroom</h1>
 
-<!-- LOGIN -->
-<div id="loginBox" class="card">
-<input id="name" placeholder="Enter Name">
-<select id="role">
-<option>Student</option>
-<option>Mentor</option>
-</select>
-<button onclick="login()">Login</button>
+<!-- CHAT -->
+<div class="card">
+<h3>💬 Chat</h3>
+<div id="chat"></div>
+
+<input id="msg" placeholder="Type message">
+<button onclick="sendMsg()">Send</button>
+
+<input id="link" placeholder="Paste link">
+<button onclick="sendLink()">Send Link</button>
 </div>
 
-<!-- TEACHER -->
-<div id="teacherPanel" class="card" style="display:none">
+<!-- TEACHER PANEL -->
+<div class="card" id="teacherPanel" style="display:none">
 
-<h3>Create Classroom</h3>
-<input id="className" placeholder="Class Name">
-<button onclick="createClass()">Create</button>
-<p id="classCode"></p>
+<h3>📄 Add Worksheet</h3>
+<input id="title">
+<input id="marks" placeholder="Marks">
+<input type="datetime-local" id="deadline">
+<button onclick="addWS()">Add</button>
 
-<h3>Add Worksheet</h3>
-<input id="wsTitle" placeholder="Title">
-<input id="wsMarks" placeholder="Marks">
-<input id="wsDeadline" type="datetime-local">
-<button onclick="addWorksheet()">Add</button>
+<h3>🎥 Start Online Class</h3>
+<input id="meetLink" placeholder="Paste Meet/Zoom link">
+<button onclick="startClass()">Start</button>
 
-<h3>Students</h3>
-<ul id="studentList"></ul>
-
-<h3>Submissions</h3>
+<h3>📥 Submissions</h3>
 <div id="submissions"></div>
 
-<h3>Analytics</h3>
-<p id="avgScore"></p>
-<p id="totalStudents"></p>
-
+<h3>📊 Analytics</h3>
+<p id="avg"></p>
+<p id="count"></p>
 <canvas id="chart"></canvas>
-
-<button onclick="downloadReport()">Download Report</button>
 
 </div>
 
-<!-- STUDENT -->
-<div id="studentPanel" class="card" style="display:none">
-
-<h3>Join Classroom</h3>
-<input id="joinCode">
-<button onclick="joinClass()">Join</button>
-
-<div id="worksheets"></div>
-
+<!-- WORKSHEETS -->
+<div class="card">
+<h3>📚 Worksheets</h3>
+<div id="works"></div>
 </div>
 
 <!-- LEADERBOARD -->
 <div class="card">
 <h3>🏆 Leaderboard</h3>
-<ul id="leaderboard"></ul>
+<ul id="board"></ul>
 </div>
+
+<button onclick="leave()">Leave Class</button>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
 getFirestore, collection, addDoc, doc, setDoc, getDocs,
-query, where, updateDoc, getDoc, onSnapshot, deleteDoc
+onSnapshot, updateDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-authDomain: "mentorloop-55a37.firebaseapp.com",
-projectId: "mentorloop-55a37"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// LOGIN
-window.login = () => {
-localStorage.setItem("ml_name", name.value);
-localStorage.setItem("ml_role", role.value);
-location.reload();
-};
-
-// UID
-if(!localStorage.getItem("ml_uid")){
-localStorage.setItem("ml_uid","user_"+Math.random().toString(36).slice(2));
-}
-
-const uid = localStorage.getItem("ml_uid");
-const userName = localStorage.getItem("ml_name");
-const role = localStorage.getItem("ml_role");
-
-if(userName){
-loginBox.style.display="none";
-(role==="Mentor"?teacherPanel:studentPanel).style.display="block";
-}
-
-let currentClass=null;
-
-// CREATE CLASS (NO DUPLICATES)
-window.createClass = async () => {
-
-const q=query(collection(db,"classrooms"),where("name","==",className.value));
-const snap=await getDocs(q);
-
-if(!snap.empty){
-alert("Class already exists!");
-return;
-}
-
-let code=Math.random().toString(36).slice(2,7).toUpperCase();
-
-const ref=await addDoc(collection(db,"classrooms"),{
-name:className.value,
-teacher:uid,
-code
+const app=initializeApp({
+apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+authDomain:"mentorloop-55a37.firebaseapp.com",
+projectId:"mentorloop-55a37"
 });
 
-currentClass=ref.id;
-classCode.innerText="Code: "+code;
+const db=getFirestore(app);
 
-loadStudents();
-loadLeaderboard();
+const uid=localStorage.getItem("ml_uid");
+const name=localStorage.getItem("ml_name");
+const role=localStorage.getItem("ml_role");
+const classId=localStorage.getItem("ml_class");
+
+if(role==="Mentor") teacherPanel.style.display="block";
+
+// ---------------- CHAT ----------------
+window.sendMsg=async()=>{
+if(!msg.value) return;
+await addDoc(collection(db,"classrooms",classId,"chat"),{
+name,text:msg.value
+});
+msg.value="";
 };
 
-// JOIN CLASS
-window.joinClass = async () => {
+window.sendLink=async()=>{
+if(!link.value) return;
+await addDoc(collection(db,"classrooms",classId,"chat"),{
+name,text:"🔗 "+link.value
+});
+link.value="";
+};
 
-const q=query(collection(db,"classrooms"),where("code","==",joinCode.value));
-const snap=await getDocs(q);
-
-snap.forEach(async docSnap=>{
-currentClass=docSnap.id;
-
-await setDoc(doc(db,"classrooms",currentClass,"students",uid),{
-name:userName,
-points:0
+onSnapshot(collection(db,"classrooms",classId,"chat"),snap=>{
+chat.innerHTML="";
+snap.forEach(d=>{
+let m=d.data();
+chat.innerHTML+=`<div class="chat">${m.name}: ${m.text}</div>`;
+});
 });
 
-loadWorksheets();
-loadLeaderboard();
+// ---------------- WORKSHEETS ----------------
+window.addWS=async()=>{
+await addDoc(collection(db,"classrooms",classId,"worksheets"),{
+title:title.value,
+marks:parseInt(marks.value),
+deadline:deadline.value
 });
 };
 
-// ADD WORKSHEET
-window.addWorksheet = async () => {
-
-await addDoc(collection(db,"classrooms",currentClass,"worksheets"),{
-title:wsTitle.value,
-marks:parseInt(wsMarks.value),
-deadline:wsDeadline.value
-});
-
-alert("Worksheet Added");
-};
-
-// LOAD WORKSHEETS (WITH CONTROLLED INPUT)
-async function loadWorksheets(){
-
-const snap=await getDocs(collection(db,"classrooms",currentClass,"worksheets"));
-
-worksheets.innerHTML="";
+onSnapshot(collection(db,"classrooms",classId,"worksheets"),snap=>{
+works.innerHTML="";
 
 snap.forEach(docSnap=>{
 let ws=docSnap.data();
 
-let div=document.createElement("div");
-
-div.innerHTML=`
+works.innerHTML+=`
+<div class="card">
 <p><b>${ws.title}</b></p>
 
-<textarea id="ans_${docSnap.id}" placeholder="Write answer"></textarea>
-
-<input type="url" id="link_${docSnap.id}" placeholder="Paste link">
-
+<textarea id="ans_${docSnap.id}" placeholder="Answer"></textarea>
+<input id="link_${docSnap.id}" placeholder="Link">
 <input type="file" id="file_${docSnap.id}" accept=".pptx">
 
-<button onclick="submitWork('${docSnap.id}')">Submit</button>
+<button onclick="submit('${docSnap.id}')">Submit</button>
+</div>
 `;
-
-worksheets.appendChild(div);
 });
-}
+});
 
-// SUBMIT (STRICT)
-window.submitWork = async (id) => {
+// ---------------- SUBMIT ----------------
+window.submit=async(id)=>{
 
 let answer=document.getElementById("ans_"+id).value;
-let link=document.getElementById("link_"+id).value;
-let fileInput=document.getElementById("file_"+id);
+let linkVal=document.getElementById("link_"+id).value;
+let file=document.getElementById("file_"+id).files[0];
 
-let file=fileInput.files[0];
-
-if(!answer && !link && !file){
-alert("Submit answer OR link OR PPT");
+if(!answer && !linkVal && !file){
+alert("Submit something!");
 return;
 }
 
 if(file && !file.name.endsWith(".pptx")){
-alert("Only PPTX allowed!");
+alert("Only PPTX allowed");
 return;
 }
 
-let fileName=file?file.name:null;
-
-let ws=(await getDoc(doc(db,"classrooms",currentClass,"worksheets",id))).data();
+let ws=(await getDoc(doc(db,"classrooms",classId,"worksheets",id))).data();
 
 let now=new Date();
 let deadline=new Date(ws.deadline);
 
 let pts=now<=deadline?ws.marks:Math.floor(ws.marks/2);
 
-await setDoc(doc(db,"classrooms",currentClass,"worksheets",id,"submissions",uid),{
-answer:answer||null,
-link:link||null,
-file:fileName,
-score:pts,
-submittedAt:now.toISOString()
+await setDoc(doc(db,"classrooms",classId,"worksheets",id,"submissions",uid),{
+answer,link:linkVal,file:file?file.name:null,score:pts
 });
 
-await updateDoc(doc(db,"classrooms",currentClass,"students",uid),{
+await updateDoc(doc(db,"classrooms",classId,"students",uid),{
 points:pts
 });
 
-alert("Submitted!");
+await addDoc(collection(db,"classrooms",classId,"chat"),{
+name:"SYSTEM",
+text:`${name} submitted ${ws.title}`
+});
 };
 
-// LOAD SUBMISSIONS (TEACHER)
-async function loadSubmissions(worksheetId){
+// ---------------- SUBMISSIONS (TEACHER) ----------------
+async function loadSubs(){
 
-const snap=await getDocs(collection(db,"classrooms",currentClass,"worksheets",worksheetId,"submissions"));
+const snap=await getDocs(collection(db,"classrooms",classId,"worksheets"));
 
 submissions.innerHTML="";
 
-snap.forEach(docSnap=>{
-let d=docSnap.data();
+for(const wsDoc of snap.docs){
 
-let div=document.createElement("div");
+let wsId=wsDoc.id;
+let subSnap=await getDocs(collection(db,"classrooms",classId,"worksheets",wsId,"submissions"));
 
-div.innerHTML=`
-<p><b>${docSnap.id}</b></p>
-<p>Answer: ${d.answer||"-"}</p>
-<p>Link: ${d.link||"-"}</p>
-<p>PPT: ${d.file||"-"}</p>
-<p>Score: ${d.score}</p>
+subSnap.forEach(d=>{
+let s=d.data();
+
+submissions.innerHTML+=`
+<div class="card">
+<p>${d.id}</p>
+<p>${s.answer||"-"}</p>
+<p>${s.link||"-"}</p>
+<p>${s.file||"-"}</p>
+<p>Score: ${s.score}</p>
+</div>
 `;
-
-submissions.appendChild(div);
 });
 }
+}
 
-// LIVE LEADERBOARD + ANALYTICS
-function loadLeaderboard(){
+if(role==="Mentor") loadSubs();
 
-onSnapshot(collection(db,"classrooms",currentClass,"students"),snap=>{
+// ---------------- LEADERBOARD ----------------
+let chartObj=null;
 
-leaderboard.innerHTML="";
-let scores=[];
+onSnapshot(collection(db,"classrooms",classId,"students"),snap=>{
 
-snap.forEach(docSnap=>{
-let d=docSnap.data();
+let arr=[];
 
-scores.push(d.points);
-
-let li=document.createElement("li");
-li.textContent=d.name+" - "+d.points;
-leaderboard.appendChild(li);
+snap.forEach(d=>{
+arr.push(d.data());
 });
 
-let avg=scores.reduce((a,b)=>a+b,0)/scores.length||0;
-avgScore.innerText="Avg Score: "+Math.round(avg);
-totalStudents.innerText="Students: "+scores.length;
+arr.sort((a,b)=>b.points-a.points);
 
-new Chart(chart,{
+board.innerHTML="";
+
+arr.forEach(s=>{
+board.innerHTML+=`<li>${s.name} - ${s.points}</li>`;
+});
+
+// analytics
+let scores=arr.map(s=>s.points);
+let avgScore=scores.reduce((a,b)=>a+b,0)/scores.length||0;
+
+avg.innerText="Average: "+Math.round(avgScore);
+count.innerText="Students: "+scores.length;
+
+// chart fix
+if(chartObj) chartObj.destroy();
+
+chartObj=new Chart(chart,{
 type:'line',
-data:{labels:scores.map((_,i)=>i+1),datasets:[{data:scores}]}
-});
-
-});
+data:{
+labels:scores.map((_,i)=>i+1),
+datasets:[{data:scores}]
 }
-
-// STUDENTS
-function loadStudents(){
-
-onSnapshot(collection(db,"classrooms",currentClass,"students"),snap=>{
-
-studentList.innerHTML="";
-
-snap.forEach(docSnap=>{
-let d=docSnap.data();
-
-let li=document.createElement("li");
-
-li.innerHTML=`
-${d.name}
-<button class="danger" onclick="removeStudent('${docSnap.id}')">X</button>
-`;
-
-studentList.appendChild(li);
 });
-});
-}
 
-window.removeStudent=async(id)=>{
-await deleteDoc(doc(db,"classrooms",currentClass,"students",id));
+});
+
+// ---------------- ONLINE CLASS ----------------
+window.startClass=async()=>{
+await addDoc(collection(db,"classrooms",classId,"chat"),{
+name:"SYSTEM",
+text:"📢 Join class: "+meetLink.value
+});
 };
 
-// REPORT
-window.downloadReport = () => {
-
-let text="MentorLoop Report\n\n";
-
-document.querySelectorAll("#leaderboard li").forEach(li=>{
-text+=li.innerText+"\n";
-});
-
-let blob=new Blob([text],{type:"text/plain"});
-let a=document.createElement("a");
-
-a.href=URL.createObjectURL(blob);
-a.download="report.txt";
-a.click();
+// ---------------- LEAVE ----------------
+window.leave=()=>{
+localStorage.removeItem("ml_class");
+location.href="dashboard.html";
 };
 
 </script>
