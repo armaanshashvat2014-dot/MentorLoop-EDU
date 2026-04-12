@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MentorLoop EDU Classroom</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  font-family:'Segoe UI';
+  background:#0f172a;
+  color:white;
+  text-align:center;
+}
+.card{
+  background:#1e293b;
+  padding:20px;
+  margin:15px auto;
+  max-width:500px;
+  border-radius:12px;
+}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+}
+button{
+  background:#22c55e;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏫 MentorLoop Classroom</h1>
+
+<!-- TEACHER -->
+<div id="teacherPanel" class="card" style="display:none">
+  <h3>Create Classroom</h3>
+  <input id="className" placeholder="Class Name">
+  <button onclick="createClass()">Create</button>
+  <p id="classCode"></p>
+
+  <h3>Add Worksheet</h3>
+  <input id="wsTitle" placeholder="Title">
+  <input id="wsMarks" placeholder="Marks">
+  <input id="wsDeadline" type="datetime-local">
+  <button onclick="addWorksheet()">Add Worksheet</button>
+</div>
+
+<!-- STUDENT -->
+<div id="studentPanel" class="card" style="display:none">
+  <h3>Join Classroom</h3>
+  <input id="joinCode" placeholder="Enter Code">
+  <button onclick="joinClass()">Join</button>
+
+  <h3>Worksheets</h3>
+  <div id="worksheets"></div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="card">
+  <h3>🏆 Leaderboard</h3>
+  <ul id="leaderboard"></ul>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, doc, setDoc, getDocs,
+  query, where, updateDoc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// USER
+if(!localStorage.getItem("ml_uid")){
+  localStorage.setItem("ml_uid","user_"+Math.random().toString(36).slice(2));
+}
+
+const uid = localStorage.getItem("ml_uid");
+const name = localStorage.getItem("ml_name") || "Student";
+const role = localStorage.getItem("ml_role") || "Student";
+
+let currentClass = null;
+
+// 🎯 AUTO ROLE UI
+if(role.includes("Mentor")){
+  document.getElementById("teacherPanel").style.display="block";
+}else{
+  document.getElementById("studentPanel").style.display="block";
+}
+
+// 🎲 GENERATE CODE
+function genCode(){
+  return Math.random().toString(36).substring(2,7).toUpperCase();
+}
+
+// 🏫 CREATE CLASS
+window.createClass = async () => {
+
+  let cname = document.getElementById("className").value;
+  let code = genCode();
+
+  const ref = await addDoc(collection(db,"classrooms"),{
+    name:cname,
+    teacher:uid,
+    code:code
+  });
+
+  currentClass = ref.id;
+
+  document.getElementById("classCode").innerText =
+    "Class Code: "+code;
+};
+
+// 👨‍🎓 JOIN CLASS
+window.joinClass = async () => {
+
+  let code = document.getElementById("joinCode").value;
+
+  const q = query(collection(db,"classrooms"), where("code","==",code));
+  const snap = await getDocs(q);
+
+  snap.forEach(async docSnap => {
+
+    currentClass = docSnap.id;
+
+    await setDoc(doc(db,"classrooms",currentClass,"students",uid),{
+      name:name,
+      points:0
+    });
+
+    loadWorksheets();
+    loadLeaderboard();
+  });
+};
+
+// 📄 ADD WORKSHEET
+window.addWorksheet = async () => {
+
+  if(!currentClass) return alert("Create class first");
+
+  let title = document.getElementById("wsTitle").value;
+  let marks = parseInt(document.getElementById("wsMarks").value);
+  let deadline = document.getElementById("wsDeadline").value;
+
+  await addDoc(collection(db,"classrooms",currentClass,"worksheets"),{
+    title:title,
+    marks:marks,
+    deadline:deadline
+  });
+
+  alert("Worksheet added");
+};
+
+// 📥 LOAD WORKSHEETS
+async function loadWorksheets(){
+
+  const snap = await getDocs(collection(db,"classrooms",currentClass,"worksheets"));
+
+  let container = document.getElementById("worksheets");
+  container.innerHTML="";
+
+  snap.forEach(docSnap => {
+
+    let ws = docSnap.data();
+
+    let div = document.createElement("div");
+
+    div.innerHTML = `
+      <p><b>${ws.title}</b></p>
+      <p>Marks: ${ws.marks}</p>
+      <button onclick="submitWork('${docSnap.id}')">Submit</button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// 📥 SUBMIT WORK
+window.submitWork = async (worksheetId) => {
+
+  let wsRef = doc(db,"classrooms",currentClass,"worksheets",worksheetId);
+  let wsSnap = await getDoc(wsRef);
+  let ws = wsSnap.data();
+
+  let now = new Date();
+  let deadline = new Date(ws.deadline);
+
+  let points = now <= deadline ? ws.marks : Math.floor(ws.marks/2);
+
+  await setDoc(doc(wsRef,"submissions",uid),{
+    submittedAt:now.toISOString(),
+    score:points
+  });
+
+  let studentRef = doc(db,"classrooms",currentClass,"students",uid);
+
+  await updateDoc(studentRef,{
+    points: points
+  });
+
+  loadLeaderboard();
+
+  alert("Submitted! Points: "+points);
+};
+
+// 🏆 LEADERBOARD
+async function loadLeaderboard(){
+
+  const snap = await getDocs(collection(db,"classrooms",currentClass,"students"));
+
+  let list = document.getElementById("leaderboard");
+  list.innerHTML="";
+
+  snap.forEach(docSnap => {
+
+    let d = docSnap.data();
+
+    let li = document.createElement("li");
+    li.textContent = d.name + " - " + d.points + " pts";
+
+    list.appendChild(li);
+  });
+}
+
+</script>
+
+</body>
+</html>
