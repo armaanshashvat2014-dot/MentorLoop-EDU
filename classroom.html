@@ -92,7 +92,7 @@ color:#555;
 
 <div class="nav">
 <button class="tab active" onclick="showTab('stream')">Stream</button>
-<button class="tab" onclick="showTab('homework')">Homework</button>
+<button class="tab" id="hwTab" onclick="showTab('homework')" style="display:none">Homework</button>
 </div>
 
 <div class="container">
@@ -109,7 +109,7 @@ color:#555;
 
 </div>
 
-<!-- HOMEWORK (TEACHER PANEL) -->
+<!-- HOMEWORK -->
 <div id="homework" class="hidden">
 
 <div id="teacherPanel" class="card hidden">
@@ -143,7 +143,7 @@ color:#555;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
 getFirestore, collection, addDoc, onSnapshot,
-doc, setDoc, getDocs, getDoc, updateDoc
+doc, setDoc, updateDoc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const app = initializeApp({
@@ -157,7 +157,8 @@ const db = getFirestore(app);
 // USER
 const uid = localStorage.getItem("ml_uid");
 const name = localStorage.getItem("ml_name");
-const role = localStorage.getItem("ml_role");
+let roleRaw = localStorage.getItem("ml_role") || "";
+const role = roleRaw.toLowerCase(); // 🔥 CASE FIX
 const classId = localStorage.getItem("ml_class");
 
 // DOM
@@ -165,17 +166,20 @@ const sendBtn = document.getElementById("sendBtn");
 const msg = document.getElementById("msg");
 const feed = document.getElementById("feed");
 
+const hwTab = document.getElementById("hwTab");
 const teacherPanel = document.getElementById("teacherPanel");
+
 const leaderboard = document.getElementById("leaderboard");
 const submissions = document.getElementById("submissions");
 
-// SHOW TEACHER PANEL
-if(role==="Mentor"){
-teacherPanel.classList.remove("hidden");
+// SHOW TEACHER FEATURES
+if(role === "mentor"){
+  teacherPanel.classList.remove("hidden");
+  hwTab.style.display = "inline-block";
 }
 
 // -------- TABS --------
-window.showTab=(id)=>{
+window.showTab = (id)=>{
 document.querySelectorAll(".container > div").forEach(d=>d.classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
 
@@ -183,8 +187,35 @@ document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
 event.target.classList.add("active");
 };
 
-// -------- STREAM (INFINITE FEED) --------
-sendBtn.onclick=async()=>{
+// -------- STREAM ORDER FIX --------
+const q = query(collection(db,"classrooms",classId,"stream"), orderBy("time","asc"));
+
+onSnapshot(q, snap=>{
+feed.innerHTML="";
+
+snap.forEach(docSnap=>{
+let p = docSnap.data();
+
+if(p.type==="message"){
+feed.innerHTML += `<div class="card"><b>${p.name}</b><p>${p.text}</p></div>`;
+}
+
+if(p.type==="homework"){
+feed.innerHTML += `
+<div class="card">
+<h4>${p.title}</h4>
+<p>${p.desc}</p>
+
+<textarea id="ans_${docSnap.id}"></textarea>
+<button class="primary" onclick="submitHW('${docSnap.id}')">Turn In</button>
+</div>`;
+}
+
+});
+});
+
+// -------- SEND MESSAGE --------
+sendBtn.onclick = async ()=>{
 if(!msg.value.trim()) return;
 
 await addDoc(collection(db,"classrooms",classId,"stream"),{
@@ -197,32 +228,8 @@ time:Date.now()
 msg.value="";
 };
 
-onSnapshot(collection(db,"classrooms",classId,"stream"),snap=>{
-feed.innerHTML="";
-
-snap.forEach(docSnap=>{
-let p=docSnap.data();
-
-if(p.type==="message"){
-feed.innerHTML+=`<div class="card"><b>${p.name}</b><p>${p.text}</p></div>`;
-}
-
-if(p.type==="homework"){
-feed.innerHTML+=`
-<div class="card">
-<h4>${p.title}</h4>
-<p>${p.desc}</p>
-<p>Marks: ${p.marks}</p>
-
-<textarea id="ans_${docSnap.id}" placeholder="Your answer"></textarea>
-<button class="primary" onclick="submitHW('${docSnap.id}')">Turn In</button>
-</div>`;
-}
-});
-});
-
 // -------- CREATE HOMEWORK --------
-document.getElementById("createHW").onclick=async()=>{
+document.getElementById("createHW").onclick = async ()=>{
 
 await addDoc(collection(db,"classrooms",classId,"stream"),{
 type:"homework",
@@ -240,9 +247,9 @@ hwDeadline.value="";
 };
 
 // -------- SUBMIT --------
-window.submitHW=async(id)=>{
+window.submitHW = async (id)=>{
 
-let ans=document.getElementById("ans_"+id).value;
+let ans = document.getElementById("ans_"+id).value;
 if(!ans) return alert("Write answer");
 
 await setDoc(doc(db,"classrooms",classId,"submissions",uid+"_"+id),{
@@ -250,42 +257,31 @@ name,
 answer:ans,
 hwId:id
 });
-
-// notify teacher
-await addDoc(collection(db,"classrooms",classId,"stream"),{
-type:"notify",
-text:`${name} submitted homework`
-});
 };
 
 // -------- LEADERBOARD --------
-onSnapshot(collection(db,"classrooms",classId,"students"),snap=>{
+onSnapshot(collection(db,"classrooms",classId,"students"), snap=>{
 leaderboard.innerHTML="";
 snap.forEach(d=>{
 let s=d.data();
-leaderboard.innerHTML+=`<li>${s.name} - ${s.points}</li>`;
+leaderboard.innerHTML += `<li>${s.name} - ${s.points}</li>`;
 });
 });
 
-// -------- SUBMISSIONS --------
-async function loadSubs(){
-
-let snap=await getDocs(collection(db,"classrooms",classId,"submissions"));
-
+// -------- LIVE SUBMISSIONS --------
+onSnapshot(collection(db,"classrooms",classId,"submissions"), snap=>{
 submissions.innerHTML="";
 
 snap.forEach(d=>{
 let s=d.data();
-submissions.innerHTML+=`
+
+submissions.innerHTML += `
 <div class="card">
 <b>${s.name}</b>
 <p>${s.answer}</p>
-</div>
-`;
+</div>`;
 });
-}
-
-if(role==="Mentor") loadSubs();
+});
 
 </script>
 
