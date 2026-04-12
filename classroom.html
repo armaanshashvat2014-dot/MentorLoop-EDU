@@ -91,8 +91,8 @@ color:#555;
 <div class="header">📘 MentorLoop Classroom</div>
 
 <div class="nav">
-<button class="tab active" onclick="showTab('stream')">Stream</button>
-<button class="tab" id="hwTab" onclick="showTab('homework')" style="display:none">Homework</button>
+<button class="tab active" data-tab="stream">Stream</button>
+<button class="tab hidden" id="hwTab" data-tab="homework">Homework</button>
 </div>
 
 <div class="container">
@@ -143,9 +143,13 @@ color:#555;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
 getFirestore, collection, addDoc, onSnapshot,
-doc, setDoc, updateDoc, query, orderBy
+doc, setDoc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// 🔥 DEBUG SAFETY
+window.onerror = (msg)=>alert("Error: "+msg);
+
+// FIREBASE
 const app = initializeApp({
 apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
 authDomain:"mentorloop-55a37.firebaseapp.com",
@@ -157,9 +161,16 @@ const db = getFirestore(app);
 // USER
 const uid = localStorage.getItem("ml_uid");
 const name = localStorage.getItem("ml_name");
-let roleRaw = localStorage.getItem("ml_role") || "";
-const role = roleRaw.toLowerCase(); // 🔥 CASE FIX
 const classId = localStorage.getItem("ml_class");
+
+// 🔥 CASE-PROOF ROLE
+const role = (localStorage.getItem("ml_role") || "").trim().toLowerCase();
+
+// SAFETY
+if(!classId){
+alert("No class selected");
+location.href="dashboard.html";
+}
 
 // DOM
 const sendBtn = document.getElementById("sendBtn");
@@ -172,20 +183,30 @@ const teacherPanel = document.getElementById("teacherPanel");
 const leaderboard = document.getElementById("leaderboard");
 const submissions = document.getElementById("submissions");
 
-// SHOW TEACHER FEATURES
+// -------- ROLE FIX --------
 if(role === "mentor"){
+  hwTab.classList.remove("hidden");
   teacherPanel.classList.remove("hidden");
-  hwTab.style.display = "inline-block";
 }
 
-// -------- TABS --------
-window.showTab = (id)=>{
-document.querySelectorAll(".container > div").forEach(d=>d.classList.add("hidden"));
-document.getElementById(id).classList.remove("hidden");
+// -------- TAB SYSTEM --------
+const tabs = document.querySelectorAll(".tab");
 
-document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");
+tabs.forEach(btn=>{
+btn.onclick = ()=>{
+let target = btn.getAttribute("data-tab");
+
+// hide all
+document.querySelectorAll(".container > div").forEach(d=>d.classList.add("hidden"));
+
+// show selected
+document.getElementById(target).classList.remove("hidden");
+
+// active state
+tabs.forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
 };
+});
 
 // -------- STREAM ORDER FIX --------
 const q = query(collection(db,"classrooms",classId,"stream"), orderBy("time","asc"));
@@ -196,17 +217,23 @@ feed.innerHTML="";
 snap.forEach(docSnap=>{
 let p = docSnap.data();
 
+// MESSAGE
 if(p.type==="message"){
-feed.innerHTML += `<div class="card"><b>${p.name}</b><p>${p.text}</p></div>`;
+feed.innerHTML += `
+<div class="card">
+<b>${p.name}</b>
+<p>${p.text}</p>
+</div>`;
 }
 
+// HOMEWORK (STUDENT VIEW)
 if(p.type==="homework"){
 feed.innerHTML += `
 <div class="card">
 <h4>${p.title}</h4>
 <p>${p.desc}</p>
 
-<textarea id="ans_${docSnap.id}"></textarea>
+<textarea id="ans_${docSnap.id}" placeholder="Your answer"></textarea>
 <button class="primary" onclick="submitHW('${docSnap.id}')">Turn In</button>
 </div>`;
 }
