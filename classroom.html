@@ -69,20 +69,7 @@ border-radius:6px;
 cursor:pointer;
 }
 
-.chat{
-background:#eef3fd;
-padding:10px;
-border-radius:8px;
-margin-top:8px;
-}
-
 .hidden{display:none;}
-
-.status{
-font-size:13px;
-margin-top:5px;
-color:#555;
-}
 </style>
 </head>
 
@@ -146,9 +133,6 @@ getFirestore, collection, addDoc, onSnapshot,
 doc, setDoc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 🔥 DEBUG SAFETY
-window.onerror = (msg)=>alert("Error: "+msg);
-
 // FIREBASE
 const app = initializeApp({
 apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
@@ -163,8 +147,10 @@ const uid = localStorage.getItem("ml_uid");
 const name = localStorage.getItem("ml_name");
 const classId = localStorage.getItem("ml_class");
 
-// 🔥 CASE-PROOF ROLE
-const role = (localStorage.getItem("ml_role") || "").trim().toLowerCase();
+// 🔥 ROLE FIX (EMOJI SAFE)
+const roleRaw = localStorage.getItem("ml_role") || "";
+const role = roleRaw.toLowerCase();
+const isMentor = role.includes("mentor");
 
 // SAFETY
 if(!classId){
@@ -183,10 +169,10 @@ const teacherPanel = document.getElementById("teacherPanel");
 const leaderboard = document.getElementById("leaderboard");
 const submissions = document.getElementById("submissions");
 
-// -------- ROLE FIX --------
-if(role === "mentor"){
-  hwTab.classList.remove("hidden");
-  teacherPanel.classList.remove("hidden");
+// SHOW TEACHER FEATURES
+if(isMentor){
+hwTab.classList.remove("hidden");
+teacherPanel.classList.remove("hidden");
 }
 
 // -------- TAB SYSTEM --------
@@ -194,21 +180,19 @@ const tabs = document.querySelectorAll(".tab");
 
 tabs.forEach(btn=>{
 btn.onclick = ()=>{
-let target = btn.getAttribute("data-tab");
+let target = btn.dataset.tab;
 
-// hide all
-document.querySelectorAll(".container > div").forEach(d=>d.classList.add("hidden"));
+document.querySelectorAll(".container > div")
+.forEach(d=>d.classList.add("hidden"));
 
-// show selected
 document.getElementById(target).classList.remove("hidden");
 
-// active state
 tabs.forEach(b=>b.classList.remove("active"));
 btn.classList.add("active");
 };
 });
 
-// -------- STREAM ORDER FIX --------
+// -------- STREAM (ORDER FIXED) --------
 const q = query(collection(db,"classrooms",classId,"stream"), orderBy("time","asc"));
 
 onSnapshot(q, snap=>{
@@ -217,7 +201,6 @@ feed.innerHTML="";
 snap.forEach(docSnap=>{
 let p = docSnap.data();
 
-// MESSAGE
 if(p.type==="message"){
 feed.innerHTML += `
 <div class="card">
@@ -226,7 +209,6 @@ feed.innerHTML += `
 </div>`;
 }
 
-// HOMEWORK (STUDENT VIEW)
 if(p.type==="homework"){
 feed.innerHTML += `
 <div class="card">
@@ -237,11 +219,10 @@ feed.innerHTML += `
 <button class="primary" onclick="submitHW('${docSnap.id}')">Turn In</button>
 </div>`;
 }
-
 });
 });
 
-// -------- SEND MESSAGE --------
+// SEND MESSAGE
 sendBtn.onclick = async ()=>{
 if(!msg.value.trim()) return;
 
@@ -255,7 +236,7 @@ time:Date.now()
 msg.value="";
 };
 
-// -------- CREATE HOMEWORK --------
+// CREATE HOMEWORK
 document.getElementById("createHW").onclick = async ()=>{
 
 await addDoc(collection(db,"classrooms",classId,"stream"),{
@@ -273,7 +254,7 @@ hwMarks.value="";
 hwDeadline.value="";
 };
 
-// -------- SUBMIT --------
+// SUBMIT HOMEWORK
 window.submitHW = async (id)=>{
 
 let ans = document.getElementById("ans_"+id).value;
@@ -286,7 +267,7 @@ hwId:id
 });
 };
 
-// -------- LEADERBOARD --------
+// LEADERBOARD
 onSnapshot(collection(db,"classrooms",classId,"students"), snap=>{
 leaderboard.innerHTML="";
 snap.forEach(d=>{
@@ -295,7 +276,7 @@ leaderboard.innerHTML += `<li>${s.name} - ${s.points}</li>`;
 });
 });
 
-// -------- LIVE SUBMISSIONS --------
+// SUBMISSIONS LIVE
 onSnapshot(collection(db,"classrooms",classId,"submissions"), snap=>{
 submissions.innerHTML="";
 
