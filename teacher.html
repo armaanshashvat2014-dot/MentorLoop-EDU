@@ -32,6 +32,27 @@ button{margin:4px;}
 <button onclick="window.location.href='https://chatbot-79kdx1gk0gm.streamlit.app/';">Produce errorless homework</button>
   <button onclick="window.location.href='classroom.html';">EDU Class</button>
   <button onclick="window.location.href='offline.html';">Offline Mode</button>
+</div><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop EDU - Advanced Homework</title>
+
+<style>
+body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
+.nav{display:flex;flex-wrap:wrap;background:#0f172a;padding:10px;}
+.nav button{margin:5px;padding:8px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;}
+.page{display:none;padding:20px;}
+.active{display:block;}
+.card{background:#020617;padding:20px;border-radius:15px;max-width:700px;margin:auto;text-align:center;box-shadow:0 0 30px rgba(56,189,248,0.2);}
+button{margin:5px;}
+</style>
+
+</head>
+<body>
+
+<div class="nav">
+<button onclick="show('homework')">Homework</button>
 </div>
 
 <div id="homework" class="page active">
@@ -81,44 +102,87 @@ return Math.floor(Math.random()*(max-min+1))+min;
 let allQuestions = [];
 let currentIndex = 0;
 
-// 🧠 SMART QUESTION GENERATOR
+// 🧠 SMART GENERATOR
 function genQuestion(grade, subject){
 
-grade=parseInt(grade);
+grade = parseInt(grade);
 
-// ---------- MATH ----------
+// ---------- MATH (UPGRADED) ----------
 if(subject==="math"){
-let a=rand(1,100), b=rand(1,100), c=rand(1,10);
 
-if(grade<=4) return `Solve the addition: ${a} + ${b}.`;
-if(grade<=6) return `Calculate the difference: ${a} - ${b}.`;
-if(grade<=8) return `Multiply: ${a} × ${c}.`;
-if(grade<=10) return `Solve for x: ${c}x + ${a} = ${b}.`;
-return `Factorize the expression: x² + ${c}x + ${rand(1,20)}.`;
+// G1–G4
+if(grade<=4){
+return `Solve: ${rand(10,99)} + ${rand(10,99)}.`;
+}
+
+// G5–G6
+if(grade<=6){
+return `Solve step-by-step: (${rand(10,50)} + ${rand(10,50)}) × ${rand(2,10)}.`;
+}
+
+// G7–G8
+if(grade<=8){
+let n1=rand(1,10), d1=rand(1,10), n2=rand(1,10), d2=rand(1,10);
+return `Simplify: ${n1}/${d1} + ${n2}/${d2}.`;
+}
+
+// G9–G10
+if(grade<=10){
+return `Solve for x: ${rand(2,10)}x + ${rand(5,20)} = ${rand(30,80)}.`;
+}
+
+// G11
+return `Solve the quadratic equation: x² + ${rand(1,10)}x + ${rand(1,20)} = 0.`;
 }
 
 // ---------- SCIENCE ----------
 if(subject==="science"){
-let topics=["gravity","photosynthesis","energy","friction","atoms","force","motion"];
-let t=topics[rand(0,topics.length-1)];
-return `Explain the concept of ${t} with a suitable example.`;
+if(grade<=4){
+let q=["What is gravity?","What is energy?","What is force?"];
+return q[rand(0,q.length-1)];
+}
+if(grade<=7){
+let q=["Explain photosynthesis.","What is friction?","Describe types of energy."];
+return q[rand(0,q.length-1)];
+}
+if(grade<=10){
+let q=["Explain Newton’s laws.","Describe atomic structure.","What is electricity?"];
+return q[rand(0,q.length-1)];
+}
+return "Explain the law of conservation of energy with examples.";
 }
 
 // ---------- ENGLISH ----------
 if(subject==="english"){
-let topics=["your favorite hobby","your school day","a memorable event","a rainy day"];
-return `Write a short paragraph (50–80 words) about ${topics[rand(0,topics.length-1)]}.`;
+if(grade<=4){
+let q=["Write a sentence about your school.","Make a sentence using 'happy'."];
+return q[rand(0,q.length-1)];
+}
+if(grade<=7){
+return "Write a short paragraph (50 words) about your favorite hobby.";
+}
+if(grade<=10){
+return "Write a paragraph on climate change.";
+}
+return "Write a formal letter to your teacher requesting leave.";
 }
 
 // ---------- GK ----------
 if(subject==="gk"){
-let topics=["global warming","democracy","United Nations","GDP","climate change"];
-return `Explain ${topics[rand(0,topics.length-1)]} in simple terms.`;
+if(grade<=4){
+let q=["What is Earth?","Name two countries."];
+return q[rand(0,q.length-1)];
+}
+if(grade<=7){
+let q=["What is democracy?","What is global warming?"];
+return q[rand(0,q.length-1)];
+}
+return "Explain the role of the United Nations.";
 }
 
 }
 
-// 📚 GENERATE 100 QUESTIONS SAFELY
+// 📚 SAFE GENERATION
 function generateFullSet(grade, subject){
 
 let set = new Set();
@@ -131,13 +195,13 @@ attempts++;
 
 // fallback safety
 while(set.size < 100){
-set.add(genQuestion(grade,subject) + " (Try again)");
+set.add(genQuestion(grade,subject) + " (Variation)");
 }
 
 return Array.from(set);
 }
 
-// 🧾 DISPLAY 10 QUESTIONS
+// 🧾 DISPLAY
 function showBatch(){
 
 let batch = allQuestions.slice(currentIndex, currentIndex+10);
@@ -165,22 +229,18 @@ currentIndex += 10;
 showBatch();
 }
 
-// 🚀 MAIN FUNCTION
+// MAIN
 function generateHW(){
 
 let grade=document.getElementById("grade").value;
 let subject=document.getElementById("subject").value;
 
-// RESET
 currentIndex = 0;
 
-// GENERATE
 allQuestions = generateFullSet(grade, subject);
 
-// SAVE
 localStorage.setItem("hw_full", JSON.stringify(allQuestions));
 
-// DISPLAY
 showBatch();
 }
 
@@ -188,3 +248,4 @@ showBatch();
 
 </body>
 </html>
+
