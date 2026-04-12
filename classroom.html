@@ -70,6 +70,8 @@ cursor:pointer;
 }
 
 .hidden{display:none;}
+
+small{color:#666}
 </style>
 </head>
 
@@ -144,13 +146,12 @@ const db = getFirestore(app);
 
 // USER
 const uid = localStorage.getItem("ml_uid");
-const name = localStorage.getItem("ml_name");
+const name = localStorage.getItem("ml_name") || "Unknown";
 const classId = localStorage.getItem("ml_class");
 
-// 🔥 ROLE FIX (EMOJI SAFE)
+// 🔥 ROLE FIX (handles emoji etc.)
 const roleRaw = localStorage.getItem("ml_role") || "";
-const role = roleRaw.toLowerCase();
-const isMentor = role.includes("mentor");
+const isMentor = roleRaw.toLowerCase().includes("mentor");
 
 // SAFETY
 if(!classId){
@@ -169,16 +170,14 @@ const teacherPanel = document.getElementById("teacherPanel");
 const leaderboard = document.getElementById("leaderboard");
 const submissions = document.getElementById("submissions");
 
-// SHOW TEACHER FEATURES
+// SHOW TEACHER UI
 if(isMentor){
 hwTab.classList.remove("hidden");
 teacherPanel.classList.remove("hidden");
 }
 
-// -------- TAB SYSTEM --------
-const tabs = document.querySelectorAll(".tab");
-
-tabs.forEach(btn=>{
+// -------- TABS --------
+document.querySelectorAll(".tab").forEach(btn=>{
 btn.onclick = ()=>{
 let target = btn.dataset.tab;
 
@@ -187,12 +186,12 @@ document.querySelectorAll(".container > div")
 
 document.getElementById(target).classList.remove("hidden");
 
-tabs.forEach(b=>b.classList.remove("active"));
+document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
 btn.classList.add("active");
 };
 });
 
-// -------- STREAM (ORDER FIXED) --------
+// -------- STREAM ORDER FIX --------
 const q = query(collection(db,"classrooms",classId,"stream"), orderBy("time","asc"));
 
 onSnapshot(q, snap=>{
@@ -201,6 +200,7 @@ feed.innerHTML="";
 snap.forEach(docSnap=>{
 let p = docSnap.data();
 
+// MESSAGE
 if(p.type==="message"){
 feed.innerHTML += `
 <div class="card">
@@ -209,20 +209,23 @@ feed.innerHTML += `
 </div>`;
 }
 
+// HOMEWORK (STUDENT VIEW)
 if(p.type==="homework"){
 feed.innerHTML += `
 <div class="card">
 <h4>${p.title}</h4>
 <p>${p.desc}</p>
+<small>👨‍🏫 ${p.teacherName}</small>
 
 <textarea id="ans_${docSnap.id}" placeholder="Your answer"></textarea>
 <button class="primary" onclick="submitHW('${docSnap.id}')">Turn In</button>
 </div>`;
 }
+
 });
 });
 
-// SEND MESSAGE
+// -------- SEND MESSAGE --------
 sendBtn.onclick = async ()=>{
 if(!msg.value.trim()) return;
 
@@ -236,7 +239,7 @@ time:Date.now()
 msg.value="";
 };
 
-// CREATE HOMEWORK
+// -------- CREATE HOMEWORK (WITH TEACHER NAME) --------
 document.getElementById("createHW").onclick = async ()=>{
 
 await addDoc(collection(db,"classrooms",classId,"stream"),{
@@ -245,7 +248,8 @@ title:hwTitle.value,
 desc:hwDesc.value,
 marks:parseInt(hwMarks.value),
 deadline:hwDeadline.value,
-time:Date.now()
+teacherName: name, // 🔥 IMPORTANT
+time: Date.now()
 });
 
 hwTitle.value="";
@@ -254,20 +258,23 @@ hwMarks.value="";
 hwDeadline.value="";
 };
 
-// SUBMIT HOMEWORK
+// -------- SUBMIT HOMEWORK --------
 window.submitHW = async (id)=>{
 
 let ans = document.getElementById("ans_"+id).value;
 if(!ans) return alert("Write answer");
 
 await setDoc(doc(db,"classrooms",classId,"submissions",uid+"_"+id),{
-name,
-answer:ans,
-hwId:id
+name: name, // 🔥 AUTO NAME
+answer: ans,
+hwId: id,
+time: Date.now()
 });
+
+alert("Submitted!");
 };
 
-// LEADERBOARD
+// -------- LEADERBOARD --------
 onSnapshot(collection(db,"classrooms",classId,"students"), snap=>{
 leaderboard.innerHTML="";
 snap.forEach(d=>{
@@ -276,17 +283,22 @@ leaderboard.innerHTML += `<li>${s.name} - ${s.points}</li>`;
 });
 });
 
-// SUBMISSIONS LIVE
+// -------- SUBMISSIONS (WITH TIME) --------
 onSnapshot(collection(db,"classrooms",classId,"submissions"), snap=>{
 submissions.innerHTML="";
 
 snap.forEach(d=>{
 let s=d.data();
 
+let time = s.time 
+? new Date(s.time).toLocaleString() 
+: "No time";
+
 submissions.innerHTML += `
 <div class="card">
-<b>${s.name}</b>
+<b>👤 ${s.name}</b>
 <p>${s.answer}</p>
+<small>🕒 ${time}</small>
 </div>`;
 });
 });
