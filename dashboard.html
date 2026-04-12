@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MentorLoop EDU Class</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{font-family:sans-serif;background:#0f172a;color:white;text-align:center}
+.card{background:#1e293b;padding:20px;margin:15px auto;max-width:500px;border-radius:10px}
+button,input,select{width:100%;padding:10px;margin-top:10px;border:none;border-radius:6px}
+button{background:#22c55e;color:white}
+.danger{background:red}
+</style>
+</head>
+
+<body>
+
+<h1>MentorLoop EDU</h1>
+
+<div class="card" id="loginBox">
+<input id="name" placeholder="Enter name">
+<select id="role">
+<option>Student</option>
+<option>Mentor</option>
+</select>
+<button onclick="login()">Login</button>
+</div>
+
+<div id="app" style="display:none">
+
+<div class="card" id="teacherPanel" style="display:none">
+<h3>Create Class</h3>
+<input id="className">
+<button onclick="createClass()">Create</button>
+</div>
+
+<div class="card">
+<h3>Your Classrooms</h3>
+<div id="classes"></div>
+</div>
+
+<div class="card" id="joinBox" style="display:none">
+<h3>Join Class</h3>
+<input id="joinCode">
+<button onclick="joinClass()">Join</button>
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+getFirestore, collection, addDoc, doc, setDoc, getDocs,
+query, where, deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+authDomain:"mentorloop-55a37.firebaseapp.com",
+projectId:"mentorloop-55a37"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+// LOGIN
+window.login=()=>{
+localStorage.setItem("ml_name",name.value);
+localStorage.setItem("ml_role",role.value);
+location.reload();
+};
+
+const uid=localStorage.getItem("ml_uid")||"user_"+Math.random();
+localStorage.setItem("ml_uid",uid);
+
+const userName=localStorage.getItem("ml_name");
+const role=localStorage.getItem("ml_role");
+
+if(userName){
+loginBox.style.display="none";
+app.style.display="block";
+
+if(role==="Mentor") teacherPanel.style.display="block";
+else joinBox.style.display="block";
+
+loadClasses();
+}
+
+// CREATE CLASS
+window.createClass=async()=>{
+let cname=className.value;
+
+const q=query(collection(db,"classrooms"),where("name","==",cname));
+const snap=await getDocs(q);
+
+if(!snap.empty){alert("Exists");return;}
+
+let code=Math.random().toString(36).slice(2,7).toUpperCase();
+
+await addDoc(collection(db,"classrooms"),{
+name:cname,teacher:uid,code
+});
+
+loadClasses();
+};
+
+// JOIN
+window.joinClass=async()=>{
+const q=query(collection(db,"classrooms"),where("code","==",joinCode.value));
+const snap=await getDocs(q);
+
+snap.forEach(async d=>{
+await setDoc(doc(db,"classrooms",d.id,"students",uid),{
+name:userName,points:0
+});
+});
+
+loadClasses();
+};
+
+// LOAD CLASSES
+async function loadClasses(){
+
+classes.innerHTML="";
+
+const snap=await getDocs(collection(db,"classrooms"));
+
+snap.forEach(docSnap=>{
+let c=docSnap.data();
+
+let div=document.createElement("div");
+
+div.innerHTML=`
+<p>${c.name}</p>
+<button onclick="openClass('${docSnap.id}')">Open</button>
+${role==="Mentor"?`<button class="danger" onclick="del('${docSnap.id}')">Delete</button>`:""}
+`;
+
+classes.appendChild(div);
+});
+}
+
+// OPEN CLASS
+window.openClass=(id)=>{
+localStorage.setItem("ml_class",id);
+location.href="classroom.html";
+};
+
+// DELETE
+window.del=async(id)=>{
+await deleteDoc(doc(db,"classrooms",id));
+loadClasses();
+};
+
+</script>
+
+</body>
+</html>
