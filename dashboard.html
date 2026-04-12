@@ -8,7 +8,7 @@
 body{font-family:sans-serif;background:#0f172a;color:white;text-align:center}
 .card{background:#1e293b;padding:20px;margin:15px auto;max-width:500px;border-radius:10px}
 button,input,select{width:100%;padding:10px;margin-top:10px;border:none;border-radius:6px}
-button{background:#22c55e;color:white}
+button{background:#22c55e;color:white;cursor:pointer}
 .danger{background:#ef4444}
 </style>
 </head>
@@ -55,13 +55,28 @@ getFirestore, collection, addDoc, doc, setDoc, getDocs,
 query, where, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const app = initializeApp({
+const appFirebase = initializeApp({
 apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
 authDomain:"mentorloop-55a37.firebaseapp.com",
 projectId:"mentorloop-55a37"
 });
 
-const db = getFirestore(app);
+const db = getFirestore(appFirebase);
+
+// 🔒 SAFE DOM
+const loginBox = document.getElementById("loginBox");
+const appDiv = document.getElementById("app");
+const teacherPanel = document.getElementById("teacherPanel");
+const joinBox = document.getElementById("joinBox");
+const classesDiv = document.getElementById("classes");
+
+const nameInput = document.getElementById("name");
+const roleSelect = document.getElementById("role");
+const loginBtn = document.getElementById("loginBtn");
+const createBtn = document.getElementById("createBtn");
+const joinBtn = document.getElementById("joinBtn");
+const classNameInput = document.getElementById("className");
+const joinCodeInput = document.getElementById("joinCode");
 
 // UID
 let uid = localStorage.getItem("ml_uid");
@@ -72,17 +87,19 @@ localStorage.setItem("ml_uid",uid);
 
 // LOGIN
 loginBtn.onclick=()=>{
-localStorage.setItem("ml_name",name.value);
-localStorage.setItem("ml_role",role.value);
+if(!nameInput.value) return alert("Enter name");
+
+localStorage.setItem("ml_name",nameInput.value);
+localStorage.setItem("ml_role",roleSelect.value);
 location.reload();
 };
 
-const userName=localStorage.getItem("ml_name");
-const roleVal=localStorage.getItem("ml_role");
+const userName = localStorage.getItem("ml_name");
+const roleVal = localStorage.getItem("ml_role");
 
 if(userName){
 loginBox.style.display="none";
-app.style.display="block";
+appDiv.style.display="block";
 
 if(roleVal==="Mentor") teacherPanel.style.display="block";
 else joinBox.style.display="block";
@@ -92,40 +109,50 @@ loadClasses();
 
 // CREATE CLASS
 createBtn.onclick=async()=>{
-let cname=className.value;
+let cname = classNameInput.value.trim();
+if(!cname) return alert("Enter class name");
 
-const q=query(collection(db,"classrooms"),where("name","==",cname));
-const snap=await getDocs(q);
+const q = query(collection(db,"classrooms"),where("name","==",cname));
+const snap = await getDocs(q);
 
-if(!snap.empty){alert("Class exists");return;}
+if(!snap.empty) return alert("Class already exists");
 
-let code=Math.random().toString(36).slice(2,7).toUpperCase();
+let code = Math.random().toString(36).slice(2,7).toUpperCase();
 
 await addDoc(collection(db,"classrooms"),{
-name:cname,teacher:uid,code
+name:cname,
+teacher:uid,
+code
 });
 
+classNameInput.value="";
 loadClasses();
 };
 
 // JOIN CLASS
 joinBtn.onclick=async()=>{
-const q=query(collection(db,"classrooms"),where("code","==",joinCode.value));
+let codeVal = joinCodeInput.value.trim();
+
+const q=query(collection(db,"classrooms"),where("code","==",codeVal));
 const snap=await getDocs(q);
+
+if(snap.empty) return alert("Invalid code");
 
 snap.forEach(async d=>{
 await setDoc(doc(db,"classrooms",d.id,"students",uid),{
-name:userName,points:0
+name:userName,
+points:0
 });
 });
 
+joinCodeInput.value="";
 loadClasses();
 };
 
 // LOAD CLASSES
 async function loadClasses(){
 
-classes.innerHTML="";
+classesDiv.innerHTML="";
 
 const snap=await getDocs(collection(db,"classrooms"));
 
@@ -133,8 +160,9 @@ snap.forEach(docSnap=>{
 let c=docSnap.data();
 
 let div=document.createElement("div");
+div.className="card";
 
-div.innerHTML=`<p>${c.name}</p>`;
+div.innerHTML=`<b>${c.name}</b><br>Code: ${c.code}`;
 
 let openBtn=document.createElement("button");
 openBtn.textContent="Open";
@@ -149,14 +177,16 @@ if(roleVal==="Mentor"){
 let delBtn=document.createElement("button");
 delBtn.textContent="Delete";
 delBtn.className="danger";
+
 delBtn.onclick=async()=>{
 await deleteDoc(doc(db,"classrooms",docSnap.id));
 loadClasses();
 };
+
 div.appendChild(delBtn);
 }
 
-classes.appendChild(div);
+classesDiv.appendChild(div);
 });
 }
 
