@@ -30,7 +30,7 @@ button{margin:4px;}
 <button onclick="window.location.href='video.html';">Teach with videos</button>
 <button onclick="window.location.href='god-level.html';">Use a learning system</button>
 <button onclick="window.location.href='https://chatbot-79kdx1gk0gm.streamlit.app/';">Produce errorless homework</button>
-  <button onclick="window.location.href='https://mentorloop-edu-classroom-7og.caffeine.xyz/';">EDU Class</button>
+  <button onclick="window.location.href='classroom.html';">EDU Class</button>
   <button onclick="window.location.href='offline.html';">Offline Mode</button>
 </div>
 
@@ -55,33 +55,12 @@ button{margin:4px;}
 <option value="gk">GK</option>
 </select>
 
-<select id="difficulty">
-<option value="easy">Easy</option>
-<option value="medium">Medium</option>
-<option value="hard">Hard</option>
-</select>
-
-<br><br>
-
-<label>
-<input type="checkbox" id="aiToggle" checked>
-Use AI Difficulty
-</label>
-
 <br><br>
 
 <button onclick="generateHW()">Generate Homework</button>
-<button onclick="shareHW()">Share 🔗</button>
 
 <div id="hw"></div>
 
-</div>
-</div>
-
-<div id="adaptive" class="page">
-<div class="card">
-<h2>🧠 Adaptive Level</h2>
-<p id="level"></p>
 </div>
 </div>
 
@@ -98,211 +77,112 @@ function rand(min,max){
 return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-// AI STATS
-let studentStats = JSON.parse(localStorage.getItem("stats")) || {
-correct:0,
-wrong:0,
-level:"easy"
-};
+// GLOBAL
+let allQuestions = [];
+let currentIndex = 0;
 
-let history=new Set();
-
-// 🧠 ADVANCED QUESTION ENGINE
-function genQuestion(grade, subject, difficulty){
+// 🧠 SMART QUESTION GENERATOR
+function genQuestion(grade, subject){
 
 grade=parseInt(grade);
 
-// ================= MATH =================
+// ---------- MATH ----------
 if(subject==="math"){
+let a=rand(1,100), b=rand(1,100), c=rand(1,10);
 
-// EASY
-if(difficulty==="easy"){
-if(grade<=4) return `${rand(10,50)} + ${rand(10,50)} = ?`;
-if(grade<=6) return `${rand(20,100)} - ${rand(10,50)} = ?`;
-if(grade<=8){
-let a=rand(1,10), b=rand(1,10);
-return `${a}/${b} + ${rand(1,5)}/${rand(1,5)} = ?`;
-}
-if(grade<=11){
-let x=rand(1,10);
-return `${x}x + ${rand(1,10)} = ${rand(20,50)}, find x`;
-}
+if(grade<=4) return `Solve the addition: ${a} + ${b}.`;
+if(grade<=6) return `Calculate the difference: ${a} - ${b}.`;
+if(grade<=8) return `Multiply: ${a} × ${c}.`;
+if(grade<=10) return `Solve for x: ${c}x + ${a} = ${b}.`;
+return `Factorize the expression: x² + ${c}x + ${rand(1,20)}.`;
 }
 
-// MEDIUM
-if(difficulty==="medium"){
-if(grade<=6) return `${rand(2,20)} × ${rand(2,20)} = ?`;
-if(grade<=8){
-let a=rand(1,10), b=rand(1,10);
-return `${a}/${b} × ${rand(2,10)} = ?`;
-}
-if(grade<=10){
-let x=rand(1,10);
-return `Solve: ${x}x + ${rand(5,20)} = ${rand(30,80)}`;
-}
-if(grade<=11){
-let a=rand(1,5);
-return `Factorize: x² + ${a*2}x + ${a*a}`;
-}
-}
-
-// HARD
-if(difficulty==="hard"){
-if(grade<=8){
-let a=rand(1,10), b=rand(1,10);
-return `Simplify: (${a}/${b}) ÷ ${rand(2,10)}`;
-}
-if(grade<=10){
-let a=rand(1,10);
-return `Solve quadratic: x² + ${a}x + ${rand(1,20)} = 0`;
-}
-if(grade<=11){
-let a=rand(1,10);
-return `Find roots: x² - ${a}x + ${rand(1,20)} = 0`;
-}
-}
-}
-
-// ================= SCIENCE =================
+// ---------- SCIENCE ----------
 if(subject==="science"){
-
-let qEasy=[
-"Define photosynthesis.",
-"What is gravity?",
-"What is friction?",
-"What is energy?"
-];
-
-let qMed=[
-"Explain Newton’s First Law with example.",
-"Why do objects fall to Earth?",
-"Explain types of energy with examples.",
-"Describe structure of an atom."
-];
-
-let qHard=[
-"Explain photosynthesis process step-by-step.",
-"Derive Ohm’s Law.",
-"Explain laws of motion with real-life application.",
-"Why is conservation of energy important?"
-];
-
-let set = difficulty==="easy"?qEasy: difficulty==="medium"?qMed:qHard;
-return set[rand(0,set.length-1)] + " (Grade " + grade + ")";
+let topics=["gravity","photosynthesis","energy","friction","atoms","force","motion"];
+let t=topics[rand(0,topics.length-1)];
+return `Explain the concept of ${t} with a suitable example.`;
 }
 
-// ================= ENGLISH =================
+// ---------- ENGLISH ----------
 if(subject==="english"){
-
-let easy=[
-"Plural of child?",
-"Opposite of fast?",
-"Make sentence with 'happy'."
-];
-
-let med=[
-"Write 2 sentences using 'because'.",
-"Identify verb in sentence: She runs fast.",
-"Convert to past tense: I go to school."
-];
-
-let hard=[
-"Write a short paragraph (50 words) on climate change.",
-"Explain noun, verb, adjective with examples.",
-"Write a formal letter to your teacher."
-];
-
-let set = difficulty==="easy"?easy: difficulty==="medium"?med:hard;
-return set[rand(0,set.length-1)];
+let topics=["your favorite hobby","your school day","a memorable event","a rainy day"];
+return `Write a short paragraph (50–80 words) about ${topics[rand(0,topics.length-1)]}.`;
 }
 
-// ================= GK =================
+// ---------- GK ----------
 if(subject==="gk"){
-
-let gk=[
-"Explain climate change impact.",
-"What is GDP and why is it important?",
-"Describe democracy with example.",
-"What is global warming?",
-"Explain importance of United Nations."
-];
-
-return gk[rand(0,gk.length-1)];
+let topics=["global warming","democracy","United Nations","GDP","climate change"];
+return `Explain ${topics[rand(0,topics.length-1)]} in simple terms.`;
 }
 
 }
 
-// AI ADJUST
-function adjustDifficulty(){
-let total=studentStats.correct+studentStats.wrong;
-if(total>=5){
-let acc=studentStats.correct/total;
-if(acc>0.7) studentStats.level="hard";
-else if(acc>0.4) studentStats.level="medium";
-else studentStats.level="easy";
-studentStats.correct=0;
-studentStats.wrong=0;
-localStorage.setItem("stats",JSON.stringify(studentStats));
-}
+// 📚 GENERATE 100 QUESTIONS SAFELY
+function generateFullSet(grade, subject){
+
+let set = new Set();
+let attempts = 0;
+
+while(set.size < 100 && attempts < 500){
+set.add(genQuestion(grade,subject));
+attempts++;
 }
 
-// GENERATE
+// fallback safety
+while(set.size < 100){
+set.add(genQuestion(grade,subject) + " (Try again)");
+}
+
+return Array.from(set);
+}
+
+// 🧾 DISPLAY 10 QUESTIONS
+function showBatch(){
+
+let batch = allQuestions.slice(currentIndex, currentIndex+10);
+
+let html = `
+<h2>📚 Homework</h2>
+<p><b>Questions ${currentIndex+1} - ${currentIndex+batch.length}</b></p>
+<hr>
+`;
+
+batch.forEach((q,i)=>{
+html += `<p><b>Q${currentIndex+i+1}.</b> ${q}</p>`;
+});
+
+if(currentIndex + 10 < allQuestions.length){
+html += `<button onclick="nextBatch()">Next 10 ➡️</button>`;
+}
+
+document.getElementById("hw").innerHTML = html;
+}
+
+// NEXT
+function nextBatch(){
+currentIndex += 10;
+showBatch();
+}
+
+// 🚀 MAIN FUNCTION
 function generateHW(){
 
 let grade=document.getElementById("grade").value;
 let subject=document.getElementById("subject").value;
-let selectedDifficulty=document.getElementById("difficulty").value;
-let useAI=document.getElementById("aiToggle").checked;
 
-let difficulty = useAI ? studentStats.level : selectedDifficulty;
+// RESET
+currentIndex = 0;
 
-let list=[];
-history.clear();
+// GENERATE
+allQuestions = generateFullSet(grade, subject);
 
-while(list.length<10){
-let q=genQuestion(grade,subject,difficulty);
-if(!history.has(q)){
-history.add(q);
-list.push(q);
+// SAVE
+localStorage.setItem("hw_full", JSON.stringify(allQuestions));
+
+// DISPLAY
+showBatch();
 }
-}
-
-localStorage.setItem("lastHW",JSON.stringify(list));
-
-let html="<b>Homework:</b><br><br>";
-list.forEach((q,i)=>{
-html+=`${i+1}. ${q}<br>
-<button onclick="mark(true)">✔</button>
-<button onclick="mark(false)">❌</button><br><br>`;
-});
-
-document.getElementById("hw").innerHTML=html;
-
-updateAdaptive();
-}
-
-// MARK
-function mark(correct){
-if(correct) studentStats.correct++;
-else studentStats.wrong++;
-adjustDifficulty();
-updateAdaptive();
-}
-
-// SHARE
-function shareHW(){
-let hw=localStorage.getItem("lastHW");
-let link=location.href.split("?")[0]+"?hw="+btoa(hw);
-navigator.clipboard.writeText(link);
-alert("Link copied!");
-}
-
-// ADAPTIVE
-function updateAdaptive(){
-document.getElementById("level").innerText="Level: "+studentStats.level;
-}
-
-updateAdaptive();
 
 </script>
 
