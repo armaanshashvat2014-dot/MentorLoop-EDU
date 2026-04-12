@@ -2,196 +2,144 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>MentorLoop EDU - Advanced</title>
+<title>MentorLoop EDU</title>
 
 <style>
-body{margin:0;font-family:'Segoe UI';background:#020617;color:#e2e8f0;}
-.nav{display:flex;flex-wrap:wrap;background:#0f172a;padding:10px;}
-.nav button{margin:5px;padding:8px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;}
-.page{display:none;padding:20px;}
-.active{display:block;}
-.card{background:#020617;padding:20px;border-radius:15px;max-width:700px;margin:auto;text-align:center;box-shadow:0 0 30px rgba(56,189,248,0.2);}
-button{margin:4px;}
+body{
+margin:0;
+font-family:'Segoe UI';
+background:#020617;
+color:#e2e8f0;
+}
+
+.nav{
+display:flex;
+flex-wrap:wrap;
+background:#0f172a;
+padding:10px;
+}
+
+.nav button{
+margin:5px;
+padding:10px 14px;
+border:none;
+border-radius:8px;
+background:#38bdf8;
+cursor:pointer;
+font-weight:bold;
+transition:0.2s;
+}
+
+.nav button:hover{
+background:#0ea5e9;
+transform:scale(1.05);
+}
+
+.page{
+display:none;
+padding:20px;
+}
+
+.active{
+display:block;
+}
+
+.card{
+background:#020617;
+padding:20px;
+border-radius:15px;
+max-width:800px;
+margin:auto;
+text-align:center;
+box-shadow:0 0 30px rgba(56,189,248,0.2);
+}
+
+h1{
+color:#38bdf8;
+}
+
 </style>
 
 </head>
+
 <body>
 
+<!-- NAVBAR -->
 <div class="nav">
-<button onclick="show('warmup')">Warmup</button>
-<button onclick="show('reset')">Reset</button>
-<button onclick="show('battle')">Battle</button>
-<button onclick="show('adaptive')">level</button>
-<button onclick="window.location.href='create.html';">Make quizzes</button>
-<button onclick="window.location.href='quizdash.html';">quizzes for 6th+</button>
-<button onclick="window.location.href='class.html';">quizzes for 1st-5th</button>
-<button onclick="window.location.href='video.html';">videos-based teaching</button>
-<button onclick="window.location.href='god-level.html';">learning system</button>
-<button onclick="window.location.href='https://chatbot-79kdx1gk0gm.streamlit.app/';">Produce errorless homework</button>
-  <button onclick="window.location.href='classroom.html';">EDU Class</button>
-  <button onclick="window.location.href='offline.html';">Offline Mode</button>
+
+
+<button onclick="window.location.href='create.html'">
+Home
+</button>
+<button onclick="window.location.href='create.html'">
+Make quizzes
+</button>
+
+<button onclick="window.location.href='quizdash.html'">
+Quizzes (6+)
+</button>
+
+<button onclick="window.location.href='class.html'">
+Quizzes (1–5)
+</button>
+
+<button onclick="window.location.href='video.html'">
+Video Learning
+</button>
+
+<button onclick="window.location.href='god-level.html'">
+Learning System
+</button>
+
+<button onclick="window.location.href='classroom.html'">
+EDU Classroom
+</button>
+
+<button onclick="window.location.href='offline.html'">
+Offline Mode
+</button>
+
 </div>
+
+<!-- HOME PAGE -->
+<div id="home" class="page active">
+<div class="card">
+
+<h1>🚀 MentorLoop EDU</h1>
+
+<p>
+Welcome to MentorLoop EDU — your complete learning platform.
+</p>
+
+<p>
+Use the navigation above to explore:
+</p>
+
+<ul style="text-align:left;line-height:1.8">
+<li>📊 Quizzes for all grades</li>
+<li>🎥 Video-based learning</li>
+<li>🏫 Classroom system</li>
+<li>📴 Offline tools</li>
+</ul>
+
+<p style="margin-top:20px;color:#94a3b8">
+More features coming soon…
+</p>
+
+</div>
+</div>
+
 <script>
 
-// NAV
+// SIMPLE NAV SYSTEM
 function show(id){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.querySelectorAll('.page')
+.forEach(p=>p.classList.remove('active'));
+
 document.getElementById(id).classList.add('active');
-}
-
-// RANDOM
-function rand(min,max){
-return Math.floor(Math.random()*(max-min+1))+min;
-}
-
-// GLOBAL
-let allQuestions = [];
-let currentIndex = 0;
-
-// 🧠 SMART GENERATOR
-function genQuestion(grade, subject){
-
-grade = parseInt(grade);
-
-// ---------- MATH (UPGRADED) ----------
-if(subject==="math"){
-
-// G1–G4
-if(grade<=4){
-return `Solve: ${rand(10,99)} + ${rand(10,99)}.`;
-}
-
-// G5–G6
-if(grade<=6){
-return `Solve step-by-step: (${rand(10,50)} + ${rand(10,50)}) × ${rand(2,10)}.`;
-}
-
-// G7–G8
-if(grade<=8){
-let n1=rand(1,10), d1=rand(1,10), n2=rand(1,10), d2=rand(1,10);
-return `Simplify: ${n1}/${d1} + ${n2}/${d2}.`;
-}
-
-// G9–G10
-if(grade<=10){
-return `Solve for x: ${rand(2,10)}x + ${rand(5,20)} = ${rand(30,80)}.`;
-}
-
-// G11
-return `Solve the quadratic equation: x² + ${rand(1,10)}x + ${rand(1,20)} = 0.`;
-}
-
-// ---------- SCIENCE ----------
-if(subject==="science"){
-if(grade<=4){
-let q=["What is gravity?","What is energy?","What is force?"];
-return q[rand(0,q.length-1)];
-}
-if(grade<=7){
-let q=["Explain photosynthesis.","What is friction?","Describe types of energy."];
-return q[rand(0,q.length-1)];
-}
-if(grade<=10){
-let q=["Explain Newton’s laws.","Describe atomic structure.","What is electricity?"];
-return q[rand(0,q.length-1)];
-}
-return "Explain the law of conservation of energy with examples.";
-}
-
-// ---------- ENGLISH ----------
-if(subject==="english"){
-if(grade<=4){
-let q=["Write a sentence about your school.","Make a sentence using 'happy'."];
-return q[rand(0,q.length-1)];
-}
-if(grade<=7){
-return "Write a short paragraph (50 words) about your favorite hobby.";
-}
-if(grade<=10){
-return "Write a paragraph on climate change.";
-}
-return "Write a formal letter to your teacher requesting leave.";
-}
-
-// ---------- GK ----------
-if(subject==="gk"){
-if(grade<=4){
-let q=["What is Earth?","Name two countries."];
-return q[rand(0,q.length-1)];
-}
-if(grade<=7){
-let q=["What is democracy?","What is global warming?"];
-return q[rand(0,q.length-1)];
-}
-return "Explain the role of the United Nations.";
-}
-
-}
-
-// 📚 SAFE GENERATION
-function generateFullSet(grade, subject){
-
-let set = new Set();
-let attempts = 0;
-
-while(set.size < 100 && attempts < 500){
-set.add(genQuestion(grade,subject));
-attempts++;
-}
-
-// fallback safety
-while(set.size < 100){
-set.add(genQuestion(grade,subject) + " (Variation)");
-}
-
-return Array.from(set);
-}
-
-// 🧾 DISPLAY
-function showBatch(){
-
-let batch = allQuestions.slice(currentIndex, currentIndex+10);
-
-let html = `
-<h2>📚 Homework</h2>
-<p><b>Questions ${currentIndex+1} - ${currentIndex+batch.length}</b></p>
-<hr>
-`;
-
-batch.forEach((q,i)=>{
-html += `<p><b>Q${currentIndex+i+1}.</b> ${q}</p>`;
-});
-
-if(currentIndex + 10 < allQuestions.length){
-html += `<button onclick="nextBatch()">Next 10 ➡️</button>`;
-}
-
-document.getElementById("hw").innerHTML = html;
-}
-
-// NEXT
-function nextBatch(){
-currentIndex += 10;
-showBatch();
-}
-
-// MAIN
-function generateHW(){
-
-let grade=document.getElementById("grade").value;
-let subject=document.getElementById("subject").value;
-
-currentIndex = 0;
-
-allQuestions = generateFullSet(grade, subject);
-
-localStorage.setItem("hw_full", JSON.stringify(allQuestions));
-
-showBatch();
 }
 
 </script>
 
 </body>
 </html>
-
