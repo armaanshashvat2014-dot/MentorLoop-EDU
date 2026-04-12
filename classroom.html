@@ -1,131 +1,253 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MentorLoop EDU Classroom</title>
+<title>MentorLoop Classroom</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-body{font-family:sans-serif;background:#0f172a;color:white;text-align:center}
-.card{background:#1e293b;padding:20px;margin:15px auto;max-width:700px;border-radius:10px}
-input,button,textarea{width:100%;padding:10px;margin-top:10px;border:none;border-radius:6px}
-button{background:#22c55e;color:white}
-.chat{background:#020617;padding:10px;border-radius:6px;margin-top:10px}
-.danger{background:red}
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:#f1f3f4;
+}
+
+/* HEADER */
+.header{
+background:#1a73e8;
+color:white;
+padding:20px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+/* BANNER */
+.banner{
+background:#1a73e8;
+color:white;
+padding:30px;
+border-radius:10px;
+margin:20px;
+}
+
+/* NAV */
+.nav{
+display:flex;
+justify-content:center;
+gap:25px;
+background:white;
+padding:12px;
+border-bottom:1px solid #ddd;
+}
+
+.nav button{
+border:none;
+background:none;
+font-size:16px;
+cursor:pointer;
+color:#5f6368;
+}
+
+.nav .active{
+color:#1a73e8;
+border-bottom:2px solid #1a73e8;
+}
+
+/* CONTAINER */
+.container{
+max-width:900px;
+margin:auto;
+padding:10px;
+}
+
+/* CARDS */
+.card{
+background:white;
+padding:15px;
+margin-bottom:15px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* BUTTON */
+.primary{
+background:#1a73e8;
+color:white;
+border:none;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* INPUT */
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+/* FLOAT BUTTON */
+.fab{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#1a73e8;
+color:white;
+width:55px;
+height:55px;
+border-radius:50%;
+font-size:28px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
+
+/* STATUS */
+.status{
+font-size:13px;
+color:#5f6368;
+margin-top:5px;
+}
+
+.hidden{display:none;}
+
 </style>
 </head>
 
 <body>
 
-<h1>🏫 Classroom</h1>
+<div class="header">📘 MentorLoop Classroom</div>
 
-<!-- CHAT -->
-<div class="card">
-<h3>💬 Chat</h3>
-<div id="chat"></div>
-
-<input id="msg" placeholder="Type message">
-<button onclick="sendMsg()">Send</button>
-
-<input id="link" placeholder="Paste link">
-<button onclick="sendLink()">Send Link</button>
+<div class="banner">
+<h2 id="classTitle">Classroom</h2>
+<p>Welcome to your class</p>
 </div>
 
-<!-- TEACHER PANEL -->
-<div class="card" id="teacherPanel" style="display:none">
+<div class="nav">
+<button class="tab active" onclick="showTab('stream')">Stream</button>
+<button class="tab" onclick="showTab('classwork')">Classwork</button>
+<button class="tab" onclick="showTab('people')">People</button>
+</div>
 
-<h3>📄 Add Worksheet</h3>
-<input id="title">
-<input id="marks" placeholder="Marks">
-<input type="datetime-local" id="deadline">
-<button onclick="addWS()">Add</button>
+<div class="container">
 
-<h3>🎥 Start Online Class</h3>
-<input id="meetLink" placeholder="Paste Meet/Zoom link">
-<button onclick="startClass()">Start</button>
+<!-- STREAM -->
+<div id="stream">
 
-<h3>📥 Submissions</h3>
-<div id="submissions"></div>
+<div class="card">
+<textarea id="msg" placeholder="Share something with your class..."></textarea>
+<button class="primary" id="postBtn">Post</button>
+</div>
 
-<h3>📊 Analytics</h3>
-<p id="avg"></p>
-<p id="count"></p>
-<canvas id="chart"></canvas>
+<div id="feed"></div>
 
 </div>
 
-<!-- WORKSHEETS -->
-<div class="card">
-<h3>📚 Worksheets</h3>
+<!-- CLASSWORK -->
+<div id="classwork" class="hidden">
+
 <div id="works"></div>
+
 </div>
 
-<!-- LEADERBOARD -->
+<!-- PEOPLE -->
+<div id="people" class="hidden">
+
 <div class="card">
-<h3>🏆 Leaderboard</h3>
-<ul id="board"></ul>
+<h3>Students</h3>
+<ul id="students"></ul>
 </div>
 
-<button onclick="leave()">Leave Class</button>
+</div>
+
+</div>
+
+<!-- FLOAT BUTTON -->
+<div id="fab" class="fab hidden">+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-getFirestore, collection, addDoc, doc, setDoc, getDocs,
-onSnapshot, updateDoc, getDoc
+getFirestore, collection, addDoc, onSnapshot,
+doc, getDoc, setDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const app=initializeApp({
+const app = initializeApp({
 apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
 authDomain:"mentorloop-55a37.firebaseapp.com",
 projectId:"mentorloop-55a37"
 });
 
-const db=getFirestore(app);
+const db = getFirestore(app);
 
 const uid=localStorage.getItem("ml_uid");
 const name=localStorage.getItem("ml_name");
 const role=localStorage.getItem("ml_role");
 const classId=localStorage.getItem("ml_class");
 
-if(role==="Mentor") teacherPanel.style.display="block";
+if(role==="Mentor") fab.classList.remove("hidden");
 
-// ---------------- CHAT ----------------
-window.sendMsg=async()=>{
+// -------- TABS --------
+window.showTab=(id)=>{
+document.querySelectorAll(".container > div").forEach(d=>d.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+
+document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+event.target.classList.add("active");
+};
+
+// -------- STREAM --------
+postBtn.onclick=async()=>{
 if(!msg.value) return;
-await addDoc(collection(db,"classrooms",classId,"chat"),{
-name,text:msg.value
+
+await addDoc(collection(db,"classrooms",classId,"stream"),{
+name,text:msg.value,type:"post"
 });
+
 msg.value="";
 };
 
-window.sendLink=async()=>{
-if(!link.value) return;
-await addDoc(collection(db,"classrooms",classId,"chat"),{
-name,text:"🔗 "+link.value
-});
-link.value="";
-};
+onSnapshot(collection(db,"classrooms",classId,"stream"),snap=>{
+feed.innerHTML="";
 
-onSnapshot(collection(db,"classrooms",classId,"chat"),snap=>{
-chat.innerHTML="";
 snap.forEach(d=>{
-let m=d.data();
-chat.innerHTML+=`<div class="chat">${m.name}: ${m.text}</div>`;
+let p=d.data();
+
+feed.innerHTML+=`
+<div class="card">
+<b>${p.name}</b>
+<p>${p.text}</p>
+</div>
+`;
 });
 });
 
-// ---------------- WORKSHEETS ----------------
-window.addWS=async()=>{
+// -------- FAB (CREATE ASSIGNMENT) --------
+fab.onclick=async()=>{
+
+let title=prompt("Assignment title:");
+let marks=prompt("Marks:");
+let deadline=prompt("Deadline (YYYY-MM-DD):");
+
+if(!title) return;
+
 await addDoc(collection(db,"classrooms",classId,"worksheets"),{
-title:title.value,
-marks:parseInt(marks.value),
-deadline:deadline.value
+title,marks:parseInt(marks),deadline
+});
+
+await addDoc(collection(db,"classrooms",classId,"stream"),{
+name:"SYSTEM",
+text:"New assignment: "+title,
+type:"assignment"
 });
 };
 
+// -------- CLASSWORK --------
 onSnapshot(collection(db,"classrooms",classId,"worksheets"),snap=>{
 works.innerHTML="";
 
@@ -134,138 +256,40 @@ let ws=docSnap.data();
 
 works.innerHTML+=`
 <div class="card">
-<p><b>${ws.title}</b></p>
+<b>${ws.title}</b>
 
-<textarea id="ans_${docSnap.id}" placeholder="Answer"></textarea>
-<input id="link_${docSnap.id}" placeholder="Link">
+<textarea id="ans_${docSnap.id}" placeholder="Your answer"></textarea>
 <input type="file" id="file_${docSnap.id}" accept=".pptx">
 
-<button onclick="submit('${docSnap.id}')">Submit</button>
+<button class="primary" onclick="submit('${docSnap.id}')">Turn In</button>
+<p class="status" id="status_${docSnap.id}">Not submitted</p>
 </div>
 `;
 });
 });
 
-// ---------------- SUBMIT ----------------
+// -------- SUBMIT --------
 window.submit=async(id)=>{
 
-let answer=document.getElementById("ans_"+id).value;
-let linkVal=document.getElementById("link_"+id).value;
+let ans=document.getElementById("ans_"+id).value;
 let file=document.getElementById("file_"+id).files[0];
 
-if(!answer && !linkVal && !file){
-alert("Submit something!");
-return;
-}
-
-if(file && !file.name.endsWith(".pptx")){
-alert("Only PPTX allowed");
-return;
-}
-
-let ws=(await getDoc(doc(db,"classrooms",classId,"worksheets",id))).data();
-
-let now=new Date();
-let deadline=new Date(ws.deadline);
-
-let pts=now<=deadline?ws.marks:Math.floor(ws.marks/2);
+if(!ans && !file){alert("Submit something");return;}
 
 await setDoc(doc(db,"classrooms",classId,"worksheets",id,"submissions",uid),{
-answer,link:linkVal,file:file?file.name:null,score:pts
+answer:ans,file:file?file.name:null
 });
 
-await updateDoc(doc(db,"classrooms",classId,"students",uid),{
-points:pts
-});
-
-await addDoc(collection(db,"classrooms",classId,"chat"),{
-name:"SYSTEM",
-text:`${name} submitted ${ws.title}`
-});
+document.getElementById("status_"+id).innerText="Turned in";
 };
 
-// ---------------- SUBMISSIONS (TEACHER) ----------------
-async function loadSubs(){
-
-const snap=await getDocs(collection(db,"classrooms",classId,"worksheets"));
-
-submissions.innerHTML="";
-
-for(const wsDoc of snap.docs){
-
-let wsId=wsDoc.id;
-let subSnap=await getDocs(collection(db,"classrooms",classId,"worksheets",wsId,"submissions"));
-
-subSnap.forEach(d=>{
-let s=d.data();
-
-submissions.innerHTML+=`
-<div class="card">
-<p>${d.id}</p>
-<p>${s.answer||"-"}</p>
-<p>${s.link||"-"}</p>
-<p>${s.file||"-"}</p>
-<p>Score: ${s.score}</p>
-</div>
-`;
-});
-}
-}
-
-if(role==="Mentor") loadSubs();
-
-// ---------------- LEADERBOARD ----------------
-let chartObj=null;
-
+// -------- STUDENTS --------
 onSnapshot(collection(db,"classrooms",classId,"students"),snap=>{
-
-let arr=[];
-
+students.innerHTML="";
 snap.forEach(d=>{
-arr.push(d.data());
+students.innerHTML+=`<li>${d.data().name}</li>`;
 });
-
-arr.sort((a,b)=>b.points-a.points);
-
-board.innerHTML="";
-
-arr.forEach(s=>{
-board.innerHTML+=`<li>${s.name} - ${s.points}</li>`;
 });
-
-// analytics
-let scores=arr.map(s=>s.points);
-let avgScore=scores.reduce((a,b)=>a+b,0)/scores.length||0;
-
-avg.innerText="Average: "+Math.round(avgScore);
-count.innerText="Students: "+scores.length;
-
-// chart fix
-if(chartObj) chartObj.destroy();
-
-chartObj=new Chart(chart,{
-type:'line',
-data:{
-labels:scores.map((_,i)=>i+1),
-datasets:[{data:scores}]
-}
-});
-
-});
-
-// ---------------- ONLINE CLASS ----------------
-window.startClass=async()=>{
-await addDoc(collection(db,"classrooms",classId,"chat"),{
-name:"SYSTEM",
-text:"📢 Join class: "+meetLink.value
-});
-};
-
-// ---------------- LEAVE ----------------
-window.leave=()=>{
-localStorage.removeItem("ml_class");
-location.href="dashboard.html";
-};
 
 </script>
 
