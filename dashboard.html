@@ -63,7 +63,7 @@ projectId:"mentorloop-55a37"
 
 const db = getFirestore(appFirebase);
 
-// 🔒 SAFE DOM
+// DOM
 const loginBox = document.getElementById("loginBox");
 const appDiv = document.getElementById("app");
 const teacherPanel = document.getElementById("teacherPanel");
@@ -87,28 +87,46 @@ localStorage.setItem("ml_uid",uid);
 
 // LOGIN
 loginBtn.onclick=()=>{
-if(!nameInput.value) return alert("Enter name");
+if(!nameInput.value.trim()) return alert("Enter name");
 
 localStorage.setItem("ml_name",nameInput.value);
-localStorage.setItem("ml_role",roleSelect.value);
+
+// 🔥 SAVE WITH EMOJI
+let role = roleSelect.value;
+if(role==="Mentor") role = "🧑‍🏫 Mentor";
+
+localStorage.setItem("ml_role",role);
+
 location.reload();
 };
 
+// 🔥 ROLE FIX (IMPORTANT)
+const roleRaw = localStorage.getItem("ml_role") || "";
+const isMentor = roleRaw.toLowerCase().includes("mentor");
+
 const userName = localStorage.getItem("ml_name");
-const roleVal = localStorage.getItem("ml_role");
 
 if(userName){
 loginBox.style.display="none";
 appDiv.style.display="block";
 
-if(roleVal==="Mentor") teacherPanel.style.display="block";
-else joinBox.style.display="block";
+if(isMentor){
+teacherPanel.style.display="block";
+} else {
+joinBox.style.display="block";
+}
 
 loadClasses();
 }
 
-// CREATE CLASS
+// CREATE CLASS (ONLY TEACHER)
 createBtn.onclick=async()=>{
+
+if(!isMentor){
+alert("Only teachers can create classes");
+return;
+}
+
 let cname = classNameInput.value.trim();
 if(!cname) return alert("Enter class name");
 
@@ -173,7 +191,8 @@ location.href="classroom.html";
 
 div.appendChild(openBtn);
 
-if(roleVal==="Mentor"){
+// 🔥 DELETE ONLY FOR TEACHER
+if(isMentor){
 let delBtn=document.createElement("button");
 delBtn.textContent="Delete";
 delBtn.className="danger";
