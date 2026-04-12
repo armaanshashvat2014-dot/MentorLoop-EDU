@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MentorLoop EDU Classroom</title>
+<title>MentorLoop EDU Ultimate Classroom</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
@@ -15,10 +17,10 @@ body{
   background:#1e293b;
   padding:20px;
   margin:15px auto;
-  max-width:500px;
+  max-width:650px;
   border-radius:12px;
 }
-input,button{
+input,button,textarea,select{
   width:100%;
   padding:10px;
   margin-top:10px;
@@ -28,213 +30,338 @@ input,button{
 button{
   background:#22c55e;
   color:white;
-  cursor:pointer;
+}
+.danger{
+  background:#ef4444;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🏫 MentorLoop Classroom</h1>
+<h1>🚀 MentorLoop EDU</h1>
+
+<!-- LOGIN -->
+<div id="loginBox" class="card">
+<input id="name" placeholder="Enter Name">
+<select id="role">
+<option>Student</option>
+<option>Mentor</option>
+</select>
+<button onclick="login()">Login</button>
+</div>
 
 <!-- TEACHER -->
 <div id="teacherPanel" class="card" style="display:none">
-  <h3>Create Classroom</h3>
-  <input id="className" placeholder="Class Name">
-  <button onclick="createClass()">Create</button>
-  <p id="classCode"></p>
 
-  <h3>Add Worksheet</h3>
-  <input id="wsTitle" placeholder="Title">
-  <input id="wsMarks" placeholder="Marks">
-  <input id="wsDeadline" type="datetime-local">
-  <button onclick="addWorksheet()">Add Worksheet</button>
+<h3>Create Classroom</h3>
+<input id="className" placeholder="Class Name">
+<button onclick="createClass()">Create</button>
+<p id="classCode"></p>
+
+<h3>Add Worksheet</h3>
+<input id="wsTitle" placeholder="Title">
+<input id="wsMarks" placeholder="Marks">
+<input id="wsDeadline" type="datetime-local">
+<button onclick="addWorksheet()">Add</button>
+
+<h3>Students</h3>
+<ul id="studentList"></ul>
+
+<h3>Submissions</h3>
+<div id="submissions"></div>
+
+<h3>Analytics</h3>
+<p id="avgScore"></p>
+<p id="totalStudents"></p>
+
+<canvas id="chart"></canvas>
+
+<button onclick="downloadReport()">Download Report</button>
+
 </div>
 
 <!-- STUDENT -->
 <div id="studentPanel" class="card" style="display:none">
-  <h3>Join Classroom</h3>
-  <input id="joinCode" placeholder="Enter Code">
-  <button onclick="joinClass()">Join</button>
 
-  <h3>Worksheets</h3>
-  <div id="worksheets"></div>
+<h3>Join Classroom</h3>
+<input id="joinCode">
+<button onclick="joinClass()">Join</button>
+
+<div id="worksheets"></div>
+
 </div>
 
 <!-- LEADERBOARD -->
 <div class="card">
-  <h3>🏆 Leaderboard</h3>
-  <ul id="leaderboard"></ul>
+<h3>🏆 Leaderboard</h3>
+<ul id="leaderboard"></ul>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, doc, setDoc, getDocs,
-  query, where, updateDoc, getDoc
+getFirestore, collection, addDoc, doc, setDoc, getDocs,
+query, where, updateDoc, getDoc, onSnapshot, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain: "mentorloop-55a37.firebaseapp.com",
-  projectId: "mentorloop-55a37"
+apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+authDomain: "mentorloop-55a37.firebaseapp.com",
+projectId: "mentorloop-55a37"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// USER
+// LOGIN
+window.login = () => {
+localStorage.setItem("ml_name", name.value);
+localStorage.setItem("ml_role", role.value);
+location.reload();
+};
+
+// UID
 if(!localStorage.getItem("ml_uid")){
-  localStorage.setItem("ml_uid","user_"+Math.random().toString(36).slice(2));
+localStorage.setItem("ml_uid","user_"+Math.random().toString(36).slice(2));
 }
 
 const uid = localStorage.getItem("ml_uid");
-const name = localStorage.getItem("ml_name") || "Student";
-const role = localStorage.getItem("ml_role") || "Student";
+const userName = localStorage.getItem("ml_name");
+const role = localStorage.getItem("ml_role");
 
-let currentClass = null;
-
-// 🎯 AUTO ROLE UI
-if(role.includes("Mentor")){
-  document.getElementById("teacherPanel").style.display="block";
-}else{
-  document.getElementById("studentPanel").style.display="block";
+if(userName){
+loginBox.style.display="none";
+(role==="Mentor"?teacherPanel:studentPanel).style.display="block";
 }
 
-// 🎲 GENERATE CODE
-function genCode(){
-  return Math.random().toString(36).substring(2,7).toUpperCase();
-}
+let currentClass=null;
 
-// 🏫 CREATE CLASS
+// CREATE CLASS (NO DUPLICATES)
 window.createClass = async () => {
 
-  let cname = document.getElementById("className").value;
-  let code = genCode();
+const q=query(collection(db,"classrooms"),where("name","==",className.value));
+const snap=await getDocs(q);
 
-  const ref = await addDoc(collection(db,"classrooms"),{
-    name:cname,
-    teacher:uid,
-    code:code
-  });
+if(!snap.empty){
+alert("Class already exists!");
+return;
+}
 
-  currentClass = ref.id;
+let code=Math.random().toString(36).slice(2,7).toUpperCase();
 
-  document.getElementById("classCode").innerText =
-    "Class Code: "+code;
+const ref=await addDoc(collection(db,"classrooms"),{
+name:className.value,
+teacher:uid,
+code
+});
+
+currentClass=ref.id;
+classCode.innerText="Code: "+code;
+
+loadStudents();
+loadLeaderboard();
 };
 
-// 👨‍🎓 JOIN CLASS
+// JOIN CLASS
 window.joinClass = async () => {
 
-  let code = document.getElementById("joinCode").value;
+const q=query(collection(db,"classrooms"),where("code","==",joinCode.value));
+const snap=await getDocs(q);
 
-  const q = query(collection(db,"classrooms"), where("code","==",code));
-  const snap = await getDocs(q);
+snap.forEach(async docSnap=>{
+currentClass=docSnap.id;
 
-  snap.forEach(async docSnap => {
+await setDoc(doc(db,"classrooms",currentClass,"students",uid),{
+name:userName,
+points:0
+});
 
-    currentClass = docSnap.id;
-
-    await setDoc(doc(db,"classrooms",currentClass,"students",uid),{
-      name:name,
-      points:0
-    });
-
-    loadWorksheets();
-    loadLeaderboard();
-  });
+loadWorksheets();
+loadLeaderboard();
+});
 };
 
-// 📄 ADD WORKSHEET
+// ADD WORKSHEET
 window.addWorksheet = async () => {
 
-  if(!currentClass) return alert("Create class first");
+await addDoc(collection(db,"classrooms",currentClass,"worksheets"),{
+title:wsTitle.value,
+marks:parseInt(wsMarks.value),
+deadline:wsDeadline.value
+});
 
-  let title = document.getElementById("wsTitle").value;
-  let marks = parseInt(document.getElementById("wsMarks").value);
-  let deadline = document.getElementById("wsDeadline").value;
-
-  await addDoc(collection(db,"classrooms",currentClass,"worksheets"),{
-    title:title,
-    marks:marks,
-    deadline:deadline
-  });
-
-  alert("Worksheet added");
+alert("Worksheet Added");
 };
 
-// 📥 LOAD WORKSHEETS
+// LOAD WORKSHEETS (WITH CONTROLLED INPUT)
 async function loadWorksheets(){
 
-  const snap = await getDocs(collection(db,"classrooms",currentClass,"worksheets"));
+const snap=await getDocs(collection(db,"classrooms",currentClass,"worksheets"));
 
-  let container = document.getElementById("worksheets");
-  container.innerHTML="";
+worksheets.innerHTML="";
 
-  snap.forEach(docSnap => {
+snap.forEach(docSnap=>{
+let ws=docSnap.data();
 
-    let ws = docSnap.data();
+let div=document.createElement("div");
 
-    let div = document.createElement("div");
+div.innerHTML=`
+<p><b>${ws.title}</b></p>
 
-    div.innerHTML = `
-      <p><b>${ws.title}</b></p>
-      <p>Marks: ${ws.marks}</p>
-      <button onclick="submitWork('${docSnap.id}')">Submit</button>
-    `;
+<textarea id="ans_${docSnap.id}" placeholder="Write answer"></textarea>
 
-    container.appendChild(div);
-  });
+<input type="url" id="link_${docSnap.id}" placeholder="Paste link">
+
+<input type="file" id="file_${docSnap.id}" accept=".pptx">
+
+<button onclick="submitWork('${docSnap.id}')">Submit</button>
+`;
+
+worksheets.appendChild(div);
+});
 }
 
-// 📥 SUBMIT WORK
-window.submitWork = async (worksheetId) => {
+// SUBMIT (STRICT)
+window.submitWork = async (id) => {
 
-  let wsRef = doc(db,"classrooms",currentClass,"worksheets",worksheetId);
-  let wsSnap = await getDoc(wsRef);
-  let ws = wsSnap.data();
+let answer=document.getElementById("ans_"+id).value;
+let link=document.getElementById("link_"+id).value;
+let fileInput=document.getElementById("file_"+id);
 
-  let now = new Date();
-  let deadline = new Date(ws.deadline);
+let file=fileInput.files[0];
 
-  let points = now <= deadline ? ws.marks : Math.floor(ws.marks/2);
+if(!answer && !link && !file){
+alert("Submit answer OR link OR PPT");
+return;
+}
 
-  await setDoc(doc(wsRef,"submissions",uid),{
-    submittedAt:now.toISOString(),
-    score:points
-  });
+if(file && !file.name.endsWith(".pptx")){
+alert("Only PPTX allowed!");
+return;
+}
 
-  let studentRef = doc(db,"classrooms",currentClass,"students",uid);
+let fileName=file?file.name:null;
 
-  await updateDoc(studentRef,{
-    points: points
-  });
+let ws=(await getDoc(doc(db,"classrooms",currentClass,"worksheets",id))).data();
 
-  loadLeaderboard();
+let now=new Date();
+let deadline=new Date(ws.deadline);
 
-  alert("Submitted! Points: "+points);
+let pts=now<=deadline?ws.marks:Math.floor(ws.marks/2);
+
+await setDoc(doc(db,"classrooms",currentClass,"worksheets",id,"submissions",uid),{
+answer:answer||null,
+link:link||null,
+file:fileName,
+score:pts,
+submittedAt:now.toISOString()
+});
+
+await updateDoc(doc(db,"classrooms",currentClass,"students",uid),{
+points:pts
+});
+
+alert("Submitted!");
 };
 
-// 🏆 LEADERBOARD
-async function loadLeaderboard(){
+// LOAD SUBMISSIONS (TEACHER)
+async function loadSubmissions(worksheetId){
 
-  const snap = await getDocs(collection(db,"classrooms",currentClass,"students"));
+const snap=await getDocs(collection(db,"classrooms",currentClass,"worksheets",worksheetId,"submissions"));
 
-  let list = document.getElementById("leaderboard");
-  list.innerHTML="";
+submissions.innerHTML="";
 
-  snap.forEach(docSnap => {
+snap.forEach(docSnap=>{
+let d=docSnap.data();
 
-    let d = docSnap.data();
+let div=document.createElement("div");
 
-    let li = document.createElement("li");
-    li.textContent = d.name + " - " + d.points + " pts";
+div.innerHTML=`
+<p><b>${docSnap.id}</b></p>
+<p>Answer: ${d.answer||"-"}</p>
+<p>Link: ${d.link||"-"}</p>
+<p>PPT: ${d.file||"-"}</p>
+<p>Score: ${d.score}</p>
+`;
 
-    list.appendChild(li);
-  });
+submissions.appendChild(div);
+});
 }
+
+// LIVE LEADERBOARD + ANALYTICS
+function loadLeaderboard(){
+
+onSnapshot(collection(db,"classrooms",currentClass,"students"),snap=>{
+
+leaderboard.innerHTML="";
+let scores=[];
+
+snap.forEach(docSnap=>{
+let d=docSnap.data();
+
+scores.push(d.points);
+
+let li=document.createElement("li");
+li.textContent=d.name+" - "+d.points;
+leaderboard.appendChild(li);
+});
+
+let avg=scores.reduce((a,b)=>a+b,0)/scores.length||0;
+avgScore.innerText="Avg Score: "+Math.round(avg);
+totalStudents.innerText="Students: "+scores.length;
+
+new Chart(chart,{
+type:'line',
+data:{labels:scores.map((_,i)=>i+1),datasets:[{data:scores}]}
+});
+
+});
+}
+
+// STUDENTS
+function loadStudents(){
+
+onSnapshot(collection(db,"classrooms",currentClass,"students"),snap=>{
+
+studentList.innerHTML="";
+
+snap.forEach(docSnap=>{
+let d=docSnap.data();
+
+let li=document.createElement("li");
+
+li.innerHTML=`
+${d.name}
+<button class="danger" onclick="removeStudent('${docSnap.id}')">X</button>
+`;
+
+studentList.appendChild(li);
+});
+});
+}
+
+window.removeStudent=async(id)=>{
+await deleteDoc(doc(db,"classrooms",currentClass,"students",id));
+};
+
+// REPORT
+window.downloadReport = () => {
+
+let text="MentorLoop Report\n\n";
+
+document.querySelectorAll("#leaderboard li").forEach(li=>{
+text+=li.innerText+"\n";
+});
+
+let blob=new Blob([text],{type:"text/plain"});
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(blob);
+a.download="report.txt";
+a.click();
+};
 
 </script>
 
