@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Secure Admin Panel</title>
+
+<style>
+body{
+  background:#020617;
+  color:white;
+  font-family:Arial;
+  padding:20px;
+}
+.card{
+  background:#1e293b;
+  padding:15px;
+  margin:10px 0;
+  border-radius:10px;
+}
+input{
+  padding:10px;
+  width:100%;
+  margin:10px 0;
+  border-radius:8px;
+  border:none;
+}
+button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.ban{background:red;color:white;}
+.unban{background:green;color:white;}
+</style>
+
+</head>
+
+<body>
+
+<div id="loginBox">
+  <h2>🔐 Admin Verification</h2>
+
+  <input type="password" id="secret" placeholder="Enter secret passphrase">
+  <button onclick="verify()">Enter Admin Panel</button>
+
+  <p id="msg"></p>
+</div>
+
+<div id="adminPanel" style="display:none;">
+  <h1>🛡️ Admin Panel</h1>
+  <div id="panel"></div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔐 YOUR UID
+const ADMIN_UID = "user_aqsxjgw2";
+
+// 🔑 YOUR SECRET (CHANGE THIS!!)
+const SECRET = "myUltraSecret123"; 
+
+const currentUID = localStorage.getItem("ml_uid");
+
+// 🚫 BLOCK WRONG UID IMMEDIATELY
+if(currentUID !== ADMIN_UID){
+  document.body.innerHTML = "<h1 style='text-align:center;'>🚫 Access Denied</h1>";
+}
+
+// 🔐 VERIFY SECRET
+window.verify = function(){
+
+  const input = document.getElementById("secret").value;
+
+  if(input === SECRET){
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    loadUsers();
+  } else {
+    document.getElementById("msg").innerText = "❌ Wrong secret";
+  }
+}
+
+// 📊 LOAD USERS
+async function loadUsers(){
+
+  const snapshot = await getDocs(collection(db,"users"));
+  const container = document.getElementById("panel");
+
+  container.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+
+    const data = docSnap.data();
+    const uid = docSnap.id;
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <b>${data.name || "User"}</b><br>
+      UID: ${uid}<br>
+      Status: ${data.banned ? "🚫 BANNED" : "✅ Active"}<br>
+
+      <button class="ban" onclick="banUser('${uid}')">Ban</button>
+      <button class="unban" onclick="unbanUser('${uid}')">Unban</button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// 🚫 BAN
+window.banUser = async function(uid){
+  await updateDoc(doc(db,"users",uid),{banned:true});
+  alert("User banned");
+  loadUsers();
+}
+
+// ✅ UNBAN
+window.unbanUser = async function(uid){
+  await updateDoc(doc(db,"users",uid),{banned:false});
+  alert("User unbanned");
+  loadUsers();
+}
+
+</script>
+
+</body>
+</html>
