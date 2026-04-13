@@ -4,6 +4,10 @@
 <title>Report Card | MentorLoop EDU</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- ✅ PDF LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
 body{
 margin:0;
@@ -80,7 +84,7 @@ color:black;
 
 <body>
 
-<div class="card">
+<div class="card" id="reportCard">
 
 <h1>📄 Report Card</h1>
 
@@ -104,7 +108,7 @@ color:black;
 
 <div class="summary" id="summary"></div>
 
-<button onclick="downloadReport()">📥 Download Report</button>
+<button onclick="downloadReport()">📥 Download PDF</button>
 <button onclick="window.print()">🖨 Print</button>
 
 </div>
@@ -191,31 +195,45 @@ document.getElementById("summary").innerHTML=`
 
 // HEADER INFO
 document.getElementById("studentName").textContent = localStorage.getItem("ml_name") || "Student";
-document.getElementById("studentId").textContent = localStorage.getItem("ml_uid");
+document.getElementById("studentId").textContent = localStorage.getItem("ml_uid") || "N/A";
 document.getElementById("date").textContent = new Date().toLocaleDateString();
 
 }
 
-// 📥 DOWNLOAD
-function downloadReport(){
+// 📥 DOWNLOAD AS PDF
+async function downloadReport(){
 
-let text="MentorLoop EDU Report Card\n\n";
-text+="Name: "+localStorage.getItem("ml_name")+"\n\n";
+const { jsPDF } = window.jspdf;
+const element = document.getElementById("reportCard");
 
-subjects.forEach(sub=>{
-let h=getHistory(sub);
-if(h.length>0){
-let avg=h.reduce((a,b)=>a+b.score,0)/h.length;
-text+=`${sub.toUpperCase()}: ${avg.toFixed(1)}%\n`;
-}
+const canvas = await html2canvas(element, {
+  scale: 2,
+  useCORS: true
 });
 
-let blob=new Blob([text],{type:"text/plain"});
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="report.txt";
-a.click();
+const imgData = canvas.toDataURL("image/png");
 
+const pdf = new jsPDF("p", "mm", "a4");
+
+const imgWidth = 210;
+const pageHeight = 295;
+const imgHeight = canvas.height * imgWidth / canvas.width;
+
+let heightLeft = imgHeight;
+let position = 0;
+
+pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+heightLeft -= pageHeight;
+
+// MULTI PAGE
+while (heightLeft > 0) {
+  position = heightLeft - imgHeight;
+  pdf.addPage();
+  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+}
+
+pdf.save("MentorLoop_Report.pdf");
 }
 
 // INIT
