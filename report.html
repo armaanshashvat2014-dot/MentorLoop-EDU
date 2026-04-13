@@ -18,7 +18,7 @@ min-height:100vh;
 
 .card{
 width:95%;
-max-width:600px;
+max-width:700px;
 background:#1e293b;
 padding:25px;
 border-radius:15px;
@@ -28,29 +28,36 @@ box-shadow:0 0 40px rgba(34,211,238,.2);
 h1{
 text-align:center;
 color:#22d3ee;
+margin-bottom:10px;
 }
 
-.row{
-display:flex;
-justify-content:space-between;
-padding:8px 0;
-border-bottom:1px solid #334155;
-}
-
-.label{
+.header{
+text-align:center;
+margin-bottom:15px;
 color:#94a3b8;
 }
 
-.value{
-font-weight:bold;
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #334155;
+text-align:center;
+}
+
+th{
+color:#22d3ee;
 }
 
 .summary{
-margin-top:15px;
-padding:10px;
+margin-top:20px;
+padding:15px;
 background:#020617;
 border-radius:10px;
-text-align:center;
 }
 
 button{
@@ -77,7 +84,23 @@ color:black;
 
 <h1>📄 Report Card</h1>
 
-<div id="report"></div>
+<div class="header">
+<p><strong>Name:</strong> <span id="studentName"></span></p>
+<p><strong>ID:</strong> <span id="studentId"></span></p>
+<p><strong>Date:</strong> <span id="date"></span></p>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Subject</th>
+<th>Score</th>
+<th>Grade</th>
+<th>Remark</th>
+</tr>
+</thead>
+<tbody id="reportTable"></tbody>
+</table>
 
 <div class="summary" id="summary"></div>
 
@@ -88,86 +111,114 @@ color:black;
 
 <script>
 
-// 📊 SUBJECTS
 const subjects = ["math","science","gk","geography","test"];
 
-// 📦 GET DATA
 function getHistory(sub){
   return JSON.parse(localStorage.getItem("ml_history_"+sub) || "[]");
+}
+
+// 🎯 GRADE SYSTEM
+function getGrade(score){
+if(score>=90) return "A+";
+if(score>=80) return "A";
+if(score>=70) return "B";
+if(score>=60) return "C";
+return "D";
+}
+
+// 🧠 REMARKS
+function getRemark(score){
+if(score>=85) return "Excellent";
+if(score>=70) return "Good";
+if(score>=50) return "Average";
+return "Needs Improvement";
 }
 
 // 📊 GENERATE REPORT
 function generateReport(){
 
-let reportHTML = "";
-let data = [];
-let total = 0;
+let tableHTML="";
+let data=[];
+let total=0;
 
 subjects.forEach(sub=>{
 
-  let h = getHistory(sub);
+let h=getHistory(sub);
+if(h.length===0) return;
 
-  if(h.length === 0) return;
+let avg=h.reduce((a,b)=>a+b.score,0)/h.length;
+let grade=getGrade(avg);
+let remark=getRemark(avg);
 
-  let avg = h.reduce((a,b)=>a+b.score,0)/h.length;
+total+=avg;
+data.push({sub,avg});
 
-  total += avg;
-
-  data.push({sub,avg});
-
-  reportHTML += `
-  <div class="row">
-    <span class="label">${sub.toUpperCase()}</span>
-    <span class="value">${avg.toFixed(1)}%</span>
-  </div>`;
+tableHTML+=`
+<tr>
+<td>${sub.toUpperCase()}</td>
+<td>${avg.toFixed(1)}%</td>
+<td>${grade}</td>
+<td>${remark}</td>
+</tr>`;
 });
 
-// 📈 OVERALL
-let overall = data.length ? total / data.length : 0;
+// OVERALL
+let overall=data.length?total/data.length:0;
+let overallGrade=getGrade(overall);
 
-// 🏆 PERFORMANCE
-let performance = "Needs Improvement";
-if(overall >= 80) performance = "Excellent";
-else if(overall >= 60) performance = "Good";
+// SORT FOR ANALYSIS
+data.sort((a,b)=>b.avg-a.avg);
 
-// ⚠️ WEAK SUBJECT
-data.sort((a,b)=>a.avg - b.avg);
-let weak = data.length ? data[0].sub.toUpperCase() : "-";
+let strong=data.length?data[0].sub.toUpperCase():"-";
+let weak=data.length?data[data.length-1].sub.toUpperCase():"-";
 
-// 🧾 RENDER
-document.getElementById("report").innerHTML = reportHTML;
+// TEACHER COMMENT
+let comment="Keep working hard.";
+if(overall>=80) comment="Outstanding performance!";
+else if(overall>=60) comment="Good progress, keep improving.";
+else comment="Needs more focus and practice.";
 
-document.getElementById("summary").innerHTML = `
+// RENDER
+document.getElementById("reportTable").innerHTML=tableHTML;
+
+document.getElementById("summary").innerHTML=`
 <p><strong>Overall:</strong> ${overall.toFixed(1)}%</p>
-<p><strong>Performance:</strong> ${performance}</p>
+<p><strong>Grade:</strong> ${overallGrade}</p>
+<p><strong>Strongest Subject:</strong> ${strong}</p>
 <p><strong>Focus Area:</strong> ${weak}</p>
+<p><strong>Teacher's Remark:</strong> ${comment}</p>
 `;
+
+// HEADER INFO
+document.getElementById("studentName").textContent = localStorage.getItem("ml_name") || "Student";
+document.getElementById("studentId").textContent = localStorage.getItem("ml_uid");
+document.getElementById("date").textContent = new Date().toLocaleDateString();
 
 }
 
 // 📥 DOWNLOAD
 function downloadReport(){
 
-let text = "MentorLoop EDU Report Card\n\n";
+let text="MentorLoop EDU Report Card\n\n";
+text+="Name: "+localStorage.getItem("ml_name")+"\n\n";
 
 subjects.forEach(sub=>{
-let h = getHistory(sub);
-
+let h=getHistory(sub);
 if(h.length>0){
-let avg = h.reduce((a,b)=>a+b.score,0)/h.length;
-text += `${sub.toUpperCase()}: ${avg.toFixed(1)}%\n`;
+let avg=h.reduce((a,b)=>a+b.score,0)/h.length;
+text+=`${sub.toUpperCase()}: ${avg.toFixed(1)}%\n`;
 }
 });
 
-let blob = new Blob([text], {type:"text/plain"});
-let a = document.createElement("a");
-a.href = URL.createObjectURL(blob);
-a.download = "report.txt";
+let blob=new Blob([text],{type:"text/plain"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="report.txt";
 a.click();
 
 }
 
-// 🚀 INIT
+// INIT
 generateReport();
 
 </script>
