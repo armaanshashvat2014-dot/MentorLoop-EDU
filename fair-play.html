@@ -92,54 +92,99 @@ button:hover{
 <div id="message"></div>
 
 </div>
+<script type="module">
 
-<script>
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-function submitReport(){
+const auth = getAuth();
+const db = getFirestore();
 
-  let reporter = document.getElementById("reporter").value.trim();
-  let reported = document.getElementById("reported").value.trim();
+// 🚨 CHECK IF USER IS BANNED (run on page load)
+async function checkBan(){
+  const user = auth.currentUser;
+  if(!user) return;
 
-  if(!reporter || !reported){
-    showMessage("Please fill all fields.","error");
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+
+  if(snap.exists() && snap.data().banned){
+    document.body.innerHTML = `
+      <div style="text-align:center;padding:40px;color:white;">
+        <h1>🚫 You are banned</h1>
+        <p>Due to multiple reports, your account has been restricted.</p>
+      </div>
+    `;
+  }
+}
+
+checkBan();
+
+// 🚨 SUBMIT REPORT
+window.submitReport = async function(){
+
+  const reporterUser = auth.currentUser;
+
+  if(!reporterUser){
+    showMessage("You must be logged in.","error");
     return;
   }
 
-  if(reporter === reported){
+  const reportedUID = document.getElementById("reported").value.trim();
+  const reason = document.getElementById("reason").value.trim();
+
+  if(!reportedUID){
+    showMessage("Enter UID to report.","error");
+    return;
+  }
+
+  if(reporterUser.uid === reportedUID){
     showMessage("You cannot report yourself.","error");
     return;
   }
 
-  let reports = JSON.parse(localStorage.getItem("fairPlayReports")) || {};
-  let bannedUsers = JSON.parse(localStorage.getItem("bannedUsers")) || [];
+  const reportRef = doc(db, "reports", reportedUID);
+  const userRef = doc(db, "users", reportedUID);
 
-  if(bannedUsers.includes(reported)){
-    showMessage("This user is already banned.","banned");
-    return;
-  }
+  let reportSnap = await getDoc(reportRef);
 
-  if(!reports[reported]){
-    reports[reported] = [];
-  }
-
-  if(reports[reported].includes(reporter)){
-    showMessage("You have already reported this user.","error");
-    return;
-  }
-
-  reports[reported].push(reporter);
-
-  if(reports[reported].length >= 3){
-    bannedUsers.push(reported);
-    localStorage.setItem("bannedUsers", JSON.stringify(bannedUsers));
-    showMessage("User has been automatically banned after 3 reports.","banned");
+  // CREATE REPORT ENTRY IF NOT EXISTS
+  if(!reportSnap.exists()){
+    await setDoc(reportRef, {
+      reporters: [reporterUser.uid],
+      reasons: [reason],
+      count: 1
+    });
   } else {
-    showMessage("Report submitted successfully.","success");
+
+    let data = reportSnap.data();
+
+    // PREVENT DUPLICATE REPORT
+    if(data.reporters.includes(reporterUser.uid)){
+      showMessage("You already reported this user.","error");
+      return;
+    }
+
+    await updateDoc(reportRef, {
+      reporters: arrayUnion(reporterUser.uid),
+      reasons: arrayUnion(reason),
+      count: data.count + 1
+    });
   }
 
-  localStorage.setItem("fairPlayReports", JSON.stringify(reports));
+  // CHECK BAN CONDITION
+  const updatedSnap = await getDoc(reportRef);
+  const count = updatedSnap.data().count;
+
+  if(count >= 3){
+    await setDoc(userRef, { banned: true }, { merge: true });
+    showMessage("🚫 User has been automatically banned!","banned");
+  } else {
+    showMessage("✅ Report submitted.","success");
+  }
 }
 
+// 🎨 UI MESSAGE
 function showMessage(text,type){
   let msg = document.getElementById("message");
   msg.className = "status " + type;
@@ -147,6 +192,5 @@ function showMessage(text,type){
 }
 
 </script>
-
 </body>
 </html>
