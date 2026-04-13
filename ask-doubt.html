@@ -198,7 +198,110 @@ button:hover {
 
   </div>
 </div>
+<script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// 🔥 YOUR FIREBASE CONFIG HERE
+const firebaseConfig = {
+ apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// 🔐 CHECK BAN STATUS
+async function checkBan(uid){
+
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
+
+  if(snap.exists() && snap.data().banned){
+    document.body.innerHTML = `
+      <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
+        <div>
+          <h1>🚫 Account Banned</h1>
+          <p>Your account has been restricted due to multiple reports.</p>
+        </div>
+      </div>
+    `;
+    return true;
+  }
+
+  return false;
+}
+
+// 🔄 AUTH STATE CHECK
+onAuthStateChanged(auth, async (user) => {
+
+  if(user){
+    const banned = await checkBan(user.uid);
+    if(banned) return;
+  }
+
+  // Continue normal flow
+  initLocalApp();
+});
+
+// 🧠 YOUR ORIGINAL LOCAL SYSTEM
+function initLocalApp(){
+
+  // 🔐 LOCAL UID (fallback if not using auth)
+  if (!localStorage.getItem("ml_uid")) {
+    localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+  }
+
+  window.login = function () {
+    let name = document.getElementById("nameInput").value.trim();
+    let role = document.getElementById("roleInput").value;
+
+    if (!name) {
+      alert("Enter your name!");
+      return;
+    }
+
+    localStorage.setItem("ml_name", name);
+    localStorage.setItem("ml_role", role);
+
+    startApp(name, role);
+  }
+
+  window.guestLogin = function () {
+    localStorage.setItem("ml_name", "Guest");
+    localStorage.setItem("ml_role", "Visitor");
+    startApp("Guest", "Visitor");
+  }
+
+  window.logout = function () {
+    localStorage.removeItem("ml_name");
+    localStorage.removeItem("ml_role");
+    localStorage.removeItem("ml_points");
+    localStorage.removeItem("ml_streak");
+    location.reload();
+  }
+
+  function startApp(name, role) {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("appBox").style.display = "block";
+    document.getElementById("welcomeText").innerText =
+      `Welcome, ${name} (${role})`;
+  }
+
+  // AUTO LOGIN
+  let name = localStorage.getItem("ml_name");
+  let role = localStorage.getItem("ml_role");
+
+  if (name && role) {
+    startApp(name, role);
+  }
+}
+
+</script>
 <script>
 
 // 🔐 UID (CREATE ON FIRST VISIT)
