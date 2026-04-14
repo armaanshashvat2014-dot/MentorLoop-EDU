@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leaderboard</title>
+<title>MentorLoop Leaderboard</title>
 
 <style>
 body {
@@ -23,9 +23,12 @@ body {
   background: rgba(255,255,255,0.1);
   display: flex;
   align-items: center;
+  transition: 0.2s;
 }
 
-.me { background: rgba(34,197,94,0.4); }
+.card:hover { transform: scale(1.02); }
+
+.me { background: rgba(34,197,94,0.35); }
 
 .top1 {
   box-shadow: 0 0 25px gold;
@@ -38,22 +41,15 @@ body {
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   margin-right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
 }
 
 .info { text-align: left; flex: 1; }
 
-.subtitle {
-  font-size: 14px;
-  opacity: 0.8;
-}
+small { opacity: 0.8; }
 </style>
 
 </head>
@@ -62,13 +58,13 @@ body {
 
 <div class="container">
 
-<h2>🌍 Weekly Leaderboard (Live)</h2>
+<h2>🌍 Live Leaderboard</h2>
 
 <p id="you"></p>
-<p id="insight" class="subtitle"></p>
-<p id="updateTime" class="subtitle"></p>
+<p id="insight"></p>
+<p id="time"></p>
 
-<div id="leaderboard"></div>
+<div id="board"></div>
 
 </div>
 
@@ -79,12 +75,18 @@ import {
   getFirestore,
   doc,
   setDoc,
+  getDoc,
+  onSnapshot,
   collection,
   query,
   orderBy,
-  limit,
-  onSnapshot
+  limit
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
@@ -94,155 +96,128 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 
-// 🔐 UID SYSTEM (NO DUPLICATES EVER)
-if (!localStorage.getItem("ml_uid")) {
-  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+// ================= HELPERS =================
+function getWeek() {
+  const d = new Date();
+  const start = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil((((d - start) / 86400000) + start.getDay() + 1) / 7);
+  return d.getFullYear() + "-W" + week;
 }
 
-
-// 🎮 RANK
-function getRank(points) {
-  if (points >= 300) return "💎 Diamond";
-  if (points >= 150) return "🟡 Gold";
-  if (points >= 50) return "⚪ Silver";
+function getRank(p) {
+  if (p >= 300) return "💎 Diamond";
+  if (p >= 150) return "🟡 Gold";
+  if (p >= 50) return "⚪ Silver";
   return "🟫 Bronze";
 }
 
-// 🎨 COLOR
-function getColor(name) {
-  let colors = ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa"];
-  return colors[name.charCodeAt(0)%colors.length];
-}
-
-// 📅 WEEK
-function getWeek() {
-  let d = new Date();
-  let onejan = new Date(d.getFullYear(),0,1);
-  let week = Math.ceil((((d - onejan)/86400000)+onejan.getDay()+1)/7);
-  return d.getFullYear()+"-W"+week;
-}
-
-// 👤 USER
-function getUser() {
-  return {
-    name: localStorage.getItem("ml_name") || "Guest",
-    points: parseInt(localStorage.getItem("ml_points")) || 0,
-    week: getWeek()
-  };
-}
-
-// 📈 TREND
-function getTrend(current) {
-  let prev = parseInt(localStorage.getItem("ml_prev_points")) || 0;
-  localStorage.setItem("ml_prev_points", current);
-
-  if (current > prev) return "🔺 Improving";
-  if (current < prev) return "🔻 Dropped";
-  return "➖ Stable";
+function color(name) {
+  const c = ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa"];
+  return c[name?.charCodeAt(0) % c.length];
 }
 
 
-// 🔥 SYNC USER (ALWAYS SAME DOC)
-async function syncUser() {
+// ================= USER SYNC =================
+async function syncUser(user) {
+  if (!user) return;
 
-  const uid = localStorage.getItem("ml_uid");
-  let user = getUser();
+  const ref = doc(db, "leaderboard", user.uid);
+  const snap = await getDoc(ref);
 
-  await setDoc(doc(db,"leaderboard", uid), user);
+  const existing = snap.exists() ? snap.data().points : 0;
 
-  return { ...user, id: uid };
+  // 🔥 anti-cheat: only allow higher updates
+  await setDoc(ref, {
+    name: user.displayName,
+    photo: user.photoURL,
+    uid: user.uid,
+    week: getWeek(),
+    points: existing
+  }, { merge: true });
 }
 
 
-// 🚀 LIVE LEADERBOARD
-function loadLeaderboardLive(){
+// ================= LEADERBOARD =================
+function loadBoard(currentUser) {
 
-  const board = document.getElementById("leaderboard");
-  const currentUID = localStorage.getItem("ml_uid");
+  const board = document.getElementById("board");
 
   const q = query(
-    collection(db,"leaderboard"),
-    orderBy("points","desc"),
+    collection(db, "leaderboard"),
+    orderBy("points", "desc"),
     limit(50)
   );
 
-  onSnapshot(q, (snapshot)=>{
+  onSnapshot(q, (snap) => {
 
     board.innerHTML = "";
 
-    let currentWeek = getWeek();
-    let users = [];
-    let yourRank = null;
+    const users = [];
+    let myRank = null;
 
-    snapshot.forEach(docSnap => {
-      let u = docSnap.data();
-
-      if(u.week === currentWeek){
-        users.push({ ...u, id: docSnap.id });
+    snap.forEach(d => {
+      const u = d.data();
+      if (u.week === getWeek()) {
+        users.push({ ...u, id: d.id });
       }
     });
 
-    if(users.length === 0){
-      board.innerHTML = "<p>No data yet 🚀</p>";
-      return;
-    }
+    users.forEach((u, i) => {
 
-    users.forEach((u,i)=>{
-
-      let div = document.createElement("div");
+      const div = document.createElement("div");
       div.className = "card";
 
-      if (u.id === currentUID) {
+      if (u.id === currentUser.uid) {
         div.classList.add("me");
-        yourRank = i + 1;
+        myRank = i + 1;
       }
 
       if (i === 0) div.classList.add("top1");
 
-      let medal = i === 0 ? "👑🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
-
       div.innerHTML = `
-        <div class="avatar" style="background:${getColor(u.name)}">
-          ${u.name[0].toUpperCase()}
-        </div>
+        <img class="avatar" src="${u.photo || ''}">
         <div class="info">
-          ${medal} #${i+1} ${u.name}
-          <br>${u.points} pts • ${getRank(u.points)}
+          ${i===0?"👑🥇":i===1?"🥈":i===2?"🥉":""}
+          #${i+1} ${u.name || "User"}
+          <br>
+          <small>${u.points} pts • ${getRank(u.points)}</small>
         </div>
       `;
 
       board.appendChild(div);
     });
 
-    // 🔥 UPDATE USER INFO LIVE
-    let user = getUser();
-
     document.getElementById("you").innerText =
-      `You: ${user.name} — ${user.points} pts (${getRank(user.points)})`;
+      `You: ${currentUser.displayName}`;
 
-    if (yourRank) {
-      let percent = Math.round((1 - yourRank / users.length) * 100);
+    if (myRank) {
+      const percent = Math.round((1 - myRank / users.length) * 100);
       document.getElementById("insight").innerText =
         `Ahead of ${percent}% of students`;
     }
 
-    document.getElementById("updateTime").innerText =
-      "Live update: " + new Date().toLocaleTimeString();
+    document.getElementById("time").innerText =
+      "Live: " + new Date().toLocaleTimeString();
 
   });
-
 }
 
 
-// 🚀 START
-window.onload = async () => {
+// ================= REAL-TIME AUTH =================
+onAuthStateChanged(auth, async (user) => {
 
-  await syncUser();      // ensure user exists
-  loadLeaderboardLive(); // start live updates
+  if (!user) {
+    document.body.innerHTML = "<h2>Please login first</h2>";
+    return;
+  }
 
-};
+  await syncUser(user);
+  loadBoard(user);
+
+});
 
 </script>
 
