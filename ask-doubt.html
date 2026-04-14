@@ -27,12 +27,6 @@ body {
 .hero-box {
   max-width: 500px;
   width: 100%;
-  animation: fadeUp 0.6s ease;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 h1 {
@@ -69,11 +63,6 @@ button {
   color: white;
 }
 
-.guest-btn {
-  background: #1e293b;
-  color: #94a3b8;
-}
-
 button:hover {
   transform: scale(1.03);
   transition: 0.2s;
@@ -95,19 +84,20 @@ button:hover {
 <body>
 
 <div class="hero">
+
   <div class="hero-box">
 
     <h1>🚀 MentorLoop EDU</h1>
-    <p class="subtitle">Together, we go farther</p>
+    <p class="subtitle">AI Learning Platform</p>
 
+    <!-- LOGIN -->
     <div class="card" id="loginBox">
-
       <button class="login-btn" onclick="loginWithGoogle()">
         🔐 Continue with Google
       </button>
-
     </div>
 
+    <!-- APP -->
     <div id="appBox" style="display:none; margin-top:20px;">
       <h3 id="welcomeText"></h3>
 
@@ -142,6 +132,8 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+
+// ================= FIREBASE =================
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
@@ -184,84 +176,83 @@ async function handleUser(user) {
 
   const publicId = await getOrCreatePublicId(user);
 
-  await setDoc(doc(db, "users", publicId), {
-    name: user.displayName,
-    email: user.email,
-    photo: user.photoURL,
-    authUID: user.uid
-  }, { merge: true });
+  const userRef = doc(db, "users", publicId);
+  const userSnap = await getDoc(userRef);
 
-  await setDoc(doc(db, "leaderboard", publicId), {
-    name: user.displayName,
-    photo: user.photoURL,
-    points: 0,
-    banned: false,
-    publicId: publicId
-  }, { merge: true });
+  if (!userSnap.exists()) {
+    await setDoc(userRef, {
+      name: user.displayName,
+      email: user.email,
+      photo: user.photoURL,
+      authUID: user.uid,
+      publicId: publicId,
+      banned: false
+    });
+  }
 
-  startApp(user.displayName);
+  const lbRef = doc(db, "leaderboard", publicId);
+  const lbSnap = await getDoc(lbRef);
+
+  if (!lbSnap.exists()) {
+    await setDoc(lbRef, {
+      name: user.displayName,
+      photo: user.photoURL,
+      points: 0,
+      banned: false,
+      publicId: publicId
+    });
+  }
+
+  return publicId;
+}
+
+
+// ================= START APP =================
+function startApp(name, publicId) {
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("appBox").style.display = "block";
+
+  document.getElementById("welcomeText").innerHTML =
+    `Welcome, ${name}<br><small style="opacity:0.7">ID: ${publicId}</small>`;
 }
 
 
 // ================= LOGIN =================
 window.loginWithGoogle = async function () {
+
   try {
     const result = await signInWithPopup(auth, provider);
-    await handleUser(result.user);
+
+    const pid = await handleUser(result.user);
+    startApp(result.user.displayName, pid);
 
   } catch (err) {
-    console.warn("Popup failed, using redirect...", err);
+    console.warn("Popup failed → redirect login", err);
     await signInWithRedirect(auth, provider);
   }
 };
 
 
-// ================= REDIRECT HANDLER =================
+// ================= REDIRECT RESULT =================
 getRedirectResult(auth).then(async (result) => {
+
   if (result?.user) {
-    await handleUser(result.user);
+    const pid = await handleUser(result.user);
+    startApp(result.user.displayName, pid);
   }
+
 });
 
 
-// ================= AUTO LOGIN + BAN CHECK =================
-function init() {
+// ================= AUTO LOGIN =================
+onAuthStateChanged(auth, async (user) => {
 
-  onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
 
-    if (!user) return;
-
-    const mapSnap = await getDoc(doc(db, "user_map", user.uid));
-
-    if (!mapSnap.exists()) return;
-
-    const publicId = mapSnap.data().publicId;
-
-    const lbSnap = await getDoc(doc(db, "leaderboard", publicId));
-
-    if (lbSnap.exists() && lbSnap.data().banned === true) {
-      document.body.innerHTML = `
-        <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
-          <div>
-            <h1>🚫 Banned</h1>
-            <p>You cannot access this platform.</p>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    startApp(user.displayName);
-  });
-}
-
-
-// ================= START APP =================
-function startApp(name) {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("appBox").style.display = "block";
-  document.getElementById("welcomeText").innerText = `Welcome, ${name}`;
-}
+  const pid = await handleUser(user);
+  startApp(user.displayName, pid);
+});
 
 
 // ================= LOGOUT =================
@@ -269,8 +260,6 @@ window.logout = async function () {
   await signOut(auth);
   location.reload();
 };
-
-init();
 
 </script>
 
