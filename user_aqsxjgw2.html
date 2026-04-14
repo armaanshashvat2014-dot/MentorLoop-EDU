@@ -20,6 +20,7 @@
 
         .ban { background:#ef4444; color:white; }
         .unban { background:#22c55e; color:white; }
+        .dismiss { background:#475569; color:white; }
         
         #debug { margin-top:20px; padding:10px; background:#111827; border-radius:10px; font-size:12px; color:#94a3b8; }
         h2 { border-bottom: 1px solid #334155; padding-bottom: 10px; margin-top: 30px; }
@@ -35,7 +36,6 @@
         <p id="msg"></p>
     </div>
 
-    <!-- Admin Panel Content (Hidden by default) -->
     <div id="adminPanel" style="display:none;">
         <h1>🛡️ Admin Control Center</h1>
 
@@ -50,9 +50,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // 🔥 FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
             authDomain: "mentorloop-55a37.firebaseapp.com",
@@ -62,33 +61,28 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 🔐 ADMIN SETTINGS
         const ADMIN_UID = "user_aqsxjgw2";
         const SECRET = "Roblox";
         const currentUID = localStorage.getItem("ml_uid");
 
-        // 🚫 BLOCK NON ADMIN
         if(currentUID !== ADMIN_UID){
             document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>🚫 Access Denied</h1>";
         }
 
-        // 🔐 VERIFY FUNCTION
         window.verify = function(){
             const input = document.getElementById("secret").value;
             if(input === SECRET){
                 document.getElementById("loginBox").style.display = "none";
                 document.getElementById("adminPanel").style.display = "block";
                 loadUsers();
-                loadReports(); // Call the reports loader
+                loadReports();
             } else {
                 document.getElementById("msg").innerText = "❌ Wrong secret";
             }
         }
 
-        // 📊 LOAD USERS FROM "leaderboard"
         async function loadUsers(){
             const panel = document.getElementById("panel");
-            const debug = document.getElementById("debug");
             panel.innerHTML = "Loading Users...";
 
             try {
@@ -125,7 +119,6 @@
             }
         }
 
-        // 📋 LOAD REPORTS FROM "reports"
         async function loadReports(){
             const container = document.getElementById("reportsPanel");
             container.innerHTML = "Loading Reports...";
@@ -141,14 +134,18 @@
 
                 snapshot.forEach(docSnap => {
                     const d = docSnap.data();
+                    const reportId = docSnap.id;
+
                     const div = document.createElement("div");
                     div.className = "report-card";
+                    div.id = "report-" + reportId;
                     div.innerHTML = `
                         <b>Reporter UID:</b> ${d.reporterUID}<br>
                         <b>Reported UID:</b> <span style="color:#f87171">${d.reportedUID}</span><br>
                         <b>Reason:</b> ${d.reason}<br>
                         <hr style="border:0; border-top:1px solid #475569; margin: 10px 0;">
-                        <button class="ban" onclick="banUser('${d.reportedUID}')">Ban Reported User</button>
+                        <button class="ban" onclick="banAndDismiss('${d.reportedUID}', '${reportId}')">🚫 Ban User</button>
+                        <button class="dismiss" onclick="dismissReport('${reportId}')">✅ Skip / Dismiss</button>
                     `;
                     container.appendChild(div);
                 });
@@ -158,7 +155,6 @@
             }
         }
 
-        // 🚫 BAN ACTION
         window.banUser = async function(uid){
             if(confirm("Are you sure you want to BAN this user?")){
                 const userRef = doc(db, "leaderboard", uid);
@@ -168,12 +164,28 @@
             }
         }
 
-        // ✅ UNBAN ACTION
         window.unbanUser = async function(uid){
             const userRef = doc(db, "leaderboard", uid);
             await updateDoc(userRef, { banned: false });
             alert("User Unbanned");
             loadUsers();
+        }
+
+        window.dismissReport = async function(reportId){
+            if(confirm("Dismiss this report?")){
+                await deleteDoc(doc(db, "reports", reportId));
+                document.getElementById("report-" + reportId)?.remove();
+            }
+        }
+
+        window.banAndDismiss = async function(uid, reportId){
+            if(confirm("Ban this user and dismiss the report?")){
+                await updateDoc(doc(db, "leaderboard", uid), { banned: true });
+                await deleteDoc(doc(db, "reports", reportId));
+                document.getElementById("report-" + reportId)?.remove();
+                alert("User banned and report dismissed.");
+                loadUsers();
+            }
         }
 
     </script>
