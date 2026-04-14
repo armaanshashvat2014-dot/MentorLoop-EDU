@@ -5,34 +5,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MentorLoop EDU | Student Doubt Solving Platform-By Armaan</title>
+<title>MentorLoop EDU | Student Platform</title>
 
-<meta name="description" content="MentorLoop EDU is a safe, school-approved learning platform where students ask doubts, answer questions, and learn together.">
-<meta name="keywords" content="student doubts, ask questions, student help platform, peer learning, education platform, mentorloop edu">
-<meta name="author" content="MentorLoop EDU">
+<meta name="description" content="MentorLoop EDU is a student learning platform.">
 
-<meta name="robots" content="index, follow">
-
-<link rel="canonical" href="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/">
-
-<!-- Google verification -->
-<meta name="google-site-verification" content="qfjqR2RYhk7rjGE7ZwNvjVhto_B1e_Ak9P8wsVbt9oQ">
-
-<!-- Open Graph (Social Preview) -->
-<meta property="og:title" content="MentorLoop EDU">
-<meta property="og:description" content="A platform where students solve doubts and help peers learn together.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/">
-<meta property="og:image" content="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/logo.png">
-
-<!-- Twitter Preview -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MentorLoop EDU">
-<meta name="twitter:description" content="Ask doubts, help others, and learn together.">
-<meta name="twitter:image" content="https://armaanshashvat2014-dot.github.io/MentorLoop-EDU/logo.png">
-
-<meta name="theme-color" content="#2563eb">
-  <style>
+<style>
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
@@ -40,7 +17,6 @@ body {
   color: white;
 }
 
-/* HERO */
 .hero {
   height: 100vh;
   display: flex;
@@ -53,12 +29,16 @@ body {
 .hero-box {
   max-width: 500px;
   width: 100%;
+  animation: fadeUp 0.7s ease;
 }
 
-/* TITLE */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 h1 {
   font-size: 40px;
-  margin-bottom: 10px;
   background: linear-gradient(90deg, #22d3ee, #10b981);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -69,27 +49,13 @@ h1 {
   margin-bottom: 30px;
 }
 
-/* CARD */
 .card {
   background: rgba(255,255,255,0.05);
   padding: 30px;
   border-radius: 20px;
   backdrop-filter: blur(20px);
-  box-shadow: 0 15px 50px rgba(0,0,0,0.6);
 }
 
-/* INPUTS */
-input, select {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 12px;
-  border: none;
-  background: #020617;
-  color: white;
-}
-
-/* BUTTONS */
 button {
   width: 100%;
   padding: 13px;
@@ -98,7 +64,6 @@ button {
   margin-top: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .login-btn {
@@ -106,23 +71,11 @@ button {
   color: white;
 }
 
-.guest-btn {
-  background: #1e293b;
-  color: #94a3b8;
-}
-
 button:hover {
   transform: scale(1.03);
+  transition: 0.2s;
 }
 
-/* FEATURES */
-.features {
-  margin-top: 20px;
-  font-size: 13px;
-  color: #64748b;
-}
-
-/* APP LINKS */
 .portal {
   display: block;
   margin: 10px 0;
@@ -131,21 +84,6 @@ button:hover {
   background: rgba(255,255,255,0.08);
   text-decoration: none;
   color: white;
-  transition: 0.2s;
-}
-
-.portal:hover {
-  background: rgba(255,255,255,0.2);
-}
-
-/* ANIMATION */
-.hero-box {
-  animation: fadeUp 0.7s ease;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 
@@ -157,28 +95,13 @@ button:hover {
   <div class="hero-box">
 
     <h1>🚀 MentorLoop EDU</h1>
-    <p class="subtitle">AI-powered learning system for students</p>
+    <p class="subtitle">Together,we go farther</p>
 
     <!-- LOGIN -->
     <div class="card" id="loginBox">
-
-      <input type="text" id="nameInput" placeholder="Enter your full name or initials">
-
-      <select id="roleInput">
-        <option>🎓 Student</option>
-        <option>🧑‍🏫 Mentor</option>
-      </select>
-
-      <button class="login-btn" onclick="login()">Login & Continue</button>
-      <button class="guest-btn" onclick="guestLogin()">Continue as Guest</button>
-
-      <div class="features">
-        ✔ Smart quizzes  
-        ✔ AI learning  
-        ✔ Track progress 
-        ✔ Student-friendly
-        ✔ Teacher-friendly
-      </div>
+      <button class="login-btn" onclick="login()">
+        Continue with Google
+      </button>
     </div>
 
     <!-- APP -->
@@ -189,9 +112,7 @@ button:hover {
       <a href="games.html" class="portal">🎮 Quizzes</a>
       <a href="teacher.html" class="portal">🧑‍🏫 Teacher Zone</a>
       <a href="profile.html" class="portal">👤 Profile</a>
-      <a href="speed.html" class="portal">Try your speed</a>
-      <a href="test.html" class="portal">Test IQ</a>
-      <a href="profile.html" class="portal">Look at your profile</a>
+
       <button onclick="logout()">Logout</button>
     </div>
 
@@ -201,8 +122,19 @@ button:hover {
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { 
+  getFirestore, doc, getDoc, setDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
@@ -211,115 +143,79 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-if (!localStorage.getItem("ml_uid")) {
-  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
-}
+// ===================== LOGIN =====================
+window.login = async function () {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-const uid = localStorage.getItem("ml_uid");
+    const uid = user.uid;
 
-// CREATE USER IN BOTH collections IF NOT EXISTS
-async function createUser(){
-  const name = localStorage.getItem("ml_name") || "Student";
-  const role = localStorage.getItem("ml_role") || "Student";
+    // Save user
+    await setDoc(doc(db, "users", uid), {
+      name: user.displayName,
+      email: user.email,
+      banned: false
+    }, { merge: true });
 
-  // users collection
-  const userRef = doc(db, "users", uid);
-  const userSnap = await getDoc(userRef);
-  if(!userSnap.exists()){
-    await setDoc(userRef, {
-      name: name,
-      role: role,
-      banned: false,
-      reports: 0
-    });
-  }
-
-  // leaderboard collection (this is where admin bans)
-  const lbRef = doc(db, "leaderboard", uid);
-  const lbSnap = await getDoc(lbRef);
-  if(!lbSnap.exists()){
-    await setDoc(lbRef, {
-      name: name,
-      role: role,
+    await setDoc(doc(db, "leaderboard", uid), {
+      name: user.displayName,
       banned: false,
       points: 0
-    });
+    }, { merge: true });
+
+    startApp(user.displayName);
+
+  } catch (err) {
+    console.error(err);
+    alert("Google login failed");
   }
-}
+};
 
-// ✅ FIX: Check ban from "leaderboard" — that's where admin sets banned:true
-async function checkBan(){
-  const ref = doc(db, "leaderboard", uid);
-  const snap = await getDoc(ref);
+// ===================== AUTO LOGIN =====================
+function init(){
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
 
-  if(snap.exists() && snap.data().banned === true){
-    document.body.innerHTML = `
-      <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;font-family:'Poppins',sans-serif;">
-        <div>
-          <h1 style="font-size:60px;margin-bottom:10px;">🚫</h1>
-          <h2 style="color:#ef4444;">Account Banned</h2>
-          <p style="color:#94a3b8;">Your account has been banned by an administrator.</p>
-          <p style="color:#475569;font-size:13px;">UID: ${uid}</p>
-          <p style="color:#475569;font-size:12px;">If you think this is a mistake, contact support.</p>
+    const uid = user.uid;
+
+    const banSnap = await getDoc(doc(db, "leaderboard", uid));
+
+    if (banSnap.exists() && banSnap.data().banned === true) {
+      document.body.innerHTML = `
+        <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
+          <div>
+            <h1>🚫 Banned</h1>
+            <p>You cannot access MentorLoop EDU</p>
+          </div>
         </div>
-      </div>
-    `;
-    return true;
-  }
-  return false;
+      `;
+      return;
+    }
+
+    startApp(user.displayName);
+  });
 }
 
-async function init(){
-  await createUser();
-  const banned = await checkBan();
-  if(banned) return;
-
-  // Auto login if name is saved
-  const name = localStorage.getItem("ml_name");
-  const role = localStorage.getItem("ml_role");
-  if(name && role){
-    startApp(name, role);
-  }
-}
-
-window.login = function () {
-  let name = document.getElementById("nameInput").value.trim();
-  let role = document.getElementById("roleInput").value;
-
-  if (!name) {
-    alert("Enter your name!");
-    return;
-  }
-
-  localStorage.setItem("ml_name", name);
-  localStorage.setItem("ml_role", role);
-
-  startApp(name, role);
-}
-
-window.guestLogin = function () {
-  localStorage.setItem("ml_name", "Guest");
-  localStorage.setItem("ml_role", "Visitor");
-  startApp("Guest", "Visitor");
-}
-
-window.logout = function () {
-  localStorage.removeItem("ml_name");
-  localStorage.removeItem("ml_role");
-  localStorage.removeItem("ml_points");
-  localStorage.removeItem("ml_streak");
-  location.reload();
-}
-
-function startApp(name, role){
+// ===================== START APP =====================
+function startApp(name){
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
-  document.getElementById("welcomeText").innerText = `Welcome, ${name} (${role})`;
+  document.getElementById("welcomeText").innerText = `Welcome, ${name}`;
 }
+
+// ===================== LOGOUT =====================
+window.logout = async function(){
+  await signOut(auth);
+  location.reload();
+};
 
 init();
 
 </script>
+
 </body>
 </html>
