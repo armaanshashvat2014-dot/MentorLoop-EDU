@@ -1,51 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Secure Admin Panel</title>
+<title>Admin Panel | MentorLoop EDU</title>
 
 <style>
 body{
   background:#020617;
   color:white;
-  font-family:Arial;
+  font-family:'Segoe UI';
   padding:20px;
 }
-.card{
-  background:#1e293b;
-  padding:15px;
-  margin:10px 0;
-  border-radius:10px;
+
+h1,h2{
+  margin-bottom:10px;
 }
+
 input{
-  padding:10px;
   width:100%;
-  margin:10px 0;
-  border-radius:8px;
+  padding:12px;
+  border-radius:10px;
   border:none;
+  margin-top:10px;
 }
+
 button{
-  padding:10px;
+  padding:10px 14px;
   border:none;
   border-radius:8px;
   cursor:pointer;
+  margin-top:10px;
 }
-.ban{background:red;color:white;}
-.unban{background:green;color:white;}
+
+.card{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  margin:10px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.status{
+  font-size:14px;
+  color:#94a3b8;
+}
+
+.actions button{
+  margin-left:5px;
+}
+
+.ban{
+  background:#dc2626;
+  color:white;
+}
+
+.unban{
+  background:#16a34a;
+  color:white;
+}
 </style>
 
 </head>
 
 <body>
 
+<!-- 🔐 LOGIN -->
 <div id="loginBox">
   <h2>🔐 Admin Verification</h2>
-
   <input type="password" id="secret" placeholder="Enter secret passphrase">
   <button onclick="verify()">Enter Admin Panel</button>
-
   <p id="msg"></p>
 </div>
 
+<!-- 🛡️ PANEL -->
 <div id="adminPanel" style="display:none;">
   <h1>🛡️ Admin Panel</h1>
   <div id="panel"></div>
@@ -56,8 +84,9 @@ button{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// 🔥 YOUR FIREBASE CONFIG
 const firebaseConfig = {
- apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
   projectId: "mentorloop-55a37",
 };
@@ -65,15 +94,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🔐 YOUR UID
+// 🔐 YOUR UID (CHANGE ONLY IF NEEDED)
 const ADMIN_UID = "user_aqsxjgw2";
 
 // 🔑 YOUR SECRET (CHANGE THIS!!)
-const SECRET = "ArmaanSIGMA"; 
+const SECRET = "Roblox";
 
+// 🧠 GET CURRENT USER
 const currentUID = localStorage.getItem("ml_uid");
 
-// 🚫 BLOCK WRONG UID IMMEDIATELY
+// 🚫 BLOCK IF NOT YOU
 if(currentUID !== ADMIN_UID){
   document.body.innerHTML = "<h1 style='text-align:center;'>🚫 Access Denied</h1>";
 }
@@ -92,46 +122,68 @@ window.verify = function(){
   }
 }
 
-// 📊 LOAD USERS
+// 📊 LOAD ALL USERS
 async function loadUsers(){
 
-  const snapshot = await getDocs(collection(db,"users"));
   const container = document.getElementById("panel");
+  container.innerHTML = "<p>Loading users...</p>";
 
-  container.innerHTML = "";
+  try {
 
-  snapshot.forEach(docSnap => {
+    const snapshot = await getDocs(collection(db,"users"));
 
-    const data = docSnap.data();
-    const uid = docSnap.id;
+    container.innerHTML = "";
 
-    const div = document.createElement("div");
-    div.className = "card";
+    if(snapshot.empty){
+      container.innerHTML = "<p>No users found</p>";
+      return;
+    }
 
-    div.innerHTML = `
-      <b>${data.name || "User"}</b><br>
-      UID: ${uid}<br>
-      Status: ${data.banned ? "🚫 BANNED" : "✅ Active"}<br>
+    snapshot.forEach(docSnap => {
 
-      <button class="ban" onclick="banUser('${uid}')">Ban</button>
-      <button class="unban" onclick="unbanUser('${uid}')">Unban</button>
-    `;
+      const data = docSnap.data();
+      const uid = docSnap.id;
 
-    container.appendChild(div);
-  });
+      const div = document.createElement("div");
+      div.className = "card";
+
+      div.innerHTML = `
+        <div>
+          <b>${data.name || "User"}</b><br>
+          <span class="status">UID: ${uid}</span><br>
+          <span class="status">
+            ${data.banned ? "🚫 BANNED" : "✅ Active"}
+          </span>
+        </div>
+
+        <div class="actions">
+          <button class="ban" onclick="banUser('${uid}')">❌</button>
+          <button class="unban" onclick="unbanUser('${uid}')">✔️</button>
+        </div>
+      `;
+
+      container.appendChild(div);
+    });
+
+  } catch(err){
+    console.error(err);
+    container.innerHTML = "<p>Error loading users</p>";
+  }
 }
 
-// 🚫 BAN
+// 🚫 BAN USER
 window.banUser = async function(uid){
-  await updateDoc(doc(db,"users",uid),{banned:true});
-  alert("User banned");
+  await updateDoc(doc(db,"users",uid),{
+    banned:true
+  });
   loadUsers();
 }
 
-// ✅ UNBAN
+// ✅ UNBAN USER
 window.unbanUser = async function(uid){
-  await updateDoc(doc(db,"users",uid),{banned:false});
-  alert("User unbanned");
+  await updateDoc(doc(db,"users",uid),{
+    banned:false
+  });
   loadUsers();
 }
 
