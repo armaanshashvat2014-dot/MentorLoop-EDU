@@ -95,80 +95,69 @@ button:hover{
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, addDoc, collection, serverTimestamp, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain: "mentorloop-55a37.firebaseapp.com",
-  projectId: "mentorloop-55a37",
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-const myUID = localStorage.getItem("ml_uid");
+let currentUser = null;
 
-// 🚨 SUBMIT REPORT
+onAuthStateChanged(auth, (user)=>{
+  currentUser = user;
+});
+
+// 🚨 REPORT FUNCTION
 window.submitReport = async function(){
 
   const reportedUID = document.getElementById("reported").value.trim();
-  const reason = document.getElementById("reason").value.trim();
 
-  if(!reportedUID){
-    showMessage("Enter UID to report","error");
+  if(!currentUser || !reportedUID){
+    alert("Login required");
     return;
   }
 
-  if(reportedUID === myUID){
-    showMessage("You cannot report yourself","error");
-    return;
-  }
+  // 📜 SAVE REPORT
+  await addDoc(collection(db,"reports"),{
+    reporterUID: currentUser.uid,
+    reportedUID: reportedUID,
+    reason: "Reported",
+    time: serverTimestamp()
+  });
 
-  const reportRef = doc(db, "reports", reportedUID);
-  const userRef = doc(db, "users", reportedUID);
+  const ref = doc(db,"leaderboard",reportedUID);
+  const snap = await getDoc(ref);
 
-  let snap = await getDoc(reportRef);
-
+  // 📊 CREATE OR UPDATE REPORT COUNT
   if(!snap.exists()){
-    await setDoc(reportRef,{
-      reporters:[myUID],
-      reasons:[reason],
-      count:1
+    await setDoc(ref,{
+      reports: 1,
+      banned: false
     });
   } else {
-
-    let data = snap.data();
-
-    if(data.reporters.includes(myUID)){
-      showMessage("Already reported","error");
-      return;
-    }
-
-    await updateDoc(reportRef,{
-      reporters: arrayUnion(myUID),
-      reasons: arrayUnion(reason),
-      count: data.count + 1
+    await updateDoc(ref,{
+      reports: increment(1)
     });
   }
 
-  // CHECK BAN
-  const updated = await getDoc(reportRef);
-  const count = updated.data().count;
+  // 🚫 AUTO BAN
+  const updated = await getDoc(ref);
 
-  if(count >= 3){
-    await setDoc(userRef,{ banned:true },{merge:true});
-    showMessage("🚫 User BANNED after 3 reports","banned");
-  } else {
-    showMessage("✅ Report submitted","success");
+  if(updated.exists() && updated.data().reports >= 3){
+    await updateDoc(ref,{
+      banned: true,
+      banReason: "Too many reports"
+    });
   }
-}
 
-// UI
-function showMessage(text,type){
-  let msg = document.getElementById("message");
-  msg.className = "status " + type;
-  msg.innerText = text;
+  alert("Report submitted");
 }
 
 </script>
