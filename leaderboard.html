@@ -23,7 +23,10 @@ body {
   background: rgba(255,255,255,0.1);
   display: flex;
   align-items: center;
+  transition: 0.2s;
 }
+
+.card:hover { transform: scale(1.02); }
 
 .me { background: rgba(34,197,94,0.35); }
 
@@ -51,7 +54,6 @@ body {
 
 small { opacity: 0.8; }
 </style>
-
 </head>
 
 <body>
@@ -70,23 +72,22 @@ small { opacity: 0.8; }
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore,
   doc,
-  setDoc,
   getDoc,
   onSnapshot,
   collection,
   query,
   orderBy,
   limit
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 import {
   getAuth,
   onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
@@ -99,7 +100,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 
-// ================= HELPERS =================
+// ================= WEEK =================
 function getWeek() {
   const d = new Date();
   const start = new Date(d.getFullYear(), 0, 1);
@@ -107,6 +108,8 @@ function getWeek() {
   return d.getFullYear() + "-W" + week;
 }
 
+
+// ================= RANK =================
 function getRank(p) {
   if (p >= 300) return "💎 Diamond";
   if (p >= 150) return "🟡 Gold";
@@ -114,66 +117,16 @@ function getRank(p) {
   return "🟫 Bronze";
 }
 
-function color(name) {
-  const c = ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa"];
-  return c[(name?.charCodeAt(0) || 0) % c.length];
+
+// ================= PUBLIC ID LOOKUP =================
+async function getPublicId(uid) {
+  const snap = await getDoc(doc(db, "user_map", uid));
+  return snap.exists() ? snap.data().publicId : null;
 }
 
 
-// ================= PUBLIC ID (user_xxx) =================
-function generatePublicId() {
-  return "user_" + Math.random().toString(36).substring(2, 10);
-}
-
-
-// ================= USER MAPPING =================
-async function getOrCreatePublicId(user) {
-
-  const mapRef = doc(db, "user_map", user.uid);
-  const snap = await getDoc(mapRef);
-
-  if (snap.exists()) {
-    return snap.data().publicId;
-  }
-
-  const publicId = generatePublicId();
-
-  await setDoc(mapRef, {
-    authUID: user.uid,
-    publicId: publicId
-  });
-
-  return publicId;
-}
-
-
-// ================= SYNC USER =================
-async function syncUser(user) {
-  if (!user) return null;
-
-  const publicId = await getOrCreatePublicId(user);
-
-  const lbRef = doc(db, "leaderboard", publicId);
-  const snap = await getDoc(lbRef);
-
-  const existingPoints = snap.exists() ? snap.data().points : 0;
-
-  await setDoc(lbRef, {
-    uid: user.uid,              // Firebase UID (hidden identity)
-    publicId: publicId,        // user_xxx ID (public identity)
-    name: user.displayName,
-    photo: user.photoURL,
-    points: existingPoints,
-    week: getWeek(),
-    banned: false
-  }, { merge: true });
-
-  return { publicId, user };
-}
-
-
-// ================= LEADERBOARD =================
-function loadBoard(currentUser, publicId) {
+// ================= LOAD LEADERBOARD =================
+function loadBoard(currentPublicId) {
 
   const board = document.getElementById("board");
 
@@ -187,14 +140,12 @@ function loadBoard(currentUser, publicId) {
 
     board.innerHTML = "";
 
-    const users = [];
+    let users = [];
     let myRank = null;
 
     snap.forEach(d => {
       const u = d.data();
-      if (u.week === getWeek() && !u.banned) {
-        users.push({ ...u });
-      }
+      users.push(u);
     });
 
     users.forEach((u, i) => {
@@ -202,7 +153,7 @@ function loadBoard(currentUser, publicId) {
       const div = document.createElement("div");
       div.className = "card";
 
-      if (u.publicId === publicId) {
+      if (u.publicId === currentPublicId) {
         div.classList.add("me");
         myRank = i + 1;
       }
@@ -222,23 +173,19 @@ function loadBoard(currentUser, publicId) {
       board.appendChild(div);
     });
 
-    document.getElementById("you").innerText =
-      `You: ${currentUser.displayName}`;
-
-    if (myRank) {
-      const percent = Math.round((1 - myRank / users.length) * 100);
-      document.getElementById("insight").innerText =
-        `Ahead of ${percent}% of students`;
-    }
-
     document.getElementById("time").innerText =
       "Live: " + new Date().toLocaleTimeString();
+
+    const me = users.find(u => u.publicId === currentPublicId);
+
+    document.getElementById("insight").innerText =
+      myRank ? `Your rank: #${myRank}` : "";
 
   });
 }
 
 
-// ================= MAIN AUTH =================
+// ================= AUTH SYNC =================
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -246,9 +193,28 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const result = await syncUser(user);
+  const publicId = await getPublicId(user.uid);
 
-  loadBoard(user, result.publicId);
+  if (!publicId) {
+    document.body.innerHTML = "<h2>User not found in system</h2>";
+    return;
+  }
+
+  const lbSnap = await getDoc(doc(db, "leaderboard", publicId));
+
+  if (lbSnap.exists() && lbSnap.data().banned === true) {
+    document.body.innerHTML = `
+      <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;">
+        <h1>🚫 Banned</h1>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById("you").innerText =
+    `You: ${user.displayName}`;
+
+  loadBoard(publicId);
 
 });
 
