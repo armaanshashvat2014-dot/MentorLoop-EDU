@@ -23,10 +23,7 @@ body {
   background: rgba(255,255,255,0.1);
   display: flex;
   align-items: center;
-  transition: 0.2s;
 }
-
-.card:hover { transform: scale(1.02); }
 
 .me { background: rgba(34,197,94,0.35); }
 
@@ -47,7 +44,10 @@ body {
   margin-right: 10px;
 }
 
-.info { text-align: left; flex: 1; }
+.info {
+  text-align: left;
+  flex: 1;
+}
 
 small { opacity: 0.8; }
 </style>
@@ -116,32 +116,64 @@ function getRank(p) {
 
 function color(name) {
   const c = ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa"];
-  return c[name?.charCodeAt(0) % c.length];
+  return c[(name?.charCodeAt(0) || 0) % c.length];
 }
 
 
-// ================= USER SYNC =================
+// ================= PUBLIC ID (user_xxx) =================
+function generatePublicId() {
+  return "user_" + Math.random().toString(36).substring(2, 10);
+}
+
+
+// ================= USER MAPPING =================
+async function getOrCreatePublicId(user) {
+
+  const mapRef = doc(db, "user_map", user.uid);
+  const snap = await getDoc(mapRef);
+
+  if (snap.exists()) {
+    return snap.data().publicId;
+  }
+
+  const publicId = generatePublicId();
+
+  await setDoc(mapRef, {
+    authUID: user.uid,
+    publicId: publicId
+  });
+
+  return publicId;
+}
+
+
+// ================= SYNC USER =================
 async function syncUser(user) {
-  if (!user) return;
+  if (!user) return null;
 
-  const ref = doc(db, "leaderboard", user.uid);
-  const snap = await getDoc(ref);
+  const publicId = await getOrCreatePublicId(user);
 
-  const existing = snap.exists() ? snap.data().points : 0;
+  const lbRef = doc(db, "leaderboard", publicId);
+  const snap = await getDoc(lbRef);
 
-  // 🔥 anti-cheat: only allow higher updates
-  await setDoc(ref, {
+  const existingPoints = snap.exists() ? snap.data().points : 0;
+
+  await setDoc(lbRef, {
+    uid: user.uid,              // Firebase UID (hidden identity)
+    publicId: publicId,        // user_xxx ID (public identity)
     name: user.displayName,
     photo: user.photoURL,
-    uid: user.uid,
+    points: existingPoints,
     week: getWeek(),
-    points: existing
+    banned: false
   }, { merge: true });
+
+  return { publicId, user };
 }
 
 
 // ================= LEADERBOARD =================
-function loadBoard(currentUser) {
+function loadBoard(currentUser, publicId) {
 
   const board = document.getElementById("board");
 
@@ -160,8 +192,8 @@ function loadBoard(currentUser) {
 
     snap.forEach(d => {
       const u = d.data();
-      if (u.week === getWeek()) {
-        users.push({ ...u, id: d.id });
+      if (u.week === getWeek() && !u.banned) {
+        users.push({ ...u });
       }
     });
 
@@ -170,7 +202,7 @@ function loadBoard(currentUser) {
       const div = document.createElement("div");
       div.className = "card";
 
-      if (u.id === currentUser.uid) {
+      if (u.publicId === publicId) {
         div.classList.add("me");
         myRank = i + 1;
       }
@@ -181,7 +213,7 @@ function loadBoard(currentUser) {
         <img class="avatar" src="${u.photo || ''}">
         <div class="info">
           ${i===0?"👑🥇":i===1?"🥈":i===2?"🥉":""}
-          #${i+1} ${u.name || "User"}
+          #${i+1} ${u.name}
           <br>
           <small>${u.points} pts • ${getRank(u.points)}</small>
         </div>
@@ -206,7 +238,7 @@ function loadBoard(currentUser) {
 }
 
 
-// ================= REAL-TIME AUTH =================
+// ================= MAIN AUTH =================
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -214,8 +246,9 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  await syncUser(user);
-  loadBoard(user);
+  const result = await syncUser(user);
+
+  loadBoard(user, result.publicId);
 
 });
 
