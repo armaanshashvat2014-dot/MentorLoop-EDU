@@ -1,179 +1,181 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Panel | MentorLoop EDU</title>
+    <title>Admin Panel | MentorLoop EDU</title>
+    <style>
+        body { background:#020617; color:white; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding:20px; }
+        input { width:100%; padding:12px; border-radius:10px; border:none; margin-top:10px; background: #1e293b; color: white; }
+        button { padding:10px 14px; border:none; border-radius:8px; cursor:pointer; margin-top:10px; font-weight: bold; }
+        
+        .card { 
+            background:#1e293b; padding:15px; border-radius:12px; 
+            margin:10px 0; display:flex; justify-content:space-between; align-items:center; 
+            border-left: 5px solid #3b82f6;
+        }
+        
+        .report-card {
+            background: #334155; padding: 15px; border-radius: 12px;
+            margin: 10px 0; border-left: 5px solid #ef4444;
+        }
 
-<style>
-body{
-  background:#020617;
-  color:white;
-  font-family:'Segoe UI';
-  padding:20px;
-}
-
-input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:none;
-  margin-top:10px;
-}
-
-button{
-  padding:10px 14px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  margin-top:10px;
-}
-
-.card{
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-  margin:10px 0;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.ban{ background:red; color:white; }
-.unban{ background:green; color:white; }
-
-#debug{
-  margin-top:20px;
-  padding:10px;
-  background:#111827;
-  border-radius:10px;
-  font-size:12px;
-  color:#94a3b8;
-}
-</style>
-
+        .ban { background:#ef4444; color:white; }
+        .unban { background:#22c55e; color:white; }
+        
+        #debug { margin-top:20px; padding:10px; background:#111827; border-radius:10px; font-size:12px; color:#94a3b8; }
+        h2 { border-bottom: 1px solid #334155; padding-bottom: 10px; margin-top: 30px; }
+    </style>
 </head>
 
 <body>
 
-<div id="loginBox">
-  <h2>🔐 Admin Verification</h2>
-  <input type="password" id="secret" placeholder="Enter secret">
-  <button onclick="verify()">Enter Admin Panel</button>
-  <p id="msg"></p>
-</div>
+    <div id="loginBox">
+        <h2>🔐 Admin Verification</h2>
+        <input type="password" id="secret" placeholder="Enter secret">
+        <button style="background: #3b82f6; color: white;" onclick="verify()">Enter Admin Panel</button>
+        <p id="msg"></p>
+    </div>
 
-<div id="adminPanel" style="display:none;">
-  <h1>🛡️ Admin Panel</h1>
-  <div id="panel"></div>
-  <div id="debug"></div>
-</div>
+    <!-- Admin Panel Content (Hidden by default) -->
+    <div id="adminPanel" style="display:none;">
+        <h1>🛡️ Admin Control Center</h1>
 
-<script type="module">
+        <h2>👥 Users (from Leaderboard)</h2>
+        <div id="panel"></div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        <h2>📜 Reports</h2>
+        <div id="reportsPanel"></div>
 
-// 🔥 CONFIG
-const firebaseConfig = {
- apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain: "mentorloop-55a37.firebaseapp.com",
-  projectId: "mentorloop-55a37",
-};
+        <div id="debug"></div>
+    </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 🔐 ADMIN SETTINGS
-const ADMIN_UID = "user_aqsxjgw2";
-const SECRET = "Roblox";
+        // 🔥 FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+            authDomain: "mentorloop-55a37.firebaseapp.com",
+            projectId: "mentorloop-55a37",
+        };
 
-const currentUID = localStorage.getItem("ml_uid");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-// 🚫 BLOCK NON ADMIN
-if(currentUID !== ADMIN_UID){
-  document.body.innerHTML = "<h1>🚫 Access Denied</h1>";
-}
+        // 🔐 ADMIN SETTINGS
+        const ADMIN_UID = "user_aqsxjgw2";
+        const SECRET = "Roblox";
+        const currentUID = localStorage.getItem("ml_uid");
 
-// 🔐 VERIFY
-window.verify = function(){
+        // 🚫 BLOCK NON ADMIN
+        if(currentUID !== ADMIN_UID){
+            document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>🚫 Access Denied</h1>";
+        }
 
-  const input = document.getElementById("secret").value;
+        // 🔐 VERIFY FUNCTION
+        window.verify = function(){
+            const input = document.getElementById("secret").value;
+            if(input === SECRET){
+                document.getElementById("loginBox").style.display = "none";
+                document.getElementById("adminPanel").style.display = "block";
+                loadUsers();
+                loadReports(); // Call the reports loader
+            } else {
+                document.getElementById("msg").innerText = "❌ Wrong secret";
+            }
+        }
 
-  if(input === SECRET){
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-    loadUsers();
-  } else {
-    document.getElementById("msg").innerText = "❌ Wrong secret";
-  }
-}
+        // 📊 LOAD USERS FROM "leaderboard"
+        async function loadUsers(){
+            const panel = document.getElementById("panel");
+            const debug = document.getElementById("debug");
+            panel.innerHTML = "Loading Users...";
 
-// 📊 LOAD USERS
-async function loadUsers(){
+            try {
+                const snapshot = await getDocs(collection(db, "leaderboard"));
+                panel.innerHTML = "";
+                
+                if(snapshot.empty){
+                    panel.innerHTML = "<p>No users found in leaderboard.</p>";
+                    return;
+                }
 
-  const panel = document.getElementById("panel");
-  const debug = document.getElementById("debug");
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const uid = docSnap.id;
 
-  panel.innerHTML = "Loading...";
-  debug.innerHTML = "Fetching from: leaderboard";
+                    const div = document.createElement("div");
+                    div.className = "card";
+                    div.innerHTML = `
+                        <div>
+                            <b>${data.name || "Unknown User"}</b><br>
+                            <small>UID: ${uid}</small><br>
+                            ${data.banned ? "<b style='color:#ef4444'>🚫 BANNED</b>" : "<b style='color:#22c55e'>✅ Active</b>"}
+                        </div>
+                        <div>
+                            <button class="ban" onclick="banUser('${uid}')">Ban</button>
+                            <button class="unban" onclick="unbanUser('${uid}')">Unban</button>
+                        </div>
+                    `;
+                    panel.appendChild(div);
+                });
+            } catch(err) {
+                console.error(err);
+                panel.innerHTML = "Error loading users.";
+            }
+        }
 
-  try{
+        // 📋 LOAD REPORTS FROM "reports"
+        async function loadReports(){
+            const container = document.getElementById("reportsPanel");
+            container.innerHTML = "Loading Reports...";
+            
+            try {
+                const snapshot = await getDocs(collection(db, "reports"));
+                container.innerHTML = "";
+                
+                if(snapshot.empty){
+                    container.innerHTML = "<p>No reports found.</p>";
+                    return;
+                }
 
-    const snapshot = await getDocs(collection(db,"leaderboard"));
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const div = document.createElement("div");
+                    div.className = "report-card";
+                    div.innerHTML = `
+                        <b>Reporter UID:</b> ${d.reporterUID}<br>
+                        <b>Reported UID:</b> <span style="color:#f87171">${d.reportedUID}</span><br>
+                        <b>Reason:</b> ${d.reason}<br>
+                        <hr style="border:0; border-top:1px solid #475569; margin: 10px 0;">
+                        <button class="ban" onclick="banUser('${d.reportedUID}')">Ban Reported User</button>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch(err) {
+                console.error(err);
+                container.innerHTML = "Error loading reports.";
+            }
+        }
 
-    debug.innerHTML += "<br>Docs found: " + snapshot.size;
+        // 🚫 BAN ACTION
+        window.banUser = async function(uid){
+            if(confirm("Are you sure you want to BAN this user?")){
+                const userRef = doc(db, "leaderboard", uid);
+                await updateDoc(userRef, { banned: true });
+                alert("User Banned");
+                loadUsers();
+            }
+        }
 
-    panel.innerHTML = "";
+        // ✅ UNBAN ACTION
+        window.unbanUser = async function(uid){
+            const userRef = doc(db, "leaderboard", uid);
+            await updateDoc(userRef, { banned: false });
+            alert("User Unbanned");
+            loadUsers();
+        }
 
-    if(snapshot.empty){
-      panel.innerHTML = "<p>No users found</p>";
-      return;
-    }
-
-    snapshot.forEach(docSnap => {
-
-      const data = docSnap.data();
-      const uid = docSnap.id;
-
-      debug.innerHTML += "<br>Found UID: " + uid;
-
-      const div = document.createElement("div");
-      div.className = "card";
-
-      div.innerHTML = `
-        <div>
-          <b>${data.name || "User"}</b><br>
-          UID: ${uid}<br>
-          ${data.banned ? "🚫 BANNED" : "✅ Active"}
-        </div>
-
-        <div>
-          <button class="ban" onclick="banUser('${uid}')">❌</button>
-          <button class="unban" onclick="unbanUser('${uid}')">✔️</button>
-        </div>
-      `;
-
-      panel.appendChild(div);
-    });
-
-  } catch(err){
-    debug.innerHTML += "<br>ERROR: " + err;
-    panel.innerHTML = "Error loading users";
-  }
-}
-
-// 🚫 BAN
-window.banUser = async function(uid){
-  await updateDoc(doc(db,"leaderboard",uid),{banned:true});
-  loadUsers();
-}
-
-// ✅ UNBAN
-window.unbanUser = async function(uid){
-  await updateDoc(doc(db,"leaderboard",uid),{banned:false});
-  loadUsers();
-}
-
-</script>
-
+    </script>
 </body>
 </html>
