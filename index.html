@@ -100,20 +100,14 @@ button:hover {
     <h1>🚀 MentorLoop EDU</h1>
     <p class="subtitle">Together, we go farther</p>
 
-    <!-- LOGIN -->
     <div class="card" id="loginBox">
 
       <button class="login-btn" onclick="loginWithGoogle()">
         🔐 Continue with Google
       </button>
 
-      <button class="guest-btn" onclick="checkExistingUser()">
-        👤 Continue as Existing User
-      </button>
-
     </div>
 
-    <!-- APP -->
     <div id="appBox" style="display:none; margin-top:20px;">
       <h3 id="welcomeText"></h3>
 
@@ -148,7 +142,6 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
@@ -161,67 +154,92 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 
+// ================= PUBLIC ID SYSTEM =================
+function generateUserId() {
+  return "user_" + Math.random().toString(36).substring(2, 10);
+}
+
+async function getOrCreatePublicId(user) {
+
+  const ref = doc(db, "user_map", user.uid);
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    return snap.data().publicId;
+  }
+
+  const newId = generateUserId();
+
+  await setDoc(ref, {
+    authUID: user.uid,
+    publicId: newId
+  });
+
+  return newId;
+}
+
+
 // ================= HANDLE USER =================
 async function handleUser(user) {
-  const uid = user.uid;
 
-  await setDoc(doc(db, "users", uid), {
+  const publicId = await getOrCreatePublicId(user);
+
+  await setDoc(doc(db, "users", publicId), {
     name: user.displayName,
     email: user.email,
-    banned: false
+    photo: user.photoURL,
+    authUID: user.uid
   }, { merge: true });
 
-  await setDoc(doc(db, "leaderboard", uid), {
+  await setDoc(doc(db, "leaderboard", publicId), {
     name: user.displayName,
+    photo: user.photoURL,
+    points: 0,
     banned: false,
-    points: 0
+    publicId: publicId
   }, { merge: true });
 
   startApp(user.displayName);
 }
 
 
-// ================= GOOGLE LOGIN =================
+// ================= LOGIN =================
 window.loginWithGoogle = async function () {
   try {
     const result = await signInWithPopup(auth, provider);
     await handleUser(result.user);
 
   } catch (err) {
-    console.warn("Popup blocked, using redirect...", err);
+    console.warn("Popup failed, using redirect...", err);
     await signInWithRedirect(auth, provider);
   }
 };
 
 
-// ================= REDIRECT RESULT =================
+// ================= REDIRECT HANDLER =================
 getRedirectResult(auth).then(async (result) => {
-  if (result && result.user) {
+  if (result?.user) {
     await handleUser(result.user);
   }
 });
 
 
-// ================= EXISTING USER =================
-window.checkExistingUser = function () {
-  const user = auth.currentUser;
-
-  if (user) {
-    startApp(user.displayName);
-  } else {
-    alert("No existing login found. Please sign in with Google.");
-  }
-};
-
-
-// ================= AUTO LOGIN =================
+// ================= AUTO LOGIN + BAN CHECK =================
 function init() {
+
   onAuthStateChanged(auth, async (user) => {
+
     if (!user) return;
 
-    const banSnap = await getDoc(doc(db, "leaderboard", user.uid));
+    const mapSnap = await getDoc(doc(db, "user_map", user.uid));
 
-    if (banSnap.exists() && banSnap.data().banned === true) {
+    if (!mapSnap.exists()) return;
+
+    const publicId = mapSnap.data().publicId;
+
+    const lbSnap = await getDoc(doc(db, "leaderboard", publicId));
+
+    if (lbSnap.exists() && lbSnap.data().banned === true) {
       document.body.innerHTML = `
         <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
           <div>
