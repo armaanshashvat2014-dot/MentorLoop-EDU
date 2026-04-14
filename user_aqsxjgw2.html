@@ -11,10 +11,6 @@ body{
   padding:20px;
 }
 
-h1,h2{
-  margin-bottom:10px;
-}
-
 input{
   width:100%;
   padding:12px;
@@ -41,23 +37,16 @@ button{
   align-items:center;
 }
 
-.status{
-  font-size:14px;
+.ban{ background:red; color:white; }
+.unban{ background:green; color:white; }
+
+#debug{
+  margin-top:20px;
+  padding:10px;
+  background:#111827;
+  border-radius:10px;
+  font-size:12px;
   color:#94a3b8;
-}
-
-.actions button{
-  margin-left:5px;
-}
-
-.ban{
-  background:#dc2626;
-  color:white;
-}
-
-.unban{
-  background:#16a34a;
-  color:white;
 }
 </style>
 
@@ -65,18 +54,17 @@ button{
 
 <body>
 
-<!-- 🔐 LOGIN -->
 <div id="loginBox">
   <h2>🔐 Admin Verification</h2>
-  <input type="password" id="secret" placeholder="Enter secret passphrase">
+  <input type="password" id="secret" placeholder="Enter secret">
   <button onclick="verify()">Enter Admin Panel</button>
   <p id="msg"></p>
 </div>
 
-<!-- 🛡️ PANEL -->
 <div id="adminPanel" style="display:none;">
   <h1>🛡️ Admin Panel</h1>
   <div id="panel"></div>
+  <div id="debug"></div>
 </div>
 
 <script type="module">
@@ -84,7 +72,7 @@ button{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 🔥 YOUR FIREBASE CONFIG
+// 🔥 CONFIG
 const firebaseConfig = {
   apiKey: "YOUR_KEY",
   authDomain: "YOUR_DOMAIN",
@@ -94,18 +82,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🔐 YOUR UID
+// 🔐 ADMIN SETTINGS
 const ADMIN_UID = "user_aqsxjgw2";
-
-// 🔑 SECRET (CHANGE THIS)
 const SECRET = "Roblox";
 
-// 🧠 CURRENT USER
 const currentUID = localStorage.getItem("ml_uid");
 
-// 🚫 BLOCK NON-ADMIN
+// 🚫 BLOCK NON ADMIN
 if(currentUID !== ADMIN_UID){
-  document.body.innerHTML = "<h1 style='text-align:center;'>🚫 Access Denied</h1>";
+  document.body.innerHTML = "<h1>🚫 Access Denied</h1>";
 }
 
 // 🔐 VERIFY
@@ -122,20 +107,25 @@ window.verify = function(){
   }
 }
 
-// 📊 LOAD USERS FROM LEADERBOARD
+// 📊 LOAD USERS
 async function loadUsers(){
 
-  const container = document.getElementById("panel");
-  container.innerHTML = "<p>Loading users...</p>";
+  const panel = document.getElementById("panel");
+  const debug = document.getElementById("debug");
 
-  try {
+  panel.innerHTML = "Loading...";
+  debug.innerHTML = "Fetching from: leaderboard";
+
+  try{
 
     const snapshot = await getDocs(collection(db,"leaderboard"));
 
-    container.innerHTML = "";
+    debug.innerHTML += "<br>Docs found: " + snapshot.size;
+
+    panel.innerHTML = "";
 
     if(snapshot.empty){
-      container.innerHTML = "<p>No users found</p>";
+      panel.innerHTML = "<p>No users found</p>";
       return;
     }
 
@@ -144,46 +134,42 @@ async function loadUsers(){
       const data = docSnap.data();
       const uid = docSnap.id;
 
+      debug.innerHTML += "<br>Found UID: " + uid;
+
       const div = document.createElement("div");
       div.className = "card";
 
       div.innerHTML = `
         <div>
           <b>${data.name || "User"}</b><br>
-          <span class="status">UID: ${uid}</span><br>
-          <span class="status">
-            ${data.banned ? "🚫 BANNED" : "✅ Active"}
-          </span>
+          UID: ${uid}<br>
+          ${data.banned ? "🚫 BANNED" : "✅ Active"}
         </div>
 
-        <div class="actions">
+        <div>
           <button class="ban" onclick="banUser('${uid}')">❌</button>
           <button class="unban" onclick="unbanUser('${uid}')">✔️</button>
         </div>
       `;
 
-      container.appendChild(div);
+      panel.appendChild(div);
     });
 
   } catch(err){
-    console.error(err);
-    container.innerHTML = "<p>Error loading users</p>";
+    debug.innerHTML += "<br>ERROR: " + err;
+    panel.innerHTML = "Error loading users";
   }
 }
 
-// 🚫 BAN USER
+// 🚫 BAN
 window.banUser = async function(uid){
-  await updateDoc(doc(db,"leaderboard",uid),{
-    banned:true
-  });
+  await updateDoc(doc(db,"leaderboard",uid),{banned:true});
   loadUsers();
 }
 
-// ✅ UNBAN USER
+// ✅ UNBAN
 window.unbanUser = async function(uid){
-  await updateDoc(doc(db,"leaderboard",uid),{
-    banned:false
-  });
+  await updateDoc(doc(db,"leaderboard",uid),{banned:false});
   loadUsers();
 }
 
