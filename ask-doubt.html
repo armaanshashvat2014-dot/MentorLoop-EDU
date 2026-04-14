@@ -5,9 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MentorLoop EDU | Student Platform</title>
-
-<meta name="description" content="MentorLoop EDU is a student learning platform.">
+<title>MentorLoop EDU</title>
 
 <style>
 body {
@@ -29,7 +27,7 @@ body {
 .hero-box {
   max-width: 500px;
   width: 100%;
-  animation: fadeUp 0.7s ease;
+  animation: fadeUp 0.6s ease;
 }
 
 @keyframes fadeUp {
@@ -46,7 +44,7 @@ h1 {
 
 .subtitle {
   color: #94a3b8;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .card {
@@ -69,6 +67,11 @@ button {
 .login-btn {
   background: linear-gradient(90deg, #22d3ee, #10b981);
   color: white;
+}
+
+.guest-btn {
+  background: #1e293b;
+  color: #94a3b8;
 }
 
 button:hover {
@@ -95,13 +98,19 @@ button:hover {
   <div class="hero-box">
 
     <h1>🚀 MentorLoop EDU</h1>
-    <p class="subtitle">Together,we go farther</p>
+    <p class="subtitle">Google Login System</p>
 
     <!-- LOGIN -->
     <div class="card" id="loginBox">
-      <button class="login-btn" onclick="login()">
-        Continue with Google
+
+      <button class="login-btn" onclick="loginWithGoogle()">
+        🔐 Continue with Google
       </button>
+
+      <button class="guest-btn" onclick="checkExistingUser()">
+        👤 Continue as Existing User
+      </button>
+
     </div>
 
     <!-- APP -->
@@ -122,14 +131,19 @@ button:hover {
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-  getFirestore, doc, getDoc, setDoc 
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -146,50 +160,73 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// ===================== LOGIN =====================
-window.login = async function () {
+
+// ================= HANDLE USER =================
+async function handleUser(user) {
+  const uid = user.uid;
+
+  await setDoc(doc(db, "users", uid), {
+    name: user.displayName,
+    email: user.email,
+    banned: false
+  }, { merge: true });
+
+  await setDoc(doc(db, "leaderboard", uid), {
+    name: user.displayName,
+    banned: false,
+    points: 0
+  }, { merge: true });
+
+  startApp(user.displayName);
+}
+
+
+// ================= GOOGLE LOGIN =================
+window.loginWithGoogle = async function () {
   try {
     const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    const uid = user.uid;
-
-    // Save user
-    await setDoc(doc(db, "users", uid), {
-      name: user.displayName,
-      email: user.email,
-      banned: false
-    }, { merge: true });
-
-    await setDoc(doc(db, "leaderboard", uid), {
-      name: user.displayName,
-      banned: false,
-      points: 0
-    }, { merge: true });
-
-    startApp(user.displayName);
+    await handleUser(result.user);
 
   } catch (err) {
-    console.error(err);
-    alert("Google login failed");
+    console.warn("Popup blocked, using redirect...", err);
+    await signInWithRedirect(auth, provider);
   }
 };
 
-// ===================== AUTO LOGIN =====================
-function init(){
+
+// ================= REDIRECT RESULT =================
+getRedirectResult(auth).then(async (result) => {
+  if (result && result.user) {
+    await handleUser(result.user);
+  }
+});
+
+
+// ================= EXISTING USER =================
+window.checkExistingUser = function () {
+  const user = auth.currentUser;
+
+  if (user) {
+    startApp(user.displayName);
+  } else {
+    alert("No existing login found. Please sign in with Google.");
+  }
+};
+
+
+// ================= AUTO LOGIN =================
+function init() {
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
 
-    const uid = user.uid;
-
-    const banSnap = await getDoc(doc(db, "leaderboard", uid));
+    const banSnap = await getDoc(doc(db, "leaderboard", user.uid));
 
     if (banSnap.exists() && banSnap.data().banned === true) {
       document.body.innerHTML = `
         <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
           <div>
             <h1>🚫 Banned</h1>
-            <p>You cannot access MentorLoop EDU</p>
+            <p>You cannot access this platform.</p>
           </div>
         </div>
       `;
@@ -200,15 +237,17 @@ function init(){
   });
 }
 
-// ===================== START APP =====================
-function startApp(name){
+
+// ================= START APP =================
+function startApp(name) {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
   document.getElementById("welcomeText").innerText = `Welcome, ${name}`;
 }
 
-// ===================== LOGOUT =====================
-window.logout = async function(){
+
+// ================= LOGOUT =================
+window.logout = async function () {
   await signOut(auth);
   location.reload();
 };
