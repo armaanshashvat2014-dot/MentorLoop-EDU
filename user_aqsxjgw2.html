@@ -65,8 +65,7 @@ import {
     getDocs,
     doc,
     updateDoc,
-    deleteDoc,
-    getDoc
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -78,17 +77,29 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+
+// ================= ADMIN CONFIG =================
 const SECRET = "Roblox";
 const ADMIN_UID = "user_buyi3x7q";
 
 const currentUID = localStorage.getItem("ml_uid");
 
-// 🔐 simple safety check
-if(currentUID !== ADMIN_UID){
-    document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:50px;'>🚫 Access Denied</h1>";
+
+// ================= ACCESS CHECK =================
+if (!currentUID || currentUID !== ADMIN_UID) {
+    document.body.innerHTML = `
+        <div style="background:#020617;color:white;height:100vh;display:flex;justify-content:center;align-items:center;text-align:center;">
+            <div>
+                <h1>🚫 Access Denied</h1>
+                <p>You are not authorized to access this panel.</p>
+                <small>ID: ${currentUID || "null"}</small>
+            </div>
+        </div>
+    `;
 }
 
-// ================= VERIFY =================
+
+// ================= VERIFY ADMIN PASSWORD =================
 window.verify = function(){
     if(document.getElementById("secret").value === SECRET){
         document.getElementById("loginBox").style.display = "none";
@@ -184,7 +195,7 @@ window.banUser = async function(publicId){
 };
 
 
-// ================= UNBAN =================
+// ================= UNBAN USER =================
 window.unbanUser = async function(publicId){
     await updateDoc(doc(db,"leaderboard",publicId), {
         banned: false
@@ -202,7 +213,7 @@ window.deleteReport = async function(id){
 };
 
 
-// ================= BAN + DELETE =================
+// ================= BAN + DELETE REPORT =================
 window.banAndDelete = async function(publicId, reportId){
 
     await updateDoc(doc(db,"leaderboard",publicId), {
@@ -218,6 +229,5 @@ window.banAndDelete = async function(publicId, reportId){
 };
 
 </script>
-
 </body>
 </html>
