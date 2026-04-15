@@ -19,13 +19,13 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
 }
 
 .card {
   background: rgba(255,255,255,0.05);
   padding: 30px;
   border-radius: 20px;
+  text-align: center;
 }
 
 button {
@@ -73,7 +73,9 @@ button {
 
       <a href="dashboard-v2.html" class="portal">Dashboard</a>
       <a href="games.html" class="portal">Quizzes</a>
-
+      <a href="profile.html" class="portal">Profile</a>
+      <a href="teacher.html" class="portal">Teacher Zone</a>
+<a href="https://mentorloop-edu-answer-and-question-4v4.caffeine.xyz" class="portal">Ask a doubt</a>
       <button onclick="logout()">Logout</button>
     </div>
 
@@ -104,7 +106,7 @@ import {
 
 // ================= FIREBASE =================
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
   projectId: "mentorloop-55a37",
 };
@@ -148,6 +150,7 @@ async function checkBan(publicId) {
       <div style="display:flex;justify-content:center;align-items:center;height:100vh;">
         <div>
           <h1>🚫 BANNED</h1>
+          <p>Your account is banned</p>
           <p>ID: ${publicId}</p>
         </div>
       </div>
@@ -221,7 +224,7 @@ async function startApp(name, publicId) {
 
   if (await checkBan(publicId)) return;
 
-  watchBan(publicId); // 🔥 LIVE WATCH
+  watchBan(publicId);
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
@@ -241,9 +244,14 @@ window.loginWithGoogle = async function () {
 
     startApp(result.user.displayName, pid);
 
-  } catch {
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    alert(err.message);
+
+    // fallback (mobile / popup blocked)
     await signInWithRedirect(auth, provider);
   }
+
 };
 
 
