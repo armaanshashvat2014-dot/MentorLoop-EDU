@@ -1,59 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Realtime Admin | MentorLoop EDU</title>
+<title>Realtime Admin | MentorLoop EDU</title>
 
-    <style>
-        body { background:#020617; color:white; font-family:Arial; padding:20px; }
+<style>
+body { background:#020617; color:white; font-family:Arial; padding:20px; }
 
-        input {
-            width:100%; padding:12px; border-radius:10px;
-            border:none; margin-top:10px; background:#1e293b; color:white;
-        }
+input {
+  width:100%; padding:12px; border-radius:10px;
+  border:none; margin-top:10px; background:#1e293b; color:white;
+}
 
-        button {
-            padding:10px 14px; border:none; border-radius:8px;
-            cursor:pointer; margin-top:10px; font-weight:bold;
-        }
+button {
+  padding:10px 14px; border:none; border-radius:8px;
+  cursor:pointer; margin-top:10px; font-weight:bold;
+}
 
-        .card {
-            background:#1e293b; padding:15px; border-radius:12px;
-            margin:10px 0; display:flex; justify-content:space-between;
-            border-left:5px solid #3b82f6;
-        }
+.card {
+  background:#1e293b; padding:15px; border-radius:12px;
+  margin:10px 0; display:flex; justify-content:space-between;
+  border-left:5px solid #3b82f6;
+}
 
-        .report-card {
-            background:#334155; padding:15px; border-radius:12px;
-            margin:10px 0; border-left:5px solid #ef4444;
-        }
+.report-card {
+  background:#334155; padding:15px; border-radius:12px;
+  margin:10px 0; border-left:5px solid #ef4444;
+}
 
-        .ban { background:#ef4444; color:white; }
-        .unban { background:#22c55e; color:white; }
-        .dismiss { background:#475569; color:white; }
+.ban { background:#ef4444; color:white; }
+.unban { background:#22c55e; color:white; }
+.dismiss { background:#475569; color:white; }
 
-        h2 { border-bottom:1px solid #334155; padding-bottom:10px; margin-top:30px; }
-    </style>
+h2 { border-bottom:1px solid #334155; padding-bottom:10px; margin-top:30px; }
+</style>
 </head>
 
 <body>
 
 <div id="loginBox" style="display:none;">
-    <h2>🔐 Admin Verification</h2>
-    <input type="password" id="secret" placeholder="Enter secret">
-    <button onclick="verify()" style="background:#3b82f6;color:white;">Enter Admin Panel</button>
-    <p id="msg"></p>
+  <h2>🔐 Admin Verification</h2>
+  <input type="password" id="secret" placeholder="Enter secret">
+  <button onclick="verify()" style="background:#3b82f6;color:white;">Enter Admin Panel</button>
+  <p id="msg"></p>
 </div>
 
 <div id="adminPanel" style="display:none;">
+  <h1>🛡️ Real-Time Moderation Panel</h1>
 
-    <h1>🛡️ Real-Time Moderation Panel</h1>
+  <h2>👥 Live Users</h2>
+  <div id="users"></div>
 
-    <h2>👥 Live Users</h2>
-    <div id="users"></div>
-
-    <h2>📜 Live Reports</h2>
-    <div id="reports"></div>
-
+  <h2>📜 Live Reports</h2>
+  <div id="reports"></div>
 </div>
 
 <script type="module">
@@ -61,26 +59,26 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
 import {
-    getFirestore,
-    collection,
-    doc,
-    updateDoc,
-    deleteDoc,
-    onSnapshot,
-    getDoc
+  getFirestore,
+  collection,
+  doc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 import {
-    getAuth,
-    onAuthStateChanged
+  getAuth,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 
 // 🔥 FIREBASE
 const firebaseConfig = {
-    apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-    authDomain: "mentorloop-55a37.firebaseapp.com",
-    projectId: "mentorloop-55a37",
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -88,142 +86,207 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 
-// 🔐 ADMIN CONFIG
+// 🔐 ADMIN
 const ADMIN_UID = "user_buyi3x7q";
 const SECRET = "Roblox";
 
 
-// ================= AUTH CHECK =================
+// ================= AUTH =================
 onAuthStateChanged(auth, async (user) => {
 
-    if (!user) {
-        document.body.innerHTML = "<h1 style='color:red;text-align:center;'>🚫 Not logged in</h1>";
-        return;
-    }
+  if (!user) {
+    document.body.innerHTML = "<h1 style='color:red;text-align:center;'>🚫 Not logged in</h1>";
+    return;
+  }
 
-    const mapSnap = await getDoc(doc(db, "user_map", user.uid));
+  const mapSnap = await getDoc(doc(db, "user_map", user.uid));
 
-    if (!mapSnap.exists()) {
-        document.body.innerHTML = "<h1 style='color:red;text-align:center;'>🚫 No mapping</h1>";
-        return;
-    }
+  if (!mapSnap.exists()) {
+    document.body.innerHTML = "<h1 style='color:red;text-align:center;'>🚫 No mapping</h1>";
+    return;
+  }
 
-    const publicId = mapSnap.data().publicId;
+  const publicId = mapSnap.data().publicId;
 
-    if (publicId !== ADMIN_UID) {
-        document.body.innerHTML = `
-            <div style="display:flex;height:100vh;justify-content:center;align-items:center;text-align:center;">
-                <div>
-                    <h1>🚫 Access Denied</h1>
-                    <p>ID: ${publicId}</p>
-                </div>
-            </div>
-        `;
-        return;
-    }
+  if (publicId !== ADMIN_UID) {
+    document.body.innerHTML = `
+      <div style="display:flex;height:100vh;justify-content:center;align-items:center;text-align:center;">
+        <div>
+          <h1>🚫 Access Denied</h1>
+          <p>ID: ${publicId}</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
-    document.getElementById("loginBox").style.display = "block";
+  document.getElementById("loginBox").style.display = "block";
 });
 
 
 // ================= VERIFY =================
 window.verify = function(){
-    if(document.getElementById("secret").value === SECRET){
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("adminPanel").style.display = "block";
+  if(document.getElementById("secret").value === SECRET){
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
 
-        startRealtime();
-    } else {
-        document.getElementById("msg").innerText = "❌ Wrong secret";
-    }
+    startRealtime();
+  } else {
+    document.getElementById("msg").innerText = "❌ Wrong secret";
+  }
 };
+
+
+// ================= AUTO MODERATION =================
+async function autoModerate(snapshot){
+
+  let reportMap = {};
+
+  snapshot.forEach(docSnap => {
+
+    const r = docSnap.data();
+
+    if (!r.reason || r.reason.length < 5) return;
+    if (r.reporterUID === r.reportedUID) return;
+
+    if (!reportMap[r.reportedUID]) {
+      reportMap[r.reportedUID] = new Set();
+    }
+
+    reportMap[r.reportedUID].add(r.reporterUID);
+  });
+
+  for (let uid in reportMap) {
+
+    const count = reportMap[uid].size;
+    const ref = doc(db, "leaderboard", uid);
+
+    if (count >= 4) {
+      await updateDoc(ref, {
+        banned: true,
+        banType: "permanent"
+      });
+
+    } else if (count === 3) {
+
+      const unbanTime = Date.now() + (10 * 60 * 1000);
+
+      await updateDoc(ref, {
+        banned: true,
+        banType: "temporary",
+        unbanAt: unbanTime
+      });
+    }
+  }
+}
+
+
+// ================= TEMP UNBAN CHECK =================
+async function checkUnban(id, data){
+
+  if (data.banned && data.banType === "temporary") {
+
+    if (Date.now() > data.unbanAt) {
+
+      await updateDoc(doc(db,"leaderboard",id), {
+        banned:false,
+        banType:null,
+        unbanAt:null
+      });
+    }
+  }
+}
 
 
 // ================= REALTIME =================
 function startRealtime(){
 
-    // 🔥 USERS LIVE
-    onSnapshot(collection(db, "leaderboard"), (snap) => {
+  // USERS
+  onSnapshot(collection(db, "leaderboard"), (snap) => {
 
-        const container = document.getElementById("users");
-        container.innerHTML = "";
+    const container = document.getElementById("users");
+    container.innerHTML = "";
 
-        snap.forEach(docSnap => {
+    snap.forEach(docSnap => {
 
-            const u = docSnap.data();
-            const id = docSnap.id;
+      const u = docSnap.data();
+      const id = docSnap.id;
 
-            const div = document.createElement("div");
-            div.className = "card";
+      checkUnban(id, u);
 
-            div.innerHTML = `
-                <div>
-                    <b>${u.name || "Unknown"}</b><br>
-                    <small>ID: ${id}</small><br>
-                    ${u.banned ? "🚫 BANNED" : "✅ ACTIVE"}
-                </div>
+      const div = document.createElement("div");
+      div.className = "card";
 
-                <div>
-                    <button class="ban" onclick="banUser('${id}')">Ban</button>
-                    <button class="unban" onclick="unbanUser('${id}')">Unban</button>
-                </div>
-            `;
+      div.innerHTML = `
+        <div>
+          <b>${u.name || "Unknown"}</b><br>
+          <small>ID: ${id}</small><br>
+          ${u.banned ? "🚫 BANNED (" + (u.banType || "manual") + ")" : "✅ ACTIVE"}
+        </div>
 
-            container.appendChild(div);
-        });
+        <div>
+          <button class="ban" onclick="banUser('${id}')">Ban</button>
+          <button class="unban" onclick="unbanUser('${id}')">Unban</button>
+        </div>
+      `;
+
+      container.appendChild(div);
     });
+  });
 
 
-    // 🔥 REPORTS LIVE
-    onSnapshot(collection(db, "reports"), (snap) => {
+  // REPORTS
+  onSnapshot(collection(db, "reports"), (snap) => {
 
-        const container = document.getElementById("reports");
-        container.innerHTML = "";
+    const container = document.getElementById("reports");
+    container.innerHTML = "";
 
-        snap.forEach(docSnap => {
+    autoModerate(snap); // 🔥 AI moderation runs here
 
-            const r = docSnap.data();
-            const id = docSnap.id;
+    snap.forEach(docSnap => {
 
-            const div = document.createElement("div");
-            div.className = "report-card";
+      const r = docSnap.data();
+      const id = docSnap.id;
 
-            div.innerHTML = `
-                <b>Reporter:</b> ${r.reporterUID}<br>
-                <b>Reported:</b> ${r.reportedUID}<br>
-                <b>Reason:</b> ${r.reason}<br>
+      const div = document.createElement("div");
+      div.className = "report-card";
 
-                <button class="ban" onclick="banAndDelete('${r.reportedUID}','${id}')">
-                    🚫 Ban User
-                </button>
+      div.innerHTML = `
+        <b>Reporter:</b> ${r.reporterUID}<br>
+        <b>Reported:</b> ${r.reportedUID}<br>
+        <b>Reason:</b> ${r.reason}<br>
 
-                <button class="dismiss" onclick="deleteReport('${id}')">
-                    ✅ Dismiss
-                </button>
-            `;
+        <button class="ban" onclick="banAndDelete('${r.reportedUID}','${id}')">
+          🚫 Ban User
+        </button>
 
-            container.appendChild(div);
-        });
+        <button class="dismiss" onclick="deleteReport('${id}')">
+          ✅ Dismiss
+        </button>
+      `;
+
+      container.appendChild(div);
     });
+  });
 }
 
 
 // ================= ACTIONS =================
 window.banUser = async function(id){
-    await updateDoc(doc(db,"leaderboard",id), { banned:true });
+  await updateDoc(doc(db,"leaderboard",id), { banned:true, banType:"manual" });
 };
 
 window.unbanUser = async function(id){
-    await updateDoc(doc(db,"leaderboard",id), { banned:false });
+  await updateDoc(doc(db,"leaderboard",id), { banned:false, banType:null });
 };
 
 window.deleteReport = async function(id){
-    await deleteDoc(doc(db,"reports",id));
+  await deleteDoc(doc(db,"reports",id));
 };
 
 window.banAndDelete = async function(uid, reportId){
-    await updateDoc(doc(db,"leaderboard",uid), { banned:true });
-    await deleteDoc(doc(db,"reports",reportId));
+  await updateDoc(doc(db,"leaderboard",uid), { banned:true, banType:"manual" });
+  await deleteDoc(doc(db,"reports",reportId));
 };
 
 </script>
