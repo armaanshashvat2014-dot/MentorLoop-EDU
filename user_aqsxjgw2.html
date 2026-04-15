@@ -37,7 +37,7 @@
 
 <body>
 
-<div id="loginBox">
+<div id="loginBox" style="display:none;">
     <h2>🔐 Admin Verification</h2>
     <input type="password" id="secret" placeholder="Enter secret">
     <button onclick="verify()" style="background:#3b82f6;color:white;">Enter Admin Panel</button>
@@ -65,9 +65,17 @@ import {
     getDocs,
     doc,
     updateDoc,
-    deleteDoc
+    deleteDoc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import {
+    getAuth,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
     authDomain: "mentorloop-55a37.firebaseapp.com",
@@ -76,30 +84,54 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 
-// ================= ADMIN CONFIG =================
-const ADMIN_UID = "user_buyi3x7q"; // ✅ NEW ADMIN
+// 🔥 ADMIN SETTINGS
+const ADMIN_UID = "user_buyi3x7q";
 const SECRET = "Roblox";
 
-const currentUID = localStorage.getItem("ml_uid");
 
+// ================= AUTH CHECK =================
+onAuthStateChanged(auth, async (user) => {
 
-// ================= ACCESS CHECK =================
-if (!currentUID || currentUID !== ADMIN_UID) {
-    document.body.innerHTML = `
-        <div style="background:#020617;color:white;height:100vh;display:flex;justify-content:center;align-items:center;text-align:center;">
-            <div>
-                <h1>🚫 Access Denied</h1>
-                <p>You are not authorized.</p>
-                <small>ID: ${currentUID || "null"}</small>
+    if (!user) {
+        document.body.innerHTML =
+            "<h1 style='color:red;text-align:center;'>🚫 Not logged in</h1>";
+        return;
+    }
+
+    // 🔥 GET PUBLIC ID FROM user_map
+    const mapSnap = await getDoc(doc(db, "user_map", user.uid));
+
+    if (!mapSnap.exists()) {
+        document.body.innerHTML =
+            "<h1 style='color:red;text-align:center;'>🚫 No user mapping</h1>";
+        return;
+    }
+
+    const publicId = mapSnap.data().publicId;
+
+    // 🔥 ADMIN CHECK
+    if (publicId !== ADMIN_UID) {
+        document.body.innerHTML = `
+            <div style="background:#020617;color:white;height:100vh;display:flex;justify-content:center;align-items:center;text-align:center;">
+                <div>
+                    <h1>🚫 Access Denied</h1>
+                    <p>You are not authorized.</p>
+                    <small>ID: ${publicId}</small>
+                </div>
             </div>
-        </div>
-    `;
-}
+        `;
+        return;
+    }
+
+    // ✅ ALLOW ADMIN
+    document.getElementById("loginBox").style.display = "block";
+});
 
 
-// ================= VERIFY =================
+// ================= VERIFY PASSWORD =================
 window.verify = function(){
     if(document.getElementById("secret").value === SECRET){
         document.getElementById("loginBox").style.display = "none";
@@ -113,7 +145,7 @@ window.verify = function(){
 };
 
 
-// ================= USERS =================
+// ================= LOAD USERS =================
 async function loadUsers(){
 
     const container = document.getElementById("users");
@@ -148,7 +180,7 @@ async function loadUsers(){
 }
 
 
-// ================= REPORTS =================
+// ================= LOAD REPORTS =================
 async function loadReports(){
 
     const container = document.getElementById("reports");
