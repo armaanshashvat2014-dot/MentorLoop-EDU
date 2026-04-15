@@ -146,19 +146,16 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 
-// ================= PUBLIC ID SYSTEM =================
+// ================= USER ID =================
 function generateUserId() {
   return "user_" + Math.random().toString(36).substring(2, 10);
 }
 
 async function getOrCreatePublicId(user) {
-
   const ref = doc(db, "user_map", user.uid);
   const snap = await getDoc(ref);
 
-  if (snap.exists()) {
-    return snap.data().publicId;
-  }
+  if (snap.exists()) return snap.data().publicId;
 
   const newId = generateUserId();
 
@@ -171,37 +168,49 @@ async function getOrCreatePublicId(user) {
 }
 
 
+// ================= BAN CHECK =================
+async function checkBan(publicId) {
+
+  const snap = await getDoc(doc(db, "leaderboard", publicId));
+
+  if (snap.exists() && snap.data().banned === true) {
+
+    document.body.innerHTML = `
+      <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
+        <div>
+          <h1>🚫 Account Banned</h1>
+          <p>You have been banned by admin.</p>
+          <p>ID: ${publicId}</p>
+        </div>
+      </div>
+    `;
+
+    return true;
+  }
+
+  return false;
+}
+
+
 // ================= HANDLE USER =================
 async function handleUser(user) {
 
   const publicId = await getOrCreatePublicId(user);
 
-  const userRef = doc(db, "users", publicId);
-  const userSnap = await getDoc(userRef);
+  await setDoc(doc(db, "users", publicId), {
+    name: user.displayName,
+    email: user.email,
+    photo: user.photoURL,
+    publicId: publicId
+  }, { merge: true });
 
-  if (!userSnap.exists()) {
-    await setDoc(userRef, {
-      name: user.displayName,
-      email: user.email,
-      photo: user.photoURL,
-      authUID: user.uid,
-      publicId: publicId,
-      banned: false
-    });
-  }
-
-  const lbRef = doc(db, "leaderboard", publicId);
-  const lbSnap = await getDoc(lbRef);
-
-  if (!lbSnap.exists()) {
-    await setDoc(lbRef, {
-      name: user.displayName,
-      photo: user.photoURL,
-      points: 0,
-      banned: false,
-      publicId: publicId
-    });
-  }
+  await setDoc(doc(db, "leaderboard", publicId), {
+    name: user.displayName,
+    photo: user.photoURL,
+    points: 0,
+    banned: false,
+    publicId: publicId
+  }, { merge: true });
 
   return publicId;
 }
@@ -209,7 +218,6 @@ async function handleUser(user) {
 
 // ================= START APP =================
 function startApp(name, publicId) {
-
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("appBox").style.display = "block";
 
@@ -225,20 +233,25 @@ window.loginWithGoogle = async function () {
     const result = await signInWithPopup(auth, provider);
 
     const pid = await handleUser(result.user);
+
+    if (await checkBan(pid)) return;
+
     startApp(result.user.displayName, pid);
 
   } catch (err) {
-    console.warn("Popup failed → redirect login", err);
     await signInWithRedirect(auth, provider);
   }
 };
 
 
-// ================= REDIRECT RESULT =================
+// ================= REDIRECT =================
 getRedirectResult(auth).then(async (result) => {
 
   if (result?.user) {
     const pid = await handleUser(result.user);
+
+    if (await checkBan(pid)) return;
+
     startApp(result.user.displayName, pid);
   }
 
@@ -251,6 +264,9 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
   const pid = await handleUser(user);
+
+  if (await checkBan(pid)) return;
+
   startApp(user.displayName, pid);
 });
 
