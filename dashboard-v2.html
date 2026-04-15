@@ -562,5 +562,108 @@ function spin(){
 }
 
 </script>
+  <script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+
+// ================= FIREBASE =================
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+
+// ================= GET PUBLIC ID =================
+async function getPublicId(user) {
+  const snap = await getDoc(doc(db, "user_map", user.uid));
+  return snap.exists() ? snap.data().publicId : null;
+}
+
+
+// ================= BAN SCREEN =================
+function showBanScreen(publicId) {
+  document.body.innerHTML = `
+    <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
+      <div>
+        <h1>🚫 BANNED</h1>
+        <p>Your account is restricted.</p>
+        <p>ID: ${publicId}</p>
+      </div>
+    </div>
+  `;
+}
+
+
+// ================= CHECK BAN =================
+async function checkBan(publicId) {
+
+  const snap = await getDoc(doc(db, "leaderboard", publicId));
+
+  if (snap.exists() && snap.data().banned === true) {
+    showBanScreen(publicId);
+    return true;
+  }
+
+  return false;
+}
+
+
+// ================= REAL-TIME WATCH =================
+function watchBan(publicId) {
+
+  const ref = doc(db, "leaderboard", publicId);
+
+  onSnapshot(ref, (snap) => {
+
+    if (snap.exists() && snap.data().banned === true) {
+      showBanScreen(publicId);
+    }
+
+  });
+}
+
+
+// ================= INIT =================
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    // Not logged in → send back
+    window.location.href = "index.html";
+    return;
+  }
+
+  const publicId = await getPublicId(user);
+
+  if (!publicId) {
+    alert("User ID not found");
+    return;
+  }
+
+  // 🔥 BLOCK if banned
+  if (await checkBan(publicId)) return;
+
+  // 🔥 WATCH for future bans
+  watchBan(publicId);
+
+});
+
+</script>
 </body>
 </html>
