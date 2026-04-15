@@ -48,7 +48,7 @@
 
     <h1>🛡️ Admin Control Center</h1>
 
-    <h2>👥 Users (Leaderboard Sync)</h2>
+    <h2>👥 Users</h2>
     <div id="users"></div>
 
     <h2>📜 Reports</h2>
@@ -79,8 +79,8 @@ const db = getFirestore(app);
 
 
 // ================= ADMIN CONFIG =================
+const ADMIN_UID = "user_buyi3x7q"; // ✅ NEW ADMIN
 const SECRET = "Roblox";
-const ADMIN_UID = "user_buyi3x7q";
 
 const currentUID = localStorage.getItem("ml_uid");
 
@@ -91,7 +91,7 @@ if (!currentUID || currentUID !== ADMIN_UID) {
         <div style="background:#020617;color:white;height:100vh;display:flex;justify-content:center;align-items:center;text-align:center;">
             <div>
                 <h1>🚫 Access Denied</h1>
-                <p>You are not authorized to access this panel.</p>
+                <p>You are not authorized.</p>
                 <small>ID: ${currentUID || "null"}</small>
             </div>
         </div>
@@ -99,7 +99,7 @@ if (!currentUID || currentUID !== ADMIN_UID) {
 }
 
 
-// ================= VERIFY ADMIN PASSWORD =================
+// ================= VERIFY =================
 window.verify = function(){
     if(document.getElementById("secret").value === SECRET){
         document.getElementById("loginBox").style.display = "none";
@@ -113,7 +113,7 @@ window.verify = function(){
 };
 
 
-// ================= LOAD USERS =================
+// ================= USERS =================
 async function loadUsers(){
 
     const container = document.getElementById("users");
@@ -125,7 +125,7 @@ async function loadUsers(){
     snap.forEach(docSnap => {
 
         const u = docSnap.data();
-        const publicId = docSnap.id;
+        const id = docSnap.id;
 
         const div = document.createElement("div");
         div.className = "card";
@@ -133,13 +133,13 @@ async function loadUsers(){
         div.innerHTML = `
             <div>
                 <b>${u.name || "Unknown"}</b><br>
-                <small>ID: ${publicId}</small><br>
-                ${u.banned ? "<span style='color:#ef4444'>🚫 BANNED</span>" : "<span style='color:#22c55e'>✅ ACTIVE</span>"}
+                <small>ID: ${id}</small><br>
+                ${u.banned ? "🚫 BANNED" : "✅ ACTIVE"}
             </div>
 
             <div>
-                <button class="ban" onclick="banUser('${publicId}')">Ban</button>
-                <button class="unban" onclick="unbanUser('${publicId}')">Unban</button>
+                <button class="ban" onclick="banUser('${id}')">Ban</button>
+                <button class="unban" onclick="unbanUser('${id}')">Unban</button>
             </div>
         `;
 
@@ -148,7 +148,7 @@ async function loadUsers(){
 }
 
 
-// ================= LOAD REPORTS =================
+// ================= REPORTS =================
 async function loadReports(){
 
     const container = document.getElementById("reports");
@@ -184,46 +184,28 @@ async function loadReports(){
 }
 
 
-// ================= BAN USER =================
-window.banUser = async function(publicId){
-    await updateDoc(doc(db,"leaderboard",publicId), {
-        banned: true
-    });
-
+// ================= ACTIONS =================
+window.banUser = async function(id){
+    await updateDoc(doc(db,"leaderboard",id), { banned:true });
     alert("User banned");
     loadUsers();
 };
 
-
-// ================= UNBAN USER =================
-window.unbanUser = async function(publicId){
-    await updateDoc(doc(db,"leaderboard",publicId), {
-        banned: false
-    });
-
+window.unbanUser = async function(id){
+    await updateDoc(doc(db,"leaderboard",id), { banned:false });
     alert("User unbanned");
     loadUsers();
 };
 
-
-// ================= DELETE REPORT =================
 window.deleteReport = async function(id){
     await deleteDoc(doc(db,"reports",id));
     loadReports();
 };
 
-
-// ================= BAN + DELETE REPORT =================
-window.banAndDelete = async function(publicId, reportId){
-
-    await updateDoc(doc(db,"leaderboard",publicId), {
-        banned: true
-    });
-
+window.banAndDelete = async function(uid, reportId){
+    await updateDoc(doc(db,"leaderboard",uid), { banned:true });
     await deleteDoc(doc(db,"reports",reportId));
-
     alert("User banned + report removed");
-
     loadUsers();
     loadReports();
 };
