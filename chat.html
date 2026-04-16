@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-*{
-  box-sizing:border-box;
-}
-
+*{box-sizing:border-box;}
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
@@ -17,21 +14,14 @@ body{
   background:radial-gradient(circle at top left,#0f172a,#020617);
   color:white;
 }
-
 .sidebar{
   width:280px;
-  background:rgba(255,255,255,0.04);
-  backdrop-filter:blur(20px);
-  border-right:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
   padding:20px;
+  border-right:1px solid rgba(255,255,255,.08);
   overflow-y:auto;
 }
-
-.sidebar h2{
-  color:#22d3ee;
-  margin-top:0;
-}
-
+.sidebar h2{color:#22d3ee;}
 .sidebar input{
   width:100%;
   padding:12px;
@@ -41,7 +31,6 @@ body{
   background:#0f172a;
   color:white;
 }
-
 .sidebar button{
   width:100%;
   padding:12px;
@@ -49,82 +38,67 @@ body{
   border-radius:12px;
   background:linear-gradient(90deg,#22d3ee,#10b981);
   color:white;
-  cursor:pointer;
 }
-
 .friend{
   margin-top:10px;
   padding:12px;
   border-radius:12px;
   background:rgba(255,255,255,.05);
 }
-
 .chat{
   flex:1;
   display:flex;
   flex-direction:column;
 }
-
 header{
   padding:18px;
   text-align:center;
-  font-size:22px;
   color:#22d3ee;
-  background:rgba(255,255,255,.03);
+  font-size:22px;
 }
-
 #chatBox{
   flex:1;
-  overflow-y:auto;
   padding:20px;
+  overflow-y:auto;
 }
-
 .message{
   background:rgba(255,255,255,.05);
   padding:14px;
-  border-radius:16px;
+  border-radius:14px;
   margin-bottom:14px;
 }
-
 .meta{
   font-size:12px;
   color:#94a3b8;
   margin-bottom:6px;
 }
-
 .flagBtn{
-  margin-top:10px;
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
+  margin-top:8px;
   background:#7f1d1d;
   color:white;
-  cursor:pointer;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
 }
-
 .bottom{
   display:flex;
   gap:10px;
   padding:15px;
-  background:rgba(255,255,255,.03);
 }
-
 .bottom input{
   flex:1;
   padding:14px;
   border:none;
-  border-radius:14px;
+  border-radius:12px;
   background:#0f172a;
   color:white;
 }
-
 .bottom button{
   padding:14px 20px;
   border:none;
-  border-radius:14px;
+  border-radius:12px;
   background:linear-gradient(90deg,#22d3ee,#10b981);
   color:white;
-  cursor:pointer;
 }
 </style>
 </head>
@@ -155,9 +129,12 @@ header{
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
 import {
   getAuth,
-  onAuthStateChanged
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 import {
@@ -175,34 +152,40 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID"
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37",
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let currentUser = null;
-let currentName = "";
-let publicId = "";
-let banned = false;
-let friends = {};
+await setPersistence(auth, browserLocalPersistence);
+
+let currentUser=null;
+let publicId="";
+let currentName="";
+let banned=false;
+let friends={};
 
 onAuthStateChanged(auth, async(user)=>{
 
   if(!user){
-    document.body.innerHTML = "Please login first";
+    setTimeout(()=>{
+      if(!auth.currentUser){
+        document.body.innerHTML="Please login first";
+      }
+    },1500);
     return;
   }
 
-  currentUser = user;
+  currentUser=user;
 
   const mapSnap = await getDoc(doc(db,"user_map",user.uid));
 
   if(!mapSnap.exists()){
-    document.body.innerHTML = "User ID not found";
+    document.body.innerHTML="User ID not found";
     return;
   }
 
@@ -216,8 +199,8 @@ onAuthStateChanged(auth, async(user)=>{
   }
 
   if(banned){
-    document.getElementById("msgInput").disabled = true;
-    document.getElementById("msgInput").placeholder = "You are banned";
+    document.getElementById("msgInput").disabled=true;
+    document.getElementById("msgInput").placeholder="You are banned";
   }
 
   loadFriends();
@@ -231,30 +214,27 @@ window.sendMessage = async function(){
     return;
   }
 
-  const text = document.getElementById("msgInput").value.trim();
-
+  const text=document.getElementById("msgInput").value.trim();
   if(!text) return;
 
   await addDoc(collection(db,"chatMessages"),{
-    uid: publicId,
-    name: currentName,
-    text: text,
-    time: serverTimestamp()
+    uid:publicId,
+    name:currentName,
+    text:text,
+    time:serverTimestamp()
   });
 
-  document.getElementById("msgInput").value = "";
+  document.getElementById("msgInput").value="";
 }
 
-window.flagMessage = async function(id, uid, name, text){
-
-  if(!confirm("Flag this message?")) return;
+window.flagMessage = async function(id,uid,name,text){
 
   await addDoc(collection(db,"flaggedMessages"),{
-    flaggedBy: publicId,
-    originalUID: uid,
-    originalName: name,
-    text: text,
-    flaggedAt: serverTimestamp()
+    flaggedBy:publicId,
+    originalUID:uid,
+    originalName:name,
+    text:text,
+    flaggedAt:serverTimestamp()
   });
 
   await deleteDoc(doc(db,"chatMessages",id));
@@ -262,22 +242,22 @@ window.flagMessage = async function(id, uid, name, text){
 
 function loadMessages(){
 
-  const q = query(collection(db,"chatMessages"), orderBy("time","asc"));
+  const q=query(collection(db,"chatMessages"),orderBy("time","asc"));
 
   onSnapshot(q,(snapshot)=>{
 
-    const box = document.getElementById("chatBox");
-    box.innerHTML = "";
+    const box=document.getElementById("chatBox");
+    box.innerHTML="";
 
     snapshot.forEach(docSnap=>{
 
-      const m = docSnap.data();
-      const id = docSnap.id;
-      const displayName = friends[m.uid] || m.name;
+      const m=docSnap.data();
+      const id=docSnap.id;
+      const display=friends[m.uid] || m.name;
 
       box.innerHTML += `
         <div class="message">
-          <div class="meta">(${m.uid}) ${displayName}</div>
+          <div class="meta">(${m.uid}) ${display}</div>
           <div>${m.text}</div>
           <button class="flagBtn"
             onclick="flagMessage('${id}','${m.uid}','${m.name}','${m.text.replace(/'/g,"\\'")}')">
@@ -287,36 +267,36 @@ function loadMessages(){
       `;
     });
 
-    box.scrollTop = box.scrollHeight;
+    box.scrollTop=box.scrollHeight;
   });
 }
 
 window.addFriend = async function(){
 
-  const uid = document.getElementById("friendUID").value.trim();
-  const nickname = document.getElementById("friendNick").value.trim();
+  const uid=document.getElementById("friendUID").value.trim();
+  const nickname=document.getElementById("friendNick").value.trim();
 
   if(!uid || !nickname) return;
 
   await setDoc(doc(db,"friends",publicId,"list",uid),{
-    nickname: nickname
+    nickname:nickname
   });
 
-  document.getElementById("friendUID").value = "";
-  document.getElementById("friendNick").value = "";
+  document.getElementById("friendUID").value="";
+  document.getElementById("friendNick").value="";
 }
 
 function loadFriends(){
 
   onSnapshot(collection(db,"friends",publicId,"list"),(snapshot)=>{
 
-    friends = {};
-    const list = document.getElementById("friendsList");
-    list.innerHTML = "";
+    friends={};
+    const list=document.getElementById("friendsList");
+    list.innerHTML="";
 
     snapshot.forEach(docSnap=>{
 
-      friends[docSnap.id] = docSnap.data().nickname;
+      friends[docSnap.id]=docSnap.data().nickname;
 
       list.innerHTML += `
         <div class="friend">
