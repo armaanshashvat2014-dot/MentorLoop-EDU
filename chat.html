@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MentorLoop EDU Chat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-*{box-sizing:border-box;}
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
@@ -14,14 +18,22 @@ body{
   background:radial-gradient(circle at top left,#0f172a,#020617);
   color:white;
 }
+
+/* SIDEBAR */
 .sidebar{
   width:280px;
   background:rgba(255,255,255,.04);
-  padding:20px;
+  backdrop-filter:blur(20px);
   border-right:1px solid rgba(255,255,255,.08);
+  padding:20px;
   overflow-y:auto;
 }
-.sidebar h2{color:#22d3ee;}
+
+.sidebar h2{
+  color:#22d3ee;
+  margin-top:0;
+}
+
 .sidebar input{
   width:100%;
   padding:12px;
@@ -31,6 +43,7 @@ body{
   background:#0f172a;
   color:white;
 }
+
 .sidebar button{
   width:100%;
   padding:12px;
@@ -38,67 +51,85 @@ body{
   border-radius:12px;
   background:linear-gradient(90deg,#22d3ee,#10b981);
   color:white;
+  cursor:pointer;
+  font-weight:bold;
 }
+
 .friend{
   margin-top:10px;
   padding:12px;
   border-radius:12px;
   background:rgba(255,255,255,.05);
 }
+
+/* CHAT */
 .chat{
   flex:1;
   display:flex;
   flex-direction:column;
 }
+
 header{
   padding:18px;
   text-align:center;
-  color:#22d3ee;
   font-size:22px;
+  color:#22d3ee;
+  background:rgba(255,255,255,.03);
 }
+
 #chatBox{
   flex:1;
   padding:20px;
   overflow-y:auto;
 }
+
 .message{
   background:rgba(255,255,255,.05);
   padding:14px;
   border-radius:14px;
   margin-bottom:14px;
 }
+
 .meta{
   font-size:12px;
   color:#94a3b8;
   margin-bottom:6px;
 }
+
 .flagBtn{
-  margin-top:8px;
+  margin-top:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
   background:#7f1d1d;
   color:white;
-  border:none;
-  padding:8px 12px;
-  border-radius:8px;
+  cursor:pointer;
 }
+
 .bottom{
   display:flex;
   gap:10px;
   padding:15px;
+  background:rgba(255,255,255,.03);
 }
+
 .bottom input{
   flex:1;
   padding:14px;
   border:none;
-  border-radius:12px;
+  border-radius:14px;
   background:#0f172a;
   color:white;
 }
+
 .bottom button{
   padding:14px 20px;
   border:none;
-  border-radius:12px;
+  border-radius:14px;
   background:linear-gradient(90deg,#22d3ee,#10b981);
   color:white;
+  cursor:pointer;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -151,10 +182,11 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+/* FIREBASE */
 const firebaseConfig = {
-  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain: "mentorloop-55a37.firebaseapp.com",
-  projectId: "mentorloop-55a37",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -163,29 +195,38 @@ const db = getFirestore(app);
 
 await setPersistence(auth, browserLocalPersistence);
 
-let currentUser=null;
-let publicId="";
-let currentName="";
-let banned=false;
-let friends={};
+/* GLOBALS */
+let currentUser = null;
+let publicId = "";
+let currentName = "";
+let banned = false;
+let friends = {};
 
+/* AUTH */
 onAuthStateChanged(auth, async(user)=>{
 
   if(!user){
     setTimeout(()=>{
       if(!auth.currentUser){
-        document.body.innerHTML="Please login first";
+        document.body.innerHTML = `
+          <div style="display:flex;justify-content:center;align-items:center;height:100vh;">
+            <div>
+              <h2>Please login first</h2>
+              <a href="index.html" style="color:#22d3ee;">Go back</a>
+            </div>
+          </div>
+        `;
       }
     },1500);
     return;
   }
 
-  currentUser=user;
+  currentUser = user;
 
   const mapSnap = await getDoc(doc(db,"user_map",user.uid));
 
   if(!mapSnap.exists()){
-    document.body.innerHTML="User ID not found";
+    document.body.innerHTML = "User ID not found";
     return;
   }
 
@@ -199,14 +240,15 @@ onAuthStateChanged(auth, async(user)=>{
   }
 
   if(banned){
-    document.getElementById("msgInput").disabled=true;
-    document.getElementById("msgInput").placeholder="You are banned";
+    document.getElementById("msgInput").disabled = true;
+    document.getElementById("msgInput").placeholder = "You are banned";
   }
 
   loadFriends();
   loadMessages();
 });
 
+/* SEND MESSAGE */
 window.sendMessage = async function(){
 
   if(banned){
@@ -214,50 +256,55 @@ window.sendMessage = async function(){
     return;
   }
 
-  const text=document.getElementById("msgInput").value.trim();
+  const text = document.getElementById("msgInput").value.trim();
+
   if(!text) return;
 
   await addDoc(collection(db,"chatMessages"),{
-    uid:publicId,
-    name:currentName,
-    text:text,
-    time:serverTimestamp()
+    uid: publicId,
+    name: currentName,
+    text: text,
+    time: serverTimestamp()
   });
 
-  document.getElementById("msgInput").value="";
+  document.getElementById("msgInput").value = "";
 }
 
+/* FLAG MESSAGE */
 window.flagMessage = async function(id,uid,name,text){
 
+  if(!confirm("Flag this message?")) return;
+
   await addDoc(collection(db,"flaggedMessages"),{
-    flaggedBy:publicId,
-    originalUID:uid,
-    originalName:name,
-    text:text,
-    flaggedAt:serverTimestamp()
+    flaggedBy: publicId,
+    originalUID: uid,
+    originalName: name,
+    text: text,
+    flaggedAt: serverTimestamp()
   });
 
   await deleteDoc(doc(db,"chatMessages",id));
 }
 
+/* LOAD CHAT */
 function loadMessages(){
 
-  const q=query(collection(db,"chatMessages"),orderBy("time","asc"));
+  const q = query(collection(db,"chatMessages"), orderBy("time","asc"));
 
   onSnapshot(q,(snapshot)=>{
 
-    const box=document.getElementById("chatBox");
-    box.innerHTML="";
+    const box = document.getElementById("chatBox");
+    box.innerHTML = "";
 
     snapshot.forEach(docSnap=>{
 
-      const m=docSnap.data();
-      const id=docSnap.id;
-      const display=friends[m.uid] || m.name;
+      const m = docSnap.data();
+      const id = docSnap.id;
+      const displayName = friends[m.uid] || m.name;
 
       box.innerHTML += `
         <div class="message">
-          <div class="meta">(${m.uid}) ${display}</div>
+          <div class="meta">(${m.uid}) ${displayName}</div>
           <div>${m.text}</div>
           <button class="flagBtn"
             onclick="flagMessage('${id}','${m.uid}','${m.name}','${m.text.replace(/'/g,"\\'")}')">
@@ -267,14 +314,15 @@ function loadMessages(){
       `;
     });
 
-    box.scrollTop=box.scrollHeight;
+    box.scrollTop = box.scrollHeight;
   });
 }
 
+/* ADD FRIEND */
 window.addFriend = async function(){
 
-  const uid=document.getElementById("friendUID").value.trim();
-  const nickname=document.getElementById("friendNick").value.trim();
+  const uid = document.getElementById("friendUID").value.trim();
+  const nickname = document.getElementById("friendNick").value.trim();
 
   if(!uid || !nickname) return;
 
@@ -282,25 +330,27 @@ window.addFriend = async function(){
     nickname:nickname
   });
 
-  document.getElementById("friendUID").value="";
-  document.getElementById("friendNick").value="";
+  document.getElementById("friendUID").value = "";
+  document.getElementById("friendNick").value = "";
 }
 
+/* LOAD FRIENDS */
 function loadFriends(){
 
   onSnapshot(collection(db,"friends",publicId,"list"),(snapshot)=>{
 
-    friends={};
-    const list=document.getElementById("friendsList");
-    list.innerHTML="";
+    friends = {};
+
+    const list = document.getElementById("friendsList");
+    list.innerHTML = "";
 
     snapshot.forEach(docSnap=>{
 
-      friends[docSnap.id]=docSnap.data().nickname;
+      friends[docSnap.id] = docSnap.data().nickname;
 
       list.innerHTML += `
         <div class="friend">
-          <strong>${docSnap.data().nickname}</strong>
+          <strong>${docSnap.data().nickname}</strong><br>
           <small>${docSnap.id}</small>
         </div>
       `;
