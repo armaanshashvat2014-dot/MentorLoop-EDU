@@ -2,308 +2,339 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Season League | MentorLoop EDU</title>
+<title>Quiz Race | MentorLoop EDU</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+<style>
 body{
 margin:0;
-font-family:'Segoe UI',sans-serif;
-background:linear-gradient(135deg,#020617,#0f172a);
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-}
-
-.container{
+font-family:Segoe UI,sans-serif;
 background:#0f172a;
-padding:30px;
-border-radius:18px;
-width:95%;
-max-width:700px;
+color:white;
 text-align:center;
-box-shadow:0 0 40px rgba(34,211,238,.2);
+padding:20px;
 }
-
 h1{color:#22d3ee;}
-
-.league{
-margin-top:15px;
-padding:18px;
-border-radius:14px;
-font-size:20px;
-font-weight:bold;
-}
-
-.spring{background:linear-gradient(90deg,#22c55e,#4ade80);color:black;}
-.summer{background:linear-gradient(90deg,#facc15,#f97316);color:black;}
-.winter{background:linear-gradient(90deg,#38bdf8,#0ea5e9);color:black;}
-
-.leaderboard{
-margin-top:20px;
-background:#1e293b;
-padding:15px;
-border-radius:12px;
-}
-
-.player{
-display:flex;
-justify-content:space-between;
-padding:8px;
-border-bottom:1px solid #334155;
-}
-
-button{
-margin-top:15px;
+select,button{
 padding:12px;
-width:100%;
+margin:10px;
 border:none;
 border-radius:10px;
+font-size:16px;
+}
+button{
 background:#22d3ee;
-color:black;
 cursor:pointer;
-font-weight:bold;
 }
-
-.rank{
-margin-top:10px;
-font-size:18px;
-color:#22d3ee;
+#timer{
+font-size:28px;
+color:#facc15;
+margin:15px;
 }
-
-.question-box{
-margin-top:20px;
+.playerRow{
+display:flex;
+align-items:center;
+margin:10px auto;
+max-width:700px;
+}
+.name{
+width:140px;
+text-align:left;
+}
+.lane{
+flex:1;
+height:24px;
 background:#1e293b;
-padding:15px;
 border-radius:12px;
+position:relative;
 }
-
+.runner{
+position:absolute;
+top:2px;
+font-size:18px;
+transition:left .25s;
+}
+#questionBox{
+background:#1e293b;
+padding:20px;
+border-radius:14px;
+max-width:700px;
+margin:20px auto;
+}
 .option{
-margin-top:8px;
-padding:10px;
+padding:12px;
+margin-top:10px;
 background:#334155;
-border-radius:8px;
+border-radius:10px;
 cursor:pointer;
 }
-
 .option:hover{
 background:#22d3ee;
 color:black;
 }
-
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<h1>🏁 Quiz Race</h1>
 
-<h1>🏆 Seasonal League</h1>
+<div id="setupBox">
+<select id="grade">
+<option value="">Select Grade</option>
+</select>
 
-<div id="leagueBox" class="league"></div>
+<select id="difficulty">
+<option value="">Select Difficulty</option>
+<option value="easy">Easy</option>
+<option value="medium">Medium</option>
+<option value="hard">Hard</option>
+</select>
 
-<div class="rank" id="rankText"></div>
-
-<div class="leaderboard" id="leaderboard"></div>
-
-<button onclick="startBattle()">⚔️ Start Battle</button>
-
-<div id="quizBox"></div>
-
+<button onclick="joinRace()">Join Race</button>
 </div>
 
+<div id="timer"></div>
+<div id="track"></div>
+<div id="questionBox"></div>
+
 <script>
-
-// ---------- SEASON ----------
-function getSeason(){
-const m=new Date().getMonth()+1;
-if(m>=2 && m<=4) return "spring";
-if(m>=5 && m<=8) return "summer";
-return "winter";
-}
-
-const season=getSeason();
-let key="ml_"+season+"_points";
-
-// ---------- RENDER LEAGUE ----------
-function renderLeague(){
-const box=document.getElementById("leagueBox");
-
-if(season==="spring"){
-box.className="league spring";
-box.innerText="🌸 Spring Battles";
-}
-if(season==="summer"){
-box.className="league summer";
-box.innerText="☀️ Summer League Tournament";
-}
-if(season==="winter"){
-box.className="league winter";
-box.innerText="❄️ Winter Winners";
-}
-}
-
-// ---------- POINTS ----------
-function getMyPoints(){
-return parseInt(localStorage.getItem(key)||0);
-}
-
-
-// ---------- SHUFFLE ----------
-function shuffle(array){
-for(let i=array.length-1;i>0;i--){
-const j=Math.floor(Math.random()*(i+1));
-[array[i],array[j]]=[array[j],array[i]];
-}
-return array;
-}
-
-// ---------- SEASON QUESTIONS ----------
-const SEASON_QUESTIONS={
-
-spring:[
-{q:"5+3=?",a:["8","7","9"],c:0},
-{q:"Sun rises in?",a:["East","West","North"],c:0},
-{q:"Plant makes food by?",a:["Photosynthesis","Digestion","Respiration"],c:0}
-],
-
-summer:[
-{q:"9x4=?",a:["36","32","40"],c:0},
-{q:"Largest planet?",a:["Jupiter","Earth","Mars"],c:0},
-{q:"Water freezes at?",a:["0°C","10°C","-5°C"],c:0}
-],
-
-winter:[
-{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata"],c:0},
-{q:"H2O is?",a:["Water","Oxygen","Salt"],c:0},
-{q:"7+6=?",a:["13","12","14"],c:0}
-]
-
+const firebaseConfig = {
+  apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain:"mentorloop-55a37.firebaseapp.com",
+  projectId:"mentorloop-55a37",
+  storageBucket:"mentorloop-55a37.firebasestorage.app",
+  messagingSenderId:"322053863438",
+  appId:"1:322053863438:web:c05dcb365853e04573a45f"
 };
 
-// ---------- SELECT QUESTIONS ----------
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let uid, studentName="Student";
+let roomId=null;
 let currentQuestions=[];
+let currentQuestion=null;
+let questionIndex=0;
+let timerInterval=null;
 
-// ---------- BATTLE ----------
-let index=0;
-let score=0;
-
-function startBattle(){
-
-// anti spam
-let last=localStorage.getItem("ml_last_play");
-let now=Date.now();
-
-if(last && now-last<5000){
-alert("⏳ Wait a few seconds!");
-return;
+for(let i=1;i<=12;i++){
+  const option=document.createElement("option");
+  option.value=i;
+  option.textContent="Grade " + i;
+  document.getElementById("grade").appendChild(option);
 }
 
-localStorage.setItem("ml_last_play",now);
+auth.signInAnonymously();
 
-// 🔥 pick season questions
-currentQuestions = shuffle([...SEASON_QUESTIONS[season]]).slice(0,2);
+auth.onAuthStateChanged(async user=>{
+  uid=user.uid;
 
-index=0;
-score=0;
+  const doc=await db.collection("users").doc(uid).get();
+  if(doc.exists){
+    studentName = doc.data().name || "Student";
+  }
+});
 
-document.getElementById("quizBox").innerHTML="";
-loadQuestion();
+function generateQuestions(diff){
+  let max=10;
+  if(diff==="medium") max=30;
+  if(diff==="hard") max=60;
+
+  let arr=[];
+
+  for(let i=0;i<20;i++){
+    let a=Math.floor(Math.random()*max)+1;
+    let b=Math.floor(Math.random()*max)+1;
+    let ans=a+b;
+
+    let options=[ans,ans+1,ans-1,ans+2]
+      .sort(()=>Math.random()-0.5);
+
+    arr.push({
+      q:`${a} + ${b} = ?`,
+      options,
+      answer:options.indexOf(ans)
+    });
+  }
+
+  return arr;
+}
+
+async function joinRace(){
+  const grade=document.getElementById("grade").value;
+  const difficulty=document.getElementById("difficulty").value;
+
+  if(!grade || !difficulty){
+    alert("Choose grade and difficulty");
+    return;
+  }
+
+  const serverKey=`grade${grade}_${difficulty}`;
+
+  const rooms=await db.collection("raceRooms")
+    .where("serverKey","==",serverKey)
+    .where("status","==","waiting")
+    .limit(1)
+    .get();
+
+  if(rooms.empty){
+    const ref=await db.collection("raceRooms").add({
+      serverKey,
+      duration:60,
+      startedAt:null,
+      status:"waiting",
+      winner:null,
+      questions:generateQuestions(difficulty),
+      players:{
+        [uid]:{
+          name:studentName,
+          progress:0
+        }
+      }
+    });
+
+    roomId=ref.id;
+
+  }else{
+    const doc=rooms.docs[0];
+    roomId=doc.id;
+    const data=doc.data();
+    let players=data.players||{};
+
+    if(Object.keys(players).length<5){
+      players[uid]={
+        name:studentName,
+        progress:0
+      };
+
+      let updates={players};
+
+      if(Object.keys(players).length>=2){
+        updates.status="active";
+        updates.startedAt=firebase.firestore.FieldValue.serverTimestamp();
+      }
+
+      await db.collection("raceRooms").doc(roomId).update(updates);
+    }
+  }
+
+  document.getElementById("setupBox").style.display="none";
+  listenRoom();
+}
+
+function listenRoom(){
+  db.collection("raceRooms").doc(roomId).onSnapshot(doc=>{
+    const data=doc.data();
+    if(!data) return;
+
+    currentQuestions=data.questions;
+    renderTrack(data.players);
+
+    if(data.startedAt){
+      startSyncedTimer(data.startedAt.toMillis(), data.duration);
+    }
+
+    if(data.winner){
+      document.getElementById("questionBox").innerHTML=
+        `<h2>${data.players[data.winner].name} wins!</h2>`;
+      return;
+    }
+
+    if(data.status==="active" && !currentQuestion){
+      loadQuestion();
+    }
+  });
+}
+
+function startSyncedTimer(startMillis, duration){
+  if(timerInterval) return;
+
+  timerInterval=setInterval(async ()=>{
+    const now=Date.now();
+    const elapsed=Math.floor((now-startMillis)/1000);
+    const left=Math.max(duration-elapsed,0);
+
+    document.getElementById("timer").innerText=`⏱ ${left}s`;
+
+    if(left<=0){
+      clearInterval(timerInterval);
+      timerInterval=null;
+
+      const doc=await db.collection("raceRooms").doc(roomId).get();
+      const data=doc.data();
+
+      if(!data.winner){
+        let winnerUid=null;
+        let best=-1;
+
+        Object.entries(data.players).forEach(([id,p])=>{
+          if(p.progress>best){
+            best=p.progress;
+            winnerUid=id;
+          }
+        });
+
+        await db.collection("raceRooms").doc(roomId).update({
+          winner:winnerUid
+        });
+      }
+    }
+  },500);
+}
+
+function renderTrack(players){
+  document.getElementById("track").innerHTML=
+    Object.entries(players).map(([id,p])=>`
+      <div class="playerRow">
+        <div class="name">${p.name}</div>
+        <div class="lane">
+          <div class="runner" style="left:${p.progress}%;">🏃</div>
+        </div>
+      </div>
+    `).join("");
 }
 
 function loadQuestion(){
+  if(questionIndex>=currentQuestions.length) return;
 
-if(index>=currentQuestions.length){
+  currentQuestion=currentQuestions[questionIndex];
 
-let earn=score*5;
-
-if(earn>0){
-let pts=getMyPoints()+earn;
-localStorage.setItem(key,pts);
-alert("🔥 You earned "+earn+" points!");
-}else{
-alert("❌ No points earned");
+  document.getElementById("questionBox").innerHTML=
+    `<h3>${currentQuestion.q}</h3>`+
+    currentQuestion.options.map((o,i)=>
+      `<div class="option" onclick="answer(${i})">${o}</div>`
+    ).join("");
 }
 
-renderAll();
-document.getElementById("quizBox").innerHTML="";
-return;
+async function answer(i){
+  if(i===currentQuestion.answer){
+    const ref=db.collection("raceRooms").doc(roomId);
+    const snap=await ref.get();
+    const data=snap.data();
+
+    let players=data.players;
+    players[uid].progress += 5;
+
+    let winner=null;
+    if(players[uid].progress>=100){
+      winner=uid;
+    }
+
+    await ref.update({
+      players,
+      winner:winner || data.winner || null
+    });
+  }
+
+  questionIndex++;
+  currentQuestion=null;
+  loadQuestion();
 }
-
-let q=currentQuestions[index];
-
-let box=document.getElementById("quizBox");
-
-box.innerHTML=
-`<div class="question-box">
-<p>${q.q}</p>
-${q.a.map((opt,i)=>`<div class="option" onclick="answer(${i},${q.c})">${opt}</div>`).join("")}
-</div>`;
-
-}
-
-function answer(i,c){
-if(i===c) score++;
-index++;
-loadQuestion();
-}
-// ---------- LEADERBOARD ----------
-function getLeaderboard(){
-let myScore=getMyPoints();
-return [
-{name:"You",score:myScore},
-{name:"Arjun",score:80},
-{name:"Riya",score:65},
-{name:"Kabir",score:50}
-].sort((a,b)=>b.score-a.score);
-}
-
-// ---------- RENDER ----------
-function renderAll(){
-
-const board=document.getElementById("leaderboard");
-board.innerHTML="<h3>Leaderboard</h3>";
-
-let data=getLeaderboard();
-
-data.forEach((p,i)=>{
-
-let div=document.createElement("div");
-div.className="player";
-
-div.innerHTML=
-"<span>"+(i+1)+". "+p.name+"</span>"+
-"<span>"+p.score+" pts</span>";
-
-board.appendChild(div);
-
-if(p.name==="You"){
-document.getElementById("rankText").innerText="Your Rank: #"+(i+1);
-}
-
-});
-
-}
-
-// ---------- RESET ----------
-function checkReset(){
-let lastSeason=localStorage.getItem("ml_last_season");
-
-if(lastSeason!==season){
-localStorage.setItem(key,0);
-localStorage.setItem("ml_last_season",season);
-alert("🌍 New Season Started!");
-}
-}
-
-// ---------- INIT ----------
-renderLeague();
-checkReset();
-renderAll();
-
 </script>
 
 </body>
