@@ -42,7 +42,7 @@ margin:10px auto;
 max-width:700px;
 }
 .name{
-width:140px;
+width:150px;
 text-align:left;
 }
 .lane{
@@ -111,11 +111,15 @@ const firebaseConfig = {
   appId:"1:322053863438:web:c05dcb365853e04573a45f"
 };
 
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let uid, studentName="Student";
+let uid=null;
+let studentName="Student";
 let roomId=null;
 let currentQuestions=[];
 let currentQuestion=null;
@@ -129,12 +133,17 @@ for(let i=1;i<=12;i++){
   document.getElementById("grade").appendChild(option);
 }
 
-auth.signInAnonymously();
-
 auth.onAuthStateChanged(async user=>{
-  uid=user.uid;
+  if(!user){
+    document.getElementById("questionBox").innerHTML =
+      "<h3>Please sign in first.</h3>";
+    return;
+  }
 
-  const doc=await db.collection("users").doc(uid).get();
+  uid = user.uid;
+
+  const doc = await db.collection("users").doc(uid).get();
+
   if(doc.exists){
     studentName = doc.data().name || "Student";
   }
@@ -166,6 +175,11 @@ function generateQuestions(diff){
 }
 
 async function joinRace(){
+  if(!uid){
+    alert("User not signed in");
+    return;
+  }
+
   const grade=document.getElementById("grade").value;
   const difficulty=document.getElementById("difficulty").value;
 
@@ -176,14 +190,14 @@ async function joinRace(){
 
   const serverKey=`grade${grade}_${difficulty}`;
 
-  const rooms=await db.collection("raceRooms")
+  const rooms = await db.collection("raceRooms")
     .where("serverKey","==",serverKey)
     .where("status","==","waiting")
     .limit(1)
     .get();
 
   if(rooms.empty){
-    const ref=await db.collection("raceRooms").add({
+    const ref = await db.collection("raceRooms").add({
       serverKey,
       duration:60,
       startedAt:null,
@@ -198,29 +212,32 @@ async function joinRace(){
       }
     });
 
-    roomId=ref.id;
+    roomId = ref.id;
 
   }else{
-    const doc=rooms.docs[0];
-    roomId=doc.id;
-    const data=doc.data();
-    let players=data.players||{};
+    const doc = rooms.docs[0];
+    roomId = doc.id;
+    const data = doc.data();
+    let players = data.players || {};
 
-    if(Object.keys(players).length<5){
-      players[uid]={
-        name:studentName,
-        progress:0
-      };
-
-      let updates={players};
-
-      if(Object.keys(players).length>=2){
-        updates.status="active";
-        updates.startedAt=firebase.firestore.FieldValue.serverTimestamp();
-      }
-
-      await db.collection("raceRooms").doc(roomId).update(updates);
+    if(Object.keys(players).length >= 5){
+      alert("Room full");
+      return;
     }
+
+    players[uid]={
+      name:studentName,
+      progress:0
+    };
+
+    const updates={players};
+
+    if(Object.keys(players).length >= 2){
+      updates.status="active";
+      updates.startedAt=firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    await db.collection("raceRooms").doc(roomId).update(updates);
   }
 
   document.getElementById("setupBox").style.display="none";
@@ -236,12 +253,18 @@ function listenRoom(){
     renderTrack(data.players);
 
     if(data.startedAt){
-      startSyncedTimer(data.startedAt.toMillis(), data.duration);
+      startTimer(data.startedAt.toMillis(), data.duration);
     }
 
     if(data.winner){
-      document.getElementById("questionBox").innerHTML=
+      document.getElementById("questionBox").innerHTML =
         `<h2>${data.players[data.winner].name} wins!</h2>`;
+      return;
+    }
+
+    if(data.status==="waiting"){
+      document.getElementById("questionBox").innerHTML =
+        "<h3>Waiting for another player...</h3>";
       return;
     }
 
@@ -251,44 +274,41 @@ function listenRoom(){
   });
 }
 
-function startSyncedTimer(startMillis, duration){
+function startTimer(startMillis,duration){
   if(timerInterval) return;
 
   timerInterval=setInterval(async ()=>{
-    const now=Date.now();
-    const elapsed=Math.floor((now-startMillis)/1000);
+    const elapsed=Math.floor((Date.now()-startMillis)/1000);
     const left=Math.max(duration-elapsed,0);
 
-    document.getElementById("timer").innerText=`⏱ ${left}s`;
+    document.getElementById("timer").innerText="⏱ " + left + "s";
 
     if(left<=0){
       clearInterval(timerInterval);
-      timerInterval=null;
 
-      const doc=await db.collection("raceRooms").doc(roomId).get();
-      const data=doc.data();
+      const ref=db.collection("raceRooms").doc(roomId);
+      const snap=await ref.get();
+      const data=snap.data();
 
       if(!data.winner){
-        let winnerUid=null;
         let best=-1;
+        let winner=null;
 
         Object.entries(data.players).forEach(([id,p])=>{
           if(p.progress>best){
             best=p.progress;
-            winnerUid=id;
+            winner=id;
           }
         });
 
-        await db.collection("raceRooms").doc(roomId).update({
-          winner:winnerUid
-        });
+        await ref.update({winner});
       }
     }
   },500);
 }
 
 function renderTrack(players){
-  document.getElementById("track").innerHTML=
+  document.getElementById("track").innerHTML =
     Object.entries(players).map(([id,p])=>`
       <div class="playerRow">
         <div class="name">${p.name}</div>
@@ -304,8 +324,8 @@ function loadQuestion(){
 
   currentQuestion=currentQuestions[questionIndex];
 
-  document.getElementById("questionBox").innerHTML=
-    `<h3>${currentQuestion.q}</h3>`+
+  document.getElementById("questionBox").innerHTML =
+    `<h3>${currentQuestion.q}</h3>` +
     currentQuestion.options.map((o,i)=>
       `<div class="option" onclick="answer(${i})">${o}</div>`
     ).join("");
@@ -320,14 +340,14 @@ async function answer(i){
     let players=data.players;
     players[uid].progress += 5;
 
-    let winner=null;
+    let winner=data.winner || null;
     if(players[uid].progress>=100){
       winner=uid;
     }
 
     await ref.update({
       players,
-      winner:winner || data.winner || null
+      winner
     });
   }
 
