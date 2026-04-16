@@ -137,48 +137,7 @@ window.verify = function(){
 };
 
 
-// ================= AUTO MODERATION =================
-async function autoModerate(snapshot){
 
-  let reportMap = {};
-
-  snapshot.forEach(docSnap => {
-
-    const r = docSnap.data();
-
-    if (!r.reason || r.reason.length < 5) return;
-    if (r.reporterUID === r.reportedUID) return;
-
-    if (!reportMap[r.reportedUID]) {
-      reportMap[r.reportedUID] = new Set();
-    }
-
-    reportMap[r.reportedUID].add(r.reporterUID);
-  });
-
-  for (let uid in reportMap) {
-
-    const count = reportMap[uid].size;
-    const ref = doc(db, "leaderboard", uid);
-
-    if (count >= 4) {
-      await updateDoc(ref, {
-        banned: true,
-        banType: "permanent"
-      });
-
-    } else if (count === 3) {
-
-      const unbanTime = Date.now() + (10 * 60 * 1000);
-
-      await updateDoc(ref, {
-        banned: true,
-        banType: "temporary",
-        unbanAt: unbanTime
-      });
-    }
-  }
-}
 
 
 // ================= TEMP UNBAN CHECK =================
