@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MentorLoop EDU Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  display:flex;
+  height:100vh;
+  background:#020617;
+  color:white;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:280px;
+  background:#111827;
+  padding:15px;
+  overflow-y:auto;
+}
+
+.sidebar h2{
+  margin-top:0;
+}
+
+.friend{
+  background:#1e293b;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+/* CHAT */
+.chat{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+header{
+  background:#1e293b;
+  padding:15px;
+  text-align:center;
+}
+
+#chatBox{
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
+}
+
+.message{
+  background:#1e293b;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.meta{
+  color:#94a3b8;
+  font-size:12px;
+}
+
+.bottom{
+  display:flex;
+  padding:10px;
+  background:#111827;
+}
+
+input{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+}
+
+button{
+  margin-left:10px;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#22d3ee;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- FRIENDS -->
+<div class="sidebar">
+  <h2>👥 Friends</h2>
+
+  <input id="friendUID" placeholder="Friend UID">
+  <input id="friendNick" placeholder="Nickname">
+  <button onclick="addFriend()">Add</button>
+
+  <div id="friendsList"></div>
+</div>
+
+<!-- CHAT -->
+<div class="chat">
+  <header>💬 Global Chat</header>
+
+  <div id="chatBox"></div>
+
+  <div class="bottom">
+    <input id="msgInput" placeholder="Type message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let currentName = "";
+let friends = {};
+let banned = false;
+
+// LOGIN CHECK
+onAuthStateChanged(auth, async(user)=>{
+
+  if(!user){
+    document.body.innerHTML = "Login required";
+    return;
+  }
+
+  currentUser = user;
+
+  const userRef = doc(db,"leaderboard",user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if(userSnap.exists()){
+    currentName = userSnap.data().name || "User";
+    banned = userSnap.data().banned || false;
+  }
+
+  if(banned){
+    document.getElementById("msgInput").disabled = true;
+  }
+
+  loadFriends();
+  loadMessages();
+});
+
+// SEND
+window.sendMessage = async function(){
+
+  if(banned){
+    alert("You are banned.");
+    return;
+  }
+
+  const text = document.getElementById("msgInput").value.trim();
+  if(!text) return;
+
+  await addDoc(collection(db,"chatMessages"),{
+    uid: currentUser.uid,
+    name: currentName,
+    text,
+    time: serverTimestamp()
+  });
+
+  document.getElementById("msgInput").value="";
+}
+
+// LOAD CHAT
+function loadMessages(){
+
+  const q = query(collection(db,"chatMessages"), orderBy("time","asc"));
+
+  onSnapshot(q,(snapshot)=>{
+
+    const box = document.getElementById("chatBox");
+    box.innerHTML="";
+
+    snapshot.forEach(docSnap=>{
+
+      const m = docSnap.data();
+      const displayName = friends[m.uid] || m.name;
+
+      box.innerHTML += `
+        <div class="message">
+          <div class="meta">(${m.uid}) ${displayName}</div>
+          <div>${m.text}</div>
+        </div>
+      `;
+    });
+
+    box.scrollTop = box.scrollHeight;
+  });
+}
+
+// ADD FRIEND
+window.addFriend = async function(){
+
+  const uid = document.getElementById("friendUID").value.trim();
+  const nickname = document.getElementById("friendNick").value.trim();
+
+  if(!uid || !nickname) return;
+
+  await setDoc(doc(db,"friends",currentUser.uid,"list",uid),{
+    nickname
+  });
+
+  loadFriends();
+}
+
+// LOAD FRIENDS
+function loadFriends(){
+
+  const list = document.getElementById("friendsList");
+
+  onSnapshot(collection(db,"friends",currentUser.uid,"list"),(snapshot)=>{
+
+    friends = {};
+    list.innerHTML="";
+
+    snapshot.forEach(docSnap=>{
+
+      friends[docSnap.id] = docSnap.data().nickname;
+
+      list.innerHTML += `
+        <div class="friend">
+          ${docSnap.data().nickname}<br>
+          <small>${docSnap.id}</small>
+        </div>
+      `;
+    });
+  });
+}
+
+</script>
+</body>
+</html>
