@@ -184,7 +184,42 @@ let currentName="";
 let friends={};
 let banned=false;
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    setTimeout(() => {
+      if (!auth.currentUser) {
+        document.body.innerHTML = `
+          <div style="display:flex;justify-content:center;align-items:center;height:100vh;">
+            <div>
+              <h2>Please login first</h2>
+              <a href="index.html" style="color:#22d3ee;">Go back</a>
+            </div>
+          </div>
+        `;
+      }
+    }, 1500);
+    return;
+  }
+
+  currentUser = user;
+
+  const ref = doc(db, "leaderboard", user.uid);
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    currentName = snap.data().name || "User";
+    banned = snap.data().banned || false;
+  }
+
+  if (banned) {
+    document.getElementById("msgInput").disabled = true;
+    document.getElementById("msgInput").placeholder = "You are banned";
+  }
+
+  loadFriends();
+  loadMessages();
+});
 
   if(!user){
     document.body.innerHTML="Please login first.";
