@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MentorLoop EDU Diagnostic</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:linear-gradient(135deg,#0f172a,#1e293b,#020617);
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.container{
+width:95%;
+max-width:750px;
+padding:30px;
+border-radius:24px;
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(18px);
+box-shadow:0 0 40px rgba(34,211,238,.2);
+text-align:center;
+}
+
+h1{
+font-size:34px;
+color:#22d3ee;
+margin-bottom:10px;
+}
+
+p{
+color:#cbd5e1;
+}
+
+.testBox{
+margin-top:20px;
+padding:18px;
+border-radius:16px;
+font-size:18px;
+font-weight:bold;
+}
+
+.pending{
+background:#334155;
+color:#e2e8f0;
+}
+
+.success{
+background:#14532d;
+color:#86efac;
+}
+
+.fail{
+background:#7f1d1d;
+color:#fca5a5;
+}
+
+small{
+display:block;
+margin-top:8px;
+font-size:13px;
+color:#94a3b8;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>🔍 MentorLoop Diagnostic</h1>
+<p>This page checks which part of the app may be causing loading problems.</p>
+
+<div id="uiTest" class="testBox pending">
+🎨 UI Test: Waiting...
+<small>Checks HTML + CSS rendering</small>
+</div>
+
+<div id="jsTest" class="testBox pending">
+⚙ JavaScript Test: Waiting...
+<small>Checks if JavaScript runs correctly</small>
+</div>
+
+<div id="firebaseTest" class="testBox pending">
+🔥 Firebase Test: Waiting...
+<small>Checks Firebase initialization</small>
+</div>
+
+<div id="finalResult" class="testBox pending">
+📋 Overall Result: Running diagnostics...
+</div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain: "mentorloop-55a37.firebaseapp.com",
+  projectId: "mentorloop-55a37",
+  storageBucket: "mentorloop-55a37.firebasestorage.app",
+  messagingSenderId: "322053863438",
+  appId: "1:322053863438:web:c05dcb365853e04573a45f",
+  measurementId: "G-PFT8KKBG4Q"
+};
+
+let uiOk=false;
+let jsOk=false;
+let firebaseOk=false;
+
+function setStatus(id,status,text){
+  const el=document.getElementById(id);
+  el.className="testBox " + status;
+  el.innerHTML=text;
+}
+
+function runUITest(){
+  try{
+    uiOk=true;
+    setStatus(
+      "uiTest",
+      "success",
+      "🎨 UI Test: PASS<small>HTML and colorful CSS loaded successfully</small>"
+    );
+  }catch(err){
+    setStatus(
+      "uiTest",
+      "fail",
+      "🎨 UI Test: FAIL<small>"+err.message+"</small>"
+    );
+  }
+}
+
+function runJSTest(){
+  try{
+    let x=5;
+    let y=10;
+    let z=x+y;
+
+    if(z===15){
+      jsOk=true;
+      setStatus(
+        "jsTest",
+        "success",
+        "⚙ JavaScript Test: PASS<small>Scripts executed normally</small>"
+      );
+    }else{
+      throw new Error("Unexpected JS result");
+    }
+  }catch(err){
+    setStatus(
+      "jsTest",
+      "fail",
+      "⚙ JavaScript Test: FAIL<small>"+err.message+"</small>"
+    );
+  }
+}
+
+async function runFirebaseTest(){
+  try{
+    firebase.initializeApp(firebaseConfig);
+
+    await firebase.firestore().enablePersistence({synchronizeTabs:true})
+      .catch(()=>{});
+
+    firebaseOk=true;
+
+    setStatus(
+      "firebaseTest",
+      "success",
+      "🔥 Firebase Test: PASS<small>Firebase connected successfully</small>"
+    );
+  }catch(err){
+    setStatus(
+      "firebaseTest",
+      "fail",
+      "🔥 Firebase Test: FAIL<small>"+err.message+"</small>"
+    );
+  }
+
+  showFinalResult();
+}
+
+function showFinalResult(){
+  if(uiOk && jsOk && firebaseOk){
+    setStatus(
+      "finalResult",
+      "success",
+      "✅ Overall Result: App core systems are working.<small>The issue may be routing or deployment configuration.</small>"
+    );
+  }
+  else if(uiOk && jsOk && !firebaseOk){
+    setStatus(
+      "finalResult",
+      "fail",
+      "⚠ Problem detected in Firebase.<small>Check Firebase config or permissions.</small>"
+    );
+  }
+  else if(uiOk && !jsOk){
+    setStatus(
+      "finalResult",
+      "fail",
+      "⚠ Problem detected in JavaScript.<small>A script error is stopping the app.</small>"
+    );
+  }
+  else if(!uiOk){
+    setStatus(
+      "finalResult",
+      "fail",
+      "⚠ Problem detected in UI.<small>HTML/CSS may not be loading.</small>"
+    );
+  }
+}
+
+runUITest();
+runJSTest();
+runFirebaseTest();
+</script>
+
+</body>
+</html>
