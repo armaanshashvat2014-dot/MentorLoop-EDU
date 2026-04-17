@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Quiz Race</title>
+<title>Quiz Race | MentorLoop EDU</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -11,18 +11,127 @@
 
 <style>
 body{
+margin:0;
+font-family:Segoe UI,sans-serif;
 background:#0f172a;
 color:white;
-font-family:Segoe UI;
 text-align:center;
 padding:20px;
 }
-.option{
-background:#334155;
+h1{color:#22d3ee;}
+
+select,button{
 padding:12px;
-margin:8px;
+margin:10px;
+border:none;
+border-radius:10px;
+font-size:16px;
+}
+button{
+background:#22d3ee;
+cursor:pointer;
+}
+
+#timer{
+font-size:28px;
+color:#facc15;
+margin:15px;
+}
+
+#track{
+max-width:950px;
+margin:20px auto;
+}
+
+.raceLane{
+position:relative;
+height:58px;
+margin-bottom:10px;
+border-radius:12px;
+background:linear-gradient(to right,#2f2f2f,#474747);
+overflow:hidden;
+box-shadow:inset 0 0 8px rgba(0,0,0,.5);
+}
+
+.raceLane::before{
+content:"";
+position:absolute;
+left:0;
+right:0;
+top:50%;
+height:2px;
+background:repeating-linear-gradient(
+to right,
+rgba(255,255,255,.5),
+rgba(255,255,255,.5) 12px,
+transparent 12px,
+transparent 24px
+);
+}
+
+.finishLine{
+position:absolute;
+right:45px;
+top:0;
+bottom:0;
+width:8px;
+background:repeating-linear-gradient(
+to bottom,
+white 0,
+white 8px,
+black 8px,
+black 16px
+);
+}
+
+.carContainer{
+position:absolute;
+top:12px;
+display:flex;
+align-items:center;
+gap:8px;
+transition:left .4s ease;
+z-index:2;
+}
+
+.car{
+font-size:26px;
+}
+
+.playerName{
+font-size:14px;
+font-weight:bold;
+color:#facc15;
+white-space:nowrap;
+}
+
+.playerScore{
+position:absolute;
+right:12px;
+top:16px;
+font-size:18px;
+font-weight:bold;
+}
+
+#questionBox{
+background:#1e293b;
+padding:20px;
+border-radius:14px;
+max-width:700px;
+margin:20px auto;
+}
+
+.option{
+padding:12px;
+margin-top:10px;
+background:#334155;
 border-radius:10px;
 cursor:pointer;
+}
+
+.option:hover{
+background:#22d3ee;
+color:black;
 }
 </style>
 </head>
@@ -30,28 +139,33 @@ cursor:pointer;
 
 <h1>🏁 Quiz Race</h1>
 
-<select id="grade"></select>
+<div id="setupBox">
+<select id="grade">
+<option value="">Select Grade</option>
+</select>
+
 <select id="difficulty">
-<option value="">Difficulty</option>
+<option value="">Select Difficulty</option>
 <option value="easy">Easy</option>
 <option value="medium">Medium</option>
 <option value="hard">Hard</option>
 </select>
 
 <button onclick="joinRace()">Join Race</button>
+</div>
 
-<div id="status"></div>
+<div id="timer"></div>
 <div id="track"></div>
 <div id="questionBox"></div>
 
 <script>
-const firebaseConfig={
-apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-authDomain:"mentorloop-55a37.firebaseapp.com",
-projectId:"mentorloop-55a37",
-storageBucket:"mentorloop-55a37.firebasestorage.app",
-messagingSenderId:"322053863438",
-appId:"1:322053863438:web:c05dcb365853e04573a45f"
+const firebaseConfig = {
+  apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+  authDomain:"mentorloop-55a37.firebaseapp.com",
+  projectId:"mentorloop-55a37",
+  storageBucket:"mentorloop-55a37.firebasestorage.app",
+  messagingSenderId:"322053863438",
+  appId:"1:322053863438:web:c05dcb365853e04573a45f"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -59,175 +173,267 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-let uid,name="Student";
-let roomId;
-let questions=[];
-let currentIndex=0;
+let uid=null;
+let studentName="Student";
+let roomId=null;
+let currentQuestions=[];
 let currentQuestion=null;
+let questionIndex=0;
+let timerInterval=null;
+let cleanupScheduled=false;
+
+const cars=["🏎️","🚗","🚙","🚕","🚓"];
 
 for(let i=1;i<=12;i++){
-grade.innerHTML+=`<option value="${i}">Grade ${i}</option>`;
+  grade.innerHTML += `<option value="${i}">Grade ${i}</option>`;
 }
 
 auth.onAuthStateChanged(async user=>{
-if(!user){
-status.innerText="Please login first";
-return;
-}
+  if(!user){
+    questionBox.innerHTML="<h3>Please sign in first</h3>";
+    return;
+  }
 
-uid=user.uid;
+  uid=user.uid;
 
-const doc=await db.collection("users").doc(uid).get();
-if(doc.exists){
-name=doc.data().name||"Student";
-}
+  const doc=await db.collection("users").doc(uid).get();
+  if(doc.exists){
+    studentName=doc.data().name || "Student";
+  }
 });
 
-function makeQuestions(){
-let arr=[];
-for(let i=0;i<20;i++){
-let a=Math.floor(Math.random()*20)+1;
-let b=Math.floor(Math.random()*20)+1;
-let ans=a+b;
-let opts=[ans,ans+1,ans-1,ans+2].sort(()=>Math.random()-0.5);
-
-arr.push({
-q:`${a}+${b}=?`,
-options:opts,
-answer:opts.indexOf(ans)
-});
+function shuffle(arr){
+  return arr.sort(()=>Math.random()-0.5);
 }
-return arr;
+
+function generateQuestions(grade,difficulty){
+  const questions=[];
+
+  for(let i=0;i<20;i++){
+    let q="", answer=0;
+
+    if(grade<=3){
+      let a=Math.floor(Math.random()*20)+1;
+      let b=Math.floor(Math.random()*20)+1;
+      if(difficulty==="easy"){ q=`${a}+${b}=?`; answer=a+b; }
+      else{ q=`${a}×${b}=?`; answer=a*b; }
+    }
+
+    else if(grade<=6){
+      let a=Math.floor(Math.random()*50)+20;
+      let b=Math.floor(Math.random()*10)+2;
+      if(difficulty==="easy"){ q=`${a}-${b}=?`; answer=a-b; }
+      else if(difficulty==="medium"){ q=`${a}÷${b} (rounded)`; answer=Math.round(a/b); }
+      else{ q=`${b}% of ${a}?`; answer=Math.round(a*b/100); }
+    }
+
+    else if(grade<=9){
+      let x=Math.floor(Math.random()*9)+1;
+      let y=Math.floor(Math.random()*9)+1;
+      if(difficulty==="easy"){ q=`x+${y}=${x+y}`; answer=x; }
+      else if(difficulty==="medium"){ q=`${x}x=${x*y}`; answer=y; }
+      else{ q=`Area of ${x}×${y}`; answer=x*y; }
+    }
+
+    else{
+      let a=Math.floor(Math.random()*4)+2;
+      if(difficulty==="easy"){
+        q=`Solve x²=${a*a}`;
+        answer=a;
+      }
+      else if(difficulty==="medium"){
+        q=`sin(30°)= ?`;
+        answer=0.5;
+      }
+      else{
+        q=`Derivative of ${a}x² ?`;
+        answer=2*a;
+      }
+    }
+
+    let options=shuffle([
+      answer,
+      answer+1,
+      answer-1,
+      answer+2
+    ]);
+
+    questions.push({
+      q,
+      options,
+      answer:options.indexOf(answer)
+    });
+  }
+
+  return questions;
 }
 
 async function joinRace(){
-const g=grade.value;
-const d=difficulty.value;
+  try{
+    const g=grade.value;
+    const d=difficulty.value;
 
-if(!g||!d){
-alert("Select grade & difficulty");
-return;
-}
+    if(!g||!d){
+      alert("Select grade and difficulty");
+      return;
+    }
 
-const server=`grade${g}_${d}`;
+    const server=`grade${g}_${d}`;
 
-const snap=await db.collection("raceRooms")
-.where("server","==",server)
-.where("status","==","waiting")
-.limit(1)
-.get();
+    const snap=await db.collection("raceRooms")
+      .where("server","==",server)
+      .where("status","==","waiting")
+      .limit(1)
+      .get();
 
-if(snap.empty){
+    if(snap.empty){
+      const ref=await db.collection("raceRooms").add({
+        server,
+        status:"waiting",
+        duration:60,
+        startedAt:null,
+        winner:null,
+        questions:generateQuestions(parseInt(g),d),
+        players:[{
+          uid,
+          name:studentName,
+          progress:0
+        }]
+      });
 
-const ref=await db.collection("raceRooms").add({
-server,
-status:"waiting",
-questions:makeQuestions(),
-players:[
-{
-uid,
-name,
-progress:0
-}
-]
-});
+      roomId=ref.id;
+      questionBox.innerHTML="<h3>Waiting for players...</h3>";
 
-roomId=ref.id;
-status.innerText="Waiting for another player...";
+    }else{
+      const doc=snap.docs[0];
+      roomId=doc.id;
+      const data=doc.data();
 
-}else{
+      let players=data.players||[];
 
-const doc=snap.docs[0];
-roomId=doc.id;
-const data=doc.data();
+      if(players.length>=5){
+        alert("Room full");
+        return;
+      }
 
-let players=data.players||[];
+      players.push({
+        uid,
+        name:studentName,
+        progress:0
+      });
 
-if(players.length>=5){
-alert("Room full");
-return;
-}
+      await db.collection("raceRooms").doc(roomId).update({
+        players,
+        status:"active",
+        startedAt:Date.now()
+      });
+    }
 
-players.push({
-uid,
-name,
-progress:0
-});
+    setupBox.style.display="none";
+    listenRoom();
 
-await db.collection("raceRooms").doc(roomId).update({
-players,
-status:"active",
-startedAt:Date.now()
-});
-}
-
-listenRoom();
+  }catch(err){
+    alert(err.message);
+  }
 }
 
 function listenRoom(){
-db.collection("raceRooms").doc(roomId)
-.onSnapshot(doc=>{
-const data=doc.data();
+  db.collection("raceRooms").doc(roomId).onSnapshot(doc=>{
+    const data=doc.data();
+    if(!data)return;
 
-questions=data.questions;
-renderPlayers(data.players);
+    currentQuestions=data.questions;
+    renderPlayers(data.players);
 
-if(data.status==="waiting"){
-status.innerText="Waiting...";
-return;
+    if(data.startedAt){
+      startTimer(data.startedAt,data.duration);
+    }
+
+    if(data.winner){
+      const winner=data.players.find(p=>p.uid===data.winner);
+      questionBox.innerHTML=`<h2>${winner?.name} wins!</h2>`;
+      scheduleCleanup();
+      return;
+    }
+
+    if(data.status==="active" && !currentQuestion){
+      loadQuestion();
+    }
+  });
 }
 
-status.innerText="Race started";
+function startTimer(start,duration){
+  if(timerInterval)return;
 
-if(!currentQuestion){
-loadQuestion();
-}
-});
+  timerInterval=setInterval(async()=>{
+    let left=Math.max(duration-Math.floor((Date.now()-start)/1000),0);
+    timer.innerText="⏱ "+left+"s";
+
+    if(left<=0){
+      clearInterval(timerInterval);
+      scheduleCleanup();
+    }
+  },500);
 }
 
 function renderPlayers(players){
-track.innerHTML=players.map(p=>`
-<div>
-${p.name}
-<div style="background:#1e293b;height:20px;border-radius:10px;">
-<div style="width:${p.progress}%;background:#22d3ee;height:20px;border-radius:10px;"></div>
-</div>
-</div>
-`).join("");
+  track.innerHTML=players.map((p,i)=>`
+    <div class="raceLane">
+      <div class="carContainer" style="left:${p.progress}%">
+        <div class="car">${cars[i%cars.length]}</div>
+        <div class="playerName">${p.name}</div>
+      </div>
+      <div class="finishLine"></div>
+      <div class="playerScore">${Math.floor(p.progress/5)}</div>
+    </div>
+  `).join("");
 }
 
 function loadQuestion(){
-if(currentIndex>=questions.length)return;
+  if(questionIndex>=currentQuestions.length)return;
 
-currentQuestion=questions[currentIndex];
+  currentQuestion=currentQuestions[questionIndex];
 
-questionBox.innerHTML=
-`<h3>${currentQuestion.q}</h3>`+
-currentQuestion.options.map((o,i)=>
-`<div class="option" onclick="answer(${i})">${o}</div>`
-).join("");
+  questionBox.innerHTML=
+    `<h3>${currentQuestion.q}</h3>`+
+    currentQuestion.options.map((o,i)=>
+      `<div class="option" onclick="answer(${i})">${o}</div>`
+    ).join("");
 }
 
 async function answer(i){
-if(i===currentQuestion.answer){
+  if(i===currentQuestion.answer){
+    const ref=db.collection("raceRooms").doc(roomId);
+    const snap=await ref.get();
+    const data=snap.data();
 
-const ref=db.collection("raceRooms").doc(roomId);
-const snap=await ref.get();
-const data=snap.data();
+    let players=data.players.map(p=>{
+      if(p.uid===uid)p.progress+=5;
+      return p;
+    });
 
-let players=data.players;
+    let me=players.find(p=>p.uid===uid);
+    let winner=data.winner;
 
-players=players.map(p=>{
-if(p.uid===uid)p.progress+=5;
-return p;
-});
+    if(me.progress>=100) winner=uid;
 
-await ref.update({players});
+    await ref.update({players,winner});
+  }
+
+  questionIndex++;
+  currentQuestion=null;
+  loadQuestion();
 }
 
-currentIndex++;
-currentQuestion=null;
-loadQuestion();
+function scheduleCleanup(){
+  if(cleanupScheduled)return;
+  cleanupScheduled=true;
+
+  setTimeout(async()=>{
+    try{
+      await db.collection("raceRooms").doc(roomId).delete();
+    }catch(e){}
+  },10000);
 }
 </script>
 
