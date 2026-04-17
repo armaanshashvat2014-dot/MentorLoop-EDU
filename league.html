@@ -18,6 +18,7 @@ color:white;
 text-align:center;
 padding:20px;
 }
+
 h1{color:#22d3ee;}
 
 select,button{
@@ -27,15 +28,38 @@ border:none;
 border-radius:10px;
 font-size:16px;
 }
+
 button{
 background:#22d3ee;
 cursor:pointer;
 }
 
-#timer{
-font-size:28px;
+#hud{
+display:flex;
+justify-content:space-between;
+align-items:center;
+max-width:900px;
+margin:20px auto;
+padding:18px;
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(12px);
+border-radius:18px;
+}
+
+#flag{font-size:34px;}
+#scoreDisplay,#timerDisplay{
+font-size:34px;
+font-family:monospace;
+}
+
+#comboDisplay{
+font-size:20px;
 color:#facc15;
-margin:15px;
+}
+
+#skipBtn{
+background:#dc2626;
+color:white;
 }
 
 #track{
@@ -50,7 +74,6 @@ margin-bottom:10px;
 border-radius:12px;
 background:linear-gradient(to right,#2f2f2f,#474747);
 overflow:hidden;
-box-shadow:inset 0 0 8px rgba(0,0,0,.5);
 }
 
 .raceLane::before{
@@ -90,19 +113,15 @@ top:12px;
 display:flex;
 align-items:center;
 gap:8px;
-transition:left .4s ease;
-z-index:2;
+transition:left .35s ease;
 }
 
-.car{
-font-size:26px;
-}
+.car{font-size:26px;}
 
 .playerName{
 font-size:14px;
 font-weight:bold;
 color:#facc15;
-white-space:nowrap;
 }
 
 .playerScore{
@@ -110,7 +129,6 @@ position:absolute;
 right:12px;
 top:16px;
 font-size:18px;
-font-weight:bold;
 }
 
 #questionBox{
@@ -154,18 +172,25 @@ color:black;
 <button onclick="joinRace()">Join Race</button>
 </div>
 
-<div id="timer"></div>
+<div id="hud">
+<div id="flag">🏁</div>
+<div id="scoreDisplay">0</div>
+<div id="comboDisplay">Combo: 0</div>
+<div id="timerDisplay">01:00</div>
+<button id="skipBtn" onclick="skipQuestion()">SKIP</button>
+</div>
+
 <div id="track"></div>
 <div id="questionBox"></div>
 
 <script>
-const firebaseConfig = {
-  apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain:"mentorloop-55a37.firebaseapp.com",
-  projectId:"mentorloop-55a37",
-  storageBucket:"mentorloop-55a37.firebasestorage.app",
-  messagingSenderId:"322053863438",
-  appId:"1:322053863438:web:c05dcb365853e04573a45f"
+const firebaseConfig={
+apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+authDomain:"mentorloop-55a37.firebaseapp.com",
+projectId:"mentorloop-55a37",
+storageBucket:"mentorloop-55a37.firebasestorage.app",
+messagingSenderId:"322053863438",
+appId:"1:322053863438:web:c05dcb365853e04573a45f"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -180,260 +205,220 @@ let currentQuestions=[];
 let currentQuestion=null;
 let questionIndex=0;
 let timerInterval=null;
-let cleanupScheduled=false;
+let combo=0;
+let skipUsed=false;
 
-const cars=["🏎️","🚗","🚙","🚕","🚓"];
+const cars=["🚓","🚗","🚙","🏎️","🚕"];
 
 for(let i=1;i<=12;i++){
-  grade.innerHTML += `<option value="${i}">Grade ${i}</option>`;
+grade.innerHTML+=`<option value="${i}">Grade ${i}</option>`;
 }
 
 auth.onAuthStateChanged(async user=>{
-  if(!user){
-    questionBox.innerHTML="<h3>Please sign in first</h3>";
-    return;
-  }
-
-  uid=user.uid;
-
-  const doc=await db.collection("users").doc(uid).get();
-  if(doc.exists){
-    studentName=doc.data().name || "Student";
-  }
+if(!user)return;
+uid=user.uid;
+const doc=await db.collection("users").doc(uid).get();
+if(doc.exists) studentName=doc.data().name||"Student";
 });
 
-function shuffle(arr){
-  return arr.sort(()=>Math.random()-0.5);
-}
+function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
 
 function generateQuestions(grade,difficulty){
-  const questions=[];
+let qs=[];
 
-  for(let i=0;i<20;i++){
-    let q="", answer=0;
+for(let i=0;i<20;i++){
+let q="",a=0;
 
-    if(grade<=3){
-      let a=Math.floor(Math.random()*20)+1;
-      let b=Math.floor(Math.random()*20)+1;
-      if(difficulty==="easy"){ q=`${a}+${b}=?`; answer=a+b; }
-      else{ q=`${a}×${b}=?`; answer=a*b; }
-    }
+if(grade<=3){
+let x=Math.floor(Math.random()*20)+1;
+let y=Math.floor(Math.random()*20)+1;
+q=`${x}+${y}=?`; a=x+y;
+}
+else if(grade<=6){
+let x=Math.floor(Math.random()*50)+10;
+let y=Math.floor(Math.random()*10)+2;
+if(difficulty==="easy"){ q=`${x}-${y}=?`; a=x-y; }
+else if(difficulty==="medium"){ q=`${x}÷${y}`; a=Math.round(x/y); }
+else{ q=`${y}% of ${x}`; a=Math.round(x*y/100); }
+}
+else if(grade<=9){
+let x=Math.floor(Math.random()*9)+1;
+let y=Math.floor(Math.random()*9)+1;
+if(difficulty==="easy"){ q=`x+${y}=${x+y}`; a=x; }
+else if(difficulty==="medium"){ q=`${x}x=${x*y}`; a=y; }
+else{ q=`Area ${x}×${y}`; a=x*y; }
+}
+else{
+let x=Math.floor(Math.random()*4)+2;
+if(difficulty==="easy"){ q=`Solve x²=${x*x}`; a=x; }
+else if(difficulty==="medium"){ q=`sin(30°)=`; a=0.5; }
+else{ q=`Derivative of ${x}x²`; a=2*x; }
+}
 
-    else if(grade<=6){
-      let a=Math.floor(Math.random()*50)+20;
-      let b=Math.floor(Math.random()*10)+2;
-      if(difficulty==="easy"){ q=`${a}-${b}=?`; answer=a-b; }
-      else if(difficulty==="medium"){ q=`${a}÷${b} (rounded)`; answer=Math.round(a/b); }
-      else{ q=`${b}% of ${a}?`; answer=Math.round(a*b/100); }
-    }
+let opts=shuffle([a,a+1,a-1,a+2]);
 
-    else if(grade<=9){
-      let x=Math.floor(Math.random()*9)+1;
-      let y=Math.floor(Math.random()*9)+1;
-      if(difficulty==="easy"){ q=`x+${y}=${x+y}`; answer=x; }
-      else if(difficulty==="medium"){ q=`${x}x=${x*y}`; answer=y; }
-      else{ q=`Area of ${x}×${y}`; answer=x*y; }
-    }
-
-    else{
-      let a=Math.floor(Math.random()*4)+2;
-      if(difficulty==="easy"){
-        q=`Solve x²=${a*a}`;
-        answer=a;
-      }
-      else if(difficulty==="medium"){
-        q=`sin(30°)= ?`;
-        answer=0.5;
-      }
-      else{
-        q=`Derivative of ${a}x² ?`;
-        answer=2*a;
-      }
-    }
-
-    let options=shuffle([
-      answer,
-      answer+1,
-      answer-1,
-      answer+2
-    ]);
-
-    questions.push({
-      q,
-      options,
-      answer:options.indexOf(answer)
-    });
-  }
-
-  return questions;
+qs.push({
+q,
+options:opts,
+answer:opts.indexOf(a)
+});
+}
+return qs;
 }
 
 async function joinRace(){
-  try{
-    const g=grade.value;
-    const d=difficulty.value;
+const g=grade.value;
+const d=difficulty.value;
+if(!g||!d)return alert("Select grade and difficulty");
 
-    if(!g||!d){
-      alert("Select grade and difficulty");
-      return;
-    }
+const server=`grade${g}_${d}`;
 
-    const server=`grade${g}_${d}`;
+const snap=await db.collection("raceRooms")
+.where("server","==",server)
+.where("status","==","waiting")
+.limit(1)
+.get();
 
-    const snap=await db.collection("raceRooms")
-      .where("server","==",server)
-      .where("status","==","waiting")
-      .limit(1)
-      .get();
+if(snap.empty){
+const ref=await db.collection("raceRooms").add({
+server,
+status:"waiting",
+duration:60,
+startedAt:null,
+winner:null,
+questions:generateQuestions(parseInt(g),d),
+players:[{uid,name:studentName,progress:0}]
+});
+roomId=ref.id;
+questionBox.innerHTML="<h3>Waiting for players...</h3>";
+}else{
+const doc=snap.docs[0];
+roomId=doc.id;
+const data=doc.data();
+let players=data.players||[];
 
-    if(snap.empty){
-      const ref=await db.collection("raceRooms").add({
-        server,
-        status:"waiting",
-        duration:60,
-        startedAt:null,
-        winner:null,
-        questions:generateQuestions(parseInt(g),d),
-        players:[{
-          uid,
-          name:studentName,
-          progress:0
-        }]
-      });
+players.push({uid,name:studentName,progress:0});
 
-      roomId=ref.id;
-      questionBox.innerHTML="<h3>Waiting for players...</h3>";
+await db.collection("raceRooms").doc(roomId).update({
+players,
+status:"active",
+startedAt:Date.now()
+});
+}
 
-    }else{
-      const doc=snap.docs[0];
-      roomId=doc.id;
-      const data=doc.data();
-
-      let players=data.players||[];
-
-      if(players.length>=5){
-        alert("Room full");
-        return;
-      }
-
-      players.push({
-        uid,
-        name:studentName,
-        progress:0
-      });
-
-      await db.collection("raceRooms").doc(roomId).update({
-        players,
-        status:"active",
-        startedAt:Date.now()
-      });
-    }
-
-    setupBox.style.display="none";
-    listenRoom();
-
-  }catch(err){
-    alert(err.message);
-  }
+setupBox.style.display="none";
+listenRoom();
 }
 
 function listenRoom(){
-  db.collection("raceRooms").doc(roomId).onSnapshot(doc=>{
-    const data=doc.data();
-    if(!data)return;
+db.collection("raceRooms").doc(roomId).onSnapshot(doc=>{
+const data=doc.data();
+if(!data)return;
 
-    currentQuestions=data.questions;
-    renderPlayers(data.players);
+currentQuestions=data.questions;
+renderPlayers(data.players);
 
-    if(data.startedAt){
-      startTimer(data.startedAt,data.duration);
-    }
+if(data.startedAt) startTimer(data.startedAt,data.duration);
 
-    if(data.winner){
-      const winner=data.players.find(p=>p.uid===data.winner);
-      questionBox.innerHTML=`<h2>${winner?.name} wins!</h2>`;
-      scheduleCleanup();
-      return;
-    }
+if(data.winner){
+let w=data.players.find(p=>p.uid===data.winner);
+questionBox.innerHTML=`<h2>${w?.name} wins!</h2>`;
+return;
+}
 
-    if(data.status==="active" && !currentQuestion){
-      loadQuestion();
-    }
-  });
+if(data.status==="active"&&!currentQuestion){
+loadQuestion();
+}
+});
+}
+
+function formatTime(s){
+let m=Math.floor(s/60).toString().padStart(2,"0");
+let sec=(s%60).toString().padStart(2,"0");
+return `${m}:${sec}`;
 }
 
 function startTimer(start,duration){
-  if(timerInterval)return;
+if(timerInterval)return;
 
-  timerInterval=setInterval(async()=>{
-    let left=Math.max(duration-Math.floor((Date.now()-start)/1000),0);
-    timer.innerText="⏱ "+left+"s";
-
-    if(left<=0){
-      clearInterval(timerInterval);
-      scheduleCleanup();
-    }
-  },500);
+timerInterval=setInterval(()=>{
+let left=Math.max(duration-Math.floor((Date.now()-start)/1000),0);
+timerDisplay.innerText=formatTime(left);
+},500);
 }
 
 function renderPlayers(players){
-  track.innerHTML=players.map((p,i)=>`
-    <div class="raceLane">
-      <div class="carContainer" style="left:${p.progress}%">
-        <div class="car">${cars[i%cars.length]}</div>
-        <div class="playerName">${p.name}</div>
-      </div>
-      <div class="finishLine"></div>
-      <div class="playerScore">${Math.floor(p.progress/5)}</div>
-    </div>
-  `).join("");
+track.innerHTML=players.map((p,i)=>`
+<div class="raceLane">
+<div class="carContainer" style="left:${p.progress}%">
+<div class="car">${cars[i%cars.length]}</div>
+<div class="playerName">${p.name}</div>
+</div>
+<div class="finishLine"></div>
+<div class="playerScore">${Math.floor(p.progress/5)}</div>
+</div>
+`).join("");
 }
 
 function loadQuestion(){
-  if(questionIndex>=currentQuestions.length)return;
+if(questionIndex>=currentQuestions.length)return;
+currentQuestion=currentQuestions[questionIndex];
 
-  currentQuestion=currentQuestions[questionIndex];
-
-  questionBox.innerHTML=
-    `<h3>${currentQuestion.q}</h3>`+
-    currentQuestion.options.map((o,i)=>
-      `<div class="option" onclick="answer(${i})">${o}</div>`
-    ).join("");
+questionBox.innerHTML=
+`<h3>${currentQuestion.q}</h3>`+
+currentQuestion.options.map((o,i)=>
+`<div class="option" onclick="answer(${i})">${o}</div>`
+).join("");
 }
 
 async function answer(i){
-  if(i===currentQuestion.answer){
-    const ref=db.collection("raceRooms").doc(roomId);
-    const snap=await ref.get();
-    const data=snap.data();
+const ref=db.collection("raceRooms").doc(roomId);
+const snap=await ref.get();
+const data=snap.data();
 
-    let players=data.players.map(p=>{
-      if(p.uid===uid)p.progress+=5;
-      return p;
-    });
+let players=data.players;
 
-    let me=players.find(p=>p.uid===uid);
-    let winner=data.winner;
+if(i===currentQuestion.answer){
+combo++;
 
-    if(me.progress>=100) winner=uid;
-
-    await ref.update({players,winner});
-  }
-
-  questionIndex++;
-  currentQuestion=null;
-  loadQuestion();
+let speed=5;
+if(combo%5===0){
+speed=10;
 }
 
-function scheduleCleanup(){
-  if(cleanupScheduled)return;
-  cleanupScheduled=true;
+players=players.map(p=>{
+if(p.uid===uid)p.progress+=speed;
+return p;
+});
+}else{
+combo=0;
+}
 
-  setTimeout(async()=>{
-    try{
-      await db.collection("raceRooms").doc(roomId).delete();
-    }catch(e){}
-  },10000);
+comboDisplay.innerText="Combo: "+combo;
+
+let me=players.find(p=>p.uid===uid);
+scoreDisplay.innerText=Math.floor(me.progress/5);
+
+let winner=data.winner;
+if(me.progress>=100) winner=uid;
+
+await ref.update({players,winner});
+
+questionIndex++;
+currentQuestion=null;
+loadQuestion();
+}
+
+function skipQuestion(){
+if(skipUsed){
+alert("Only one skip per race");
+return;
+}
+skipUsed=true;
+skipBtn.disabled=true;
+questionIndex++;
+currentQuestion=null;
+loadQuestion();
 }
 </script>
 
