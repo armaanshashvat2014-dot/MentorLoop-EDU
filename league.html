@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Quiz Race | MentorLoop EDU</title>
+<title>Quiz Race</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -11,70 +11,18 @@
 
 <style>
 body{
-margin:0;
-font-family:Segoe UI,sans-serif;
 background:#0f172a;
 color:white;
+font-family:Segoe UI;
 text-align:center;
 padding:20px;
 }
-h1{color:#22d3ee;}
-select,button{
-padding:12px;
-margin:10px;
-border:none;
-border-radius:10px;
-font-size:16px;
-}
-button{
-background:#22d3ee;
-cursor:pointer;
-}
-#timer{
-font-size:28px;
-color:#facc15;
-margin:15px;
-}
-.playerRow{
-display:flex;
-align-items:center;
-margin:10px auto;
-max-width:700px;
-}
-.name{
-width:150px;
-text-align:left;
-}
-.lane{
-flex:1;
-height:24px;
-background:#1e293b;
-border-radius:12px;
-position:relative;
-}
-.runner{
-position:absolute;
-top:2px;
-font-size:18px;
-transition:left .25s;
-}
-#questionBox{
-background:#1e293b;
-padding:20px;
-border-radius:14px;
-max-width:700px;
-margin:20px auto;
-}
 .option{
-padding:12px;
-margin-top:10px;
 background:#334155;
+padding:12px;
+margin:8px;
 border-radius:10px;
 cursor:pointer;
-}
-.option:hover{
-background:#22d3ee;
-color:black;
 }
 </style>
 </head>
@@ -82,278 +30,204 @@ color:black;
 
 <h1>🏁 Quiz Race</h1>
 
-<div id="setupBox">
-<select id="grade">
-<option value="">Select Grade</option>
-</select>
-
+<select id="grade"></select>
 <select id="difficulty">
-<option value="">Select Difficulty</option>
+<option value="">Difficulty</option>
 <option value="easy">Easy</option>
 <option value="medium">Medium</option>
 <option value="hard">Hard</option>
 </select>
 
 <button onclick="joinRace()">Join Race</button>
-</div>
 
-<div id="timer"></div>
+<div id="status"></div>
 <div id="track"></div>
 <div id="questionBox"></div>
 
 <script>
-const firebaseConfig = {
-  apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain:"mentorloop-55a37.firebaseapp.com",
-  projectId:"mentorloop-55a37",
-  storageBucket:"mentorloop-55a37.firebasestorage.app",
-  messagingSenderId:"322053863438",
-  appId:"1:322053863438:web:c05dcb365853e04573a45f"
+const firebaseConfig={
+apiKey:"AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+authDomain:"mentorloop-55a37.firebaseapp.com",
+projectId:"mentorloop-55a37",
+storageBucket:"mentorloop-55a37.firebasestorage.app",
+messagingSenderId:"322053863438",
+appId:"1:322053863438:web:c05dcb365853e04573a45f"
 };
 
-if(!firebase.apps.length){
-  firebase.initializeApp(firebaseConfig);
-}
+firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth=firebase.auth();
+const db=firebase.firestore();
 
-let uid=null;
-let studentName="Student";
-let roomId=null;
-let currentQuestions=[];
+let uid,name="Student";
+let roomId;
+let questions=[];
+let currentIndex=0;
 let currentQuestion=null;
-let questionIndex=0;
-let timerInterval=null;
 
 for(let i=1;i<=12;i++){
-  const option=document.createElement("option");
-  option.value=i;
-  option.textContent="Grade " + i;
-  document.getElementById("grade").appendChild(option);
+grade.innerHTML+=`<option value="${i}">Grade ${i}</option>`;
 }
 
 auth.onAuthStateChanged(async user=>{
-  if(!user){
-    document.getElementById("questionBox").innerHTML =
-      "<h3>Please sign in first.</h3>";
-    return;
-  }
+if(!user){
+status.innerText="Please login first";
+return;
+}
 
-  uid = user.uid;
+uid=user.uid;
 
-  const doc = await db.collection("users").doc(uid).get();
-
-  if(doc.exists){
-    studentName = doc.data().name || "Student";
-  }
+const doc=await db.collection("users").doc(uid).get();
+if(doc.exists){
+name=doc.data().name||"Student";
+}
 });
 
-function generateQuestions(diff){
-  let max=10;
-  if(diff==="medium") max=30;
-  if(diff==="hard") max=60;
+function makeQuestions(){
+let arr=[];
+for(let i=0;i<20;i++){
+let a=Math.floor(Math.random()*20)+1;
+let b=Math.floor(Math.random()*20)+1;
+let ans=a+b;
+let opts=[ans,ans+1,ans-1,ans+2].sort(()=>Math.random()-0.5);
 
-  let arr=[];
-
-  for(let i=0;i<20;i++){
-    let a=Math.floor(Math.random()*max)+1;
-    let b=Math.floor(Math.random()*max)+1;
-    let ans=a+b;
-
-    let options=[ans,ans+1,ans-1,ans+2]
-      .sort(()=>Math.random()-0.5);
-
-    arr.push({
-      q:`${a} + ${b} = ?`,
-      options,
-      answer:options.indexOf(ans)
-    });
-  }
-
-  return arr;
+arr.push({
+q:`${a}+${b}=?`,
+options:opts,
+answer:opts.indexOf(ans)
+});
+}
+return arr;
 }
 
 async function joinRace(){
-  if(!uid){
-    alert("User not signed in");
-    return;
-  }
+const g=grade.value;
+const d=difficulty.value;
 
-  const grade=document.getElementById("grade").value;
-  const difficulty=document.getElementById("difficulty").value;
+if(!g||!d){
+alert("Select grade & difficulty");
+return;
+}
 
-  if(!grade || !difficulty){
-    alert("Choose grade and difficulty");
-    return;
-  }
+const server=`grade${g}_${d}`;
 
-  const serverKey=`grade${grade}_${difficulty}`;
+const snap=await db.collection("raceRooms")
+.where("server","==",server)
+.where("status","==","waiting")
+.limit(1)
+.get();
 
-  const rooms = await db.collection("raceRooms")
-    .where("serverKey","==",serverKey)
-    .where("status","==","waiting")
-    .limit(1)
-    .get();
+if(snap.empty){
 
-  if(rooms.empty){
-    const ref = await db.collection("raceRooms").add({
-      serverKey,
-      duration:60,
-      startedAt:null,
-      status:"waiting",
-      winner:null,
-      questions:generateQuestions(difficulty),
-      players:{
-        [uid]:{
-          name:studentName,
-          progress:0
-        }
-      }
-    });
+const ref=await db.collection("raceRooms").add({
+server,
+status:"waiting",
+questions:makeQuestions(),
+players:[
+{
+uid,
+name,
+progress:0
+}
+]
+});
 
-    roomId = ref.id;
+roomId=ref.id;
+status.innerText="Waiting for another player...";
 
-  }else{
-    const doc = rooms.docs[0];
-    roomId = doc.id;
-    const data = doc.data();
-    let players = data.players || {};
+}else{
 
-    if(Object.keys(players).length >= 5){
-      alert("Room full");
-      return;
-    }
+const doc=snap.docs[0];
+roomId=doc.id;
+const data=doc.data();
 
-    players[uid]={
-      name:studentName,
-      progress:0
-    };
+let players=data.players||[];
 
-    const updates={players};
+if(players.length>=5){
+alert("Room full");
+return;
+}
 
-    if(Object.keys(players).length >= 2){
-      updates.status="active";
-      updates.startedAt=firebase.firestore.FieldValue.serverTimestamp();
-    }
+players.push({
+uid,
+name,
+progress:0
+});
 
-    await db.collection("raceRooms").doc(roomId).update(updates);
-  }
+await db.collection("raceRooms").doc(roomId).update({
+players,
+status:"active",
+startedAt:Date.now()
+});
+}
 
-  document.getElementById("setupBox").style.display="none";
-  listenRoom();
+listenRoom();
 }
 
 function listenRoom(){
-  db.collection("raceRooms").doc(roomId).onSnapshot(doc=>{
-    const data=doc.data();
-    if(!data) return;
+db.collection("raceRooms").doc(roomId)
+.onSnapshot(doc=>{
+const data=doc.data();
 
-    currentQuestions=data.questions;
-    renderTrack(data.players);
+questions=data.questions;
+renderPlayers(data.players);
 
-    if(data.startedAt){
-      startTimer(data.startedAt.toMillis(), data.duration);
-    }
-
-    if(data.winner){
-      document.getElementById("questionBox").innerHTML =
-        `<h2>${data.players[data.winner].name} wins!</h2>`;
-      return;
-    }
-
-    if(data.status==="waiting"){
-      document.getElementById("questionBox").innerHTML =
-        "<h3>Waiting for another player...</h3>";
-      return;
-    }
-
-    if(data.status==="active" && !currentQuestion){
-      loadQuestion();
-    }
-  });
+if(data.status==="waiting"){
+status.innerText="Waiting...";
+return;
 }
 
-function startTimer(startMillis,duration){
-  if(timerInterval) return;
+status.innerText="Race started";
 
-  timerInterval=setInterval(async ()=>{
-    const elapsed=Math.floor((Date.now()-startMillis)/1000);
-    const left=Math.max(duration-elapsed,0);
-
-    document.getElementById("timer").innerText="⏱ " + left + "s";
-
-    if(left<=0){
-      clearInterval(timerInterval);
-
-      const ref=db.collection("raceRooms").doc(roomId);
-      const snap=await ref.get();
-      const data=snap.data();
-
-      if(!data.winner){
-        let best=-1;
-        let winner=null;
-
-        Object.entries(data.players).forEach(([id,p])=>{
-          if(p.progress>best){
-            best=p.progress;
-            winner=id;
-          }
-        });
-
-        await ref.update({winner});
-      }
-    }
-  },500);
+if(!currentQuestion){
+loadQuestion();
+}
+});
 }
 
-function renderTrack(players){
-  document.getElementById("track").innerHTML =
-    Object.entries(players).map(([id,p])=>`
-      <div class="playerRow">
-        <div class="name">${p.name}</div>
-        <div class="lane">
-          <div class="runner" style="left:${p.progress}%;">🏃</div>
-        </div>
-      </div>
-    `).join("");
+function renderPlayers(players){
+track.innerHTML=players.map(p=>`
+<div>
+${p.name}
+<div style="background:#1e293b;height:20px;border-radius:10px;">
+<div style="width:${p.progress}%;background:#22d3ee;height:20px;border-radius:10px;"></div>
+</div>
+</div>
+`).join("");
 }
 
 function loadQuestion(){
-  if(questionIndex>=currentQuestions.length) return;
+if(currentIndex>=questions.length)return;
 
-  currentQuestion=currentQuestions[questionIndex];
+currentQuestion=questions[currentIndex];
 
-  document.getElementById("questionBox").innerHTML =
-    `<h3>${currentQuestion.q}</h3>` +
-    currentQuestion.options.map((o,i)=>
-      `<div class="option" onclick="answer(${i})">${o}</div>`
-    ).join("");
+questionBox.innerHTML=
+`<h3>${currentQuestion.q}</h3>`+
+currentQuestion.options.map((o,i)=>
+`<div class="option" onclick="answer(${i})">${o}</div>`
+).join("");
 }
 
 async function answer(i){
-  if(i===currentQuestion.answer){
-    const ref=db.collection("raceRooms").doc(roomId);
-    const snap=await ref.get();
-    const data=snap.data();
+if(i===currentQuestion.answer){
 
-    let players=data.players;
-    players[uid].progress += 5;
+const ref=db.collection("raceRooms").doc(roomId);
+const snap=await ref.get();
+const data=snap.data();
 
-    let winner=data.winner || null;
-    if(players[uid].progress>=100){
-      winner=uid;
-    }
+let players=data.players;
 
-    await ref.update({
-      players,
-      winner
-    });
-  }
+players=players.map(p=>{
+if(p.uid===uid)p.progress+=5;
+return p;
+});
 
-  questionIndex++;
-  currentQuestion=null;
-  loadQuestion();
+await ref.update({players});
+}
+
+currentIndex++;
+currentQuestion=null;
+loadQuestion();
 }
 </script>
 
