@@ -274,302 +274,13 @@ button {
 </div>
 
 </div>
-
 <script type="module">
-
-// 🔥 FIREBASE
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain: "mentorloop-55a37.firebaseapp.com",
-  projectId: "mentorloop-55a37"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-
-// 🔐 UID (CRITICAL FIX)
-if (!localStorage.getItem("ml_uid")) {
-  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
-}
-
-// 📅 WEEK
-function getWeek(){
-  let d=new Date();
-  let onejan=new Date(d.getFullYear(),0,1);
-  let week=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
-  return d.getFullYear()+"-W"+week;
-}
-
-// 🔥 SYNC
-async function syncToFirebase(points){
-  const uid = localStorage.getItem("ml_uid");
-
-  await setDoc(doc(db,"leaderboard",uid),{
-    name: localStorage.getItem("ml_name") || "Guest",
-    points: points,
-    week: getWeek()
-  });
-}
-
-// 💎 POINT SYSTEM
-function addPoints(amount){
-  let current = parseInt(localStorage.getItem("ml_points")) || 0;
-  let newPoints = current + amount;
-
-  localStorage.setItem("ml_points", newPoints);
-
-  syncToFirebase(newPoints);
-
-  return newPoints;
-}
-
-
-// SIDEBAR CONTROL
-function toggleSidebar(){
-  if(window.innerWidth <= 768){
-    openSidebar();
-  } else {
-    document.getElementById("sidebar").classList.toggle("expanded");
-  }
-}
-function openSidebar(){
-  document.getElementById("sidebar").classList.add("expanded");
-  document.getElementById("overlay").classList.add("active");
-}
-function closeSidebar(){
-  document.getElementById("sidebar").classList.remove("expanded");
-  document.getElementById("overlay").classList.remove("active");
-}
-
-
-// 🔥 LOGIN REWARD (FIXED + SYNCED)
-let today = new Date().toDateString();
-let lastLogin = localStorage.getItem("ml_last_login");
-
-let points = parseInt(localStorage.getItem("ml_points")) || 0;
-
-if(lastLogin !== today){
-  points = addPoints(5);
-  localStorage.setItem("ml_last_login", today);
-}
-
-document.getElementById("points").innerText = points;
-
-
-// STREAK
-let streak = Number(localStorage.getItem("ml_streak")) || 0;
-document.getElementById("streak").innerText = streak;
-
-
-// AI HELPER
-let score = Number(localStorage.getItem("ml_last_quiz_score")) || 0;
-let tip = "Start a quiz to get insights.";
-
-if(score < 50) tip = "Revise basics.";
-else if(score < 80) tip = "Good attempt. Practice more.";
-else tip = "Excellent! Try harder.";
-
-document.getElementById("studyTip").innerText = tip;
-
-
-// BADGES
-[100,200,400,800,1600].forEach(l=>{
-  let span=document.createElement("span");
-  span.className="badge";
-  span.innerText = points>=l ? "🏆 "+l : "🔒 "+l;
-  if(points>=l) span.classList.add("unlocked");
-  document.getElementById("badges").appendChild(span);
-});
-
-
-// 🎡 WHEEL
-const canvas=document.getElementById("wheel");
-const ctx=canvas.getContext("2d");
-
-const rewards=[10,20,30,"streak",15,25,5,"RARE"];
-
-function drawWheel(){
-  let angle=0;
-  for(let i=0;i<8;i++){
-    ctx.beginPath();
-    ctx.moveTo(100,100);
-    ctx.arc(100,100,100,angle,angle+Math.PI/4);
-    ctx.fillStyle=i%2?"#22d3ee":"#10b981";
-    ctx.fill();
-    angle+=Math.PI/4;
-  }
-}
-drawWheel();
-
-let spins=Number(localStorage.getItem("ml_spins"))||0;
-let lastSpin=localStorage.getItem("ml_last_spin");
-
-function spin(){
-
-  if(lastSpin===today){
-    alert("Come back tomorrow!");
-    return;
-  }
-
-  spins++;
-
-  let index = (spins%10===0) ? 7 : Math.floor(Math.random()*7);
-
-  let deg = 360*5 + index*45;
-  canvas.style.transform=`rotate(${deg}deg)`;
-
-  setTimeout(()=>{
-
-    let reward=rewards[index];
-
-    if(reward==="RARE"){
-      points = addPoints(200);
-      alert("🔥 RARE 200!");
-    } 
-    else if(reward==="streak"){
-      streak++;
-      localStorage.setItem("ml_streak",streak);
-      alert("+1 streak");
-    } 
-    else {
-      points = addPoints(reward);
-      alert("+"+reward);
-    }
-
-    localStorage.setItem("ml_spins",spins);
-    localStorage.setItem("ml_last_spin",today);
-
-    location.reload();
-
-  },3000);
-}
-
-</script>
-<script>
-
-// SIDEBAR CONTROL (GLOBAL)
-function toggleSidebar(){
-  if(window.innerWidth <= 768){
-    openSidebar();
-  } else {
-    document.getElementById("sidebar").classList.toggle("expanded");
-  }
-}
-
-function openSidebar(){
-  document.getElementById("sidebar").classList.add("expanded");
-  document.getElementById("overlay").classList.add("active");
-}
-
-function closeSidebar(){
-  document.getElementById("sidebar").classList.remove("expanded");
-  document.getElementById("overlay").classList.remove("active");
-}
-
-</script>
- <script>
-
-// 🛡 prevent double clicks
-let spinning = false;
-
-function spin(){
-
-  if(spinning) return;
-  spinning = true;
-
-  try {
-
-    const today = new Date().toDateString();
-    let lastSpin = localStorage.getItem("ml_last_spin");
-
-    if(lastSpin === today){
-      alert("Come back tomorrow!");
-      spinning = false;
-      return;
-    }
-
-    const canvas = document.getElementById("wheel");
-    if(!canvas){
-      alert("Wheel not found!");
-      spinning = false;
-      return;
-    }
-
-    let spins = Number(localStorage.getItem("ml_spins")) || 0;
-    spins++;
-
-    const rewards = [10,20,30,"streak",15,25,5,"RARE"];
-
-    const index = (spins % 10 === 0)
-      ? 7
-      : Math.floor(Math.random() * 7);
-
-    const deg = 360 * 5 + index * 45;
-
-    // smooth spin
-    canvas.style.transition = "transform 3s ease-out";
-    canvas.style.transform = `rotate(${deg}deg)`;
-
-    setTimeout(()=>{
-
-      try {
-
-        let reward = rewards[index];
-        let pts = parseInt(localStorage.getItem("ml_points")) || 0;
-        let streak = Number(localStorage.getItem("ml_streak")) || 0;
-
-        if(reward === "RARE"){
-          pts += 200;
-          alert("🔥 RARE 200 POINTS!");
-        }
-        else if(reward === "streak"){
-          streak++;
-          localStorage.setItem("ml_streak", streak);
-          alert("+1 streak!");
-        }
-        else {
-          pts += reward;
-          alert("+" + reward + " points!");
-        }
-
-        // 💎 SAVE LOCALLY
-        localStorage.setItem("ml_points", pts);
-        localStorage.setItem("ml_spins", spins);
-        localStorage.setItem("ml_last_spin", today);
-
-        // 🔥 UPDATE UI SAFELY
-        const p = document.getElementById("points");
-        if(p) p.innerText = pts;
-
-        const s = document.getElementById("streak");
-        if(s) s.innerText = streak;
-
-      } catch(e){
-        console.warn("Spin reward error:", e);
-      }
-
-      spinning = false;
-
-    }, 3000);
-
-  } catch(e){
-    console.warn("Spin error:", e);
-    spinning = false;
-  }
-}
-
-</script>
-  <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore,
   doc,
   getDoc,
+  setDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -583,7 +294,7 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
-  projectId: "mentorloop-55a37",
+  projectId: "mentorloop-55a37"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -591,33 +302,49 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 
-// ================= GET PUBLIC ID =================
-async function getPublicId(user) {
-  const snap = await getDoc(doc(db, "user_map", user.uid));
+// ================= GLOBAL =================
+let currentUser = null;
+let publicId = null;
+let points = 0;
+let streak = Number(localStorage.getItem("ml_streak")) || 0;
+let spinning = false;
+
+const rewards = [10,20,30,"streak",15,25,5,"RARE"];
+
+
+// ================= WEEK =================
+function getWeek(){
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear() + "-W" + week;
+}
+
+
+// ================= PUBLIC ID =================
+async function getPublicId(user){
+  const snap = await getDoc(doc(db,"user_map",user.uid));
   return snap.exists() ? snap.data().publicId : null;
 }
 
 
-// ================= BAN SCREEN =================
-function showBanScreen(publicId) {
+// ================= BAN SYSTEM =================
+function showBanScreen(id){
   document.body.innerHTML = `
     <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#020617;color:white;text-align:center;">
       <div>
-        <h1>🚫 BANNED</h1>
-        <p>Your account is restricted.</p>
-        <p>ID: ${publicId}</p>
+        <h1>🚫 Account Restricted</h1>
+        <p>Please contact your school administrator.</p>
+        <p>ID: ${id}</p>
       </div>
     </div>
   `;
 }
 
+async function checkBan(){
+  const snap = await getDoc(doc(db,"leaderboard",publicId));
 
-// ================= CHECK BAN =================
-async function checkBan(publicId) {
-
-  const snap = await getDoc(doc(db, "leaderboard", publicId));
-
-  if (snap.exists() && snap.data().banned === true) {
+  if(snap.exists() && snap.data().banned === true){
     showBanScreen(publicId);
     return true;
   }
@@ -625,46 +352,228 @@ async function checkBan(publicId) {
   return false;
 }
 
-
-// ================= REAL-TIME WATCH =================
-function watchBan(publicId) {
-
-  const ref = doc(db, "leaderboard", publicId);
-
-  onSnapshot(ref, (snap) => {
-
-    if (snap.exists() && snap.data().banned === true) {
+function watchBan(){
+  onSnapshot(doc(db,"leaderboard",publicId),(snap)=>{
+    if(snap.exists() && snap.data().banned === true){
       showBanScreen(publicId);
     }
-
   });
 }
 
 
+// ================= UI =================
+function updatePointsUI(){
+  const el = document.getElementById("points");
+  if(el) el.innerText = points;
+}
+
+function updateStreakUI(){
+  const el = document.getElementById("streak");
+  if(el) el.innerText = streak;
+}
+
+function renderTip(){
+  const score = Number(localStorage.getItem("ml_last_quiz_score")) || 0;
+  let tip = "Start a quiz to get insights.";
+
+  if(score < 50) tip = "Revise basics.";
+  else if(score < 80) tip = "Good attempt. Practice more.";
+  else tip = "Excellent! Try harder.";
+
+  const el = document.getElementById("studyTip");
+  if(el) el.innerText = tip;
+}
+
+function renderBadges(){
+  const box = document.getElementById("badges");
+  if(!box) return;
+
+  box.innerHTML = "";
+
+  [100,200,400,800,1600].forEach(level=>{
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.innerText = points >= level ? "🏆 " + level : "🔒 " + level;
+
+    if(points >= level){
+      badge.classList.add("unlocked");
+    }
+
+    box.appendChild(badge);
+  });
+}
+
+
+// ================= FIREBASE POINTS =================
+async function savePoints(){
+  if(!publicId) return;
+
+  await setDoc(doc(db,"leaderboard",publicId),{
+    name: localStorage.getItem("ml_name") || "Guest",
+    points: points,
+    week: getWeek()
+  },{merge:true});
+
+  updatePointsUI();
+}
+
+async function loadPoints(){
+  const snap = await getDoc(doc(db,"leaderboard",publicId));
+
+  if(snap.exists()){
+    points = snap.data().points || 0;
+  }else{
+    points = 0;
+  }
+
+  updatePointsUI();
+}
+
+async function addPoints(amount){
+  points += amount;
+  await savePoints();
+  renderBadges();
+}
+
+
+// ================= DAILY LOGIN =================
+async function giveDailyReward(){
+  const today = new Date().toDateString();
+  const lastLogin = localStorage.getItem("ml_last_login");
+
+  if(lastLogin !== today){
+    await addPoints(5);
+    localStorage.setItem("ml_last_login", today);
+  }
+}
+
+
+// ================= SIDEBAR =================
+window.toggleSidebar = function(){
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+
+  if(window.innerWidth <= 768){
+    sidebar.classList.add("expanded");
+    overlay.classList.add("active");
+  }else{
+    sidebar.classList.toggle("expanded");
+  }
+};
+
+window.closeSidebar = function(){
+  document.getElementById("sidebar").classList.remove("expanded");
+  document.getElementById("overlay").classList.remove("active");
+};
+
+
+// ================= WHEEL =================
+const canvas = document.getElementById("wheel");
+
+if(canvas){
+  const ctx = canvas.getContext("2d");
+
+  function drawWheel(){
+    let angle = 0;
+
+    for(let i=0;i<8;i++){
+      ctx.beginPath();
+      ctx.moveTo(100,100);
+      ctx.arc(100,100,100,angle,angle+Math.PI/4);
+      ctx.fillStyle = i % 2 ? "#22d3ee" : "#10b981";
+      ctx.fill();
+      angle += Math.PI/4;
+    }
+  }
+
+  drawWheel();
+}
+
+window.spin = async function(){
+
+  if(spinning) return;
+  spinning = true;
+
+  const today = new Date().toDateString();
+  const lastSpin = localStorage.getItem("ml_last_spin");
+
+  if(lastSpin === today){
+    alert("Come back tomorrow!");
+    spinning = false;
+    return;
+  }
+
+  let spins = Number(localStorage.getItem("ml_spins")) || 0;
+  spins++;
+
+  const index = (spins % 10 === 0)
+    ? 7
+    : Math.floor(Math.random()*7);
+
+  const deg = 360*5 + index*45;
+
+  if(canvas){
+    canvas.style.transition = "transform 3s ease-out";
+    canvas.style.transform = `rotate(${deg}deg)`;
+  }
+
+  setTimeout(async()=>{
+
+    const reward = rewards[index];
+
+    if(reward === "RARE"){
+      await addPoints(200);
+      alert("🔥 Rare reward: 200 points!");
+    }
+    else if(reward === "streak"){
+      streak++;
+      localStorage.setItem("ml_streak", streak);
+      updateStreakUI();
+      alert("+1 streak!");
+    }
+    else{
+      await addPoints(reward);
+      alert("+" + reward + " points!");
+    }
+
+    localStorage.setItem("ml_spins", spins);
+    localStorage.setItem("ml_last_spin", today);
+
+    spinning = false;
+
+  },3000);
+};
+
+
 // ================= INIT =================
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async(user)=>{
 
-  if (!user) {
-    // Not logged in → send back
-    window.location.href = "index.html";
+  if(!user){
+    window.location.replace("index.html");
     return;
   }
 
-  const publicId = await getPublicId(user);
+  currentUser = user;
+  publicId = await getPublicId(user);
 
-  if (!publicId) {
-    alert("User ID not found");
+  if(!publicId){
+    alert("User profile missing.");
+    window.location.replace("index.html");
     return;
   }
 
-  // 🔥 BLOCK if banned
-  if (await checkBan(publicId)) return;
+  if(await checkBan()) return;
 
-  // 🔥 WATCH for future bans
-  watchBan(publicId);
+  watchBan();
+
+  await loadPoints();
+  await giveDailyReward();
+
+  updateStreakUI();
+  renderTip();
+  renderBadges();
 
 });
-
 </script>
 </body>
 </html>
