@@ -49,13 +49,89 @@
   <div id="options"></div>
   <p><strong>Score:</strong> <span id="score">0</span></p>
 </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Sprint | MentorLoop EDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0f172a,#1e293b);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      color:#e2e8f0;
+      margin:0;
+    }
+
+    .card{
+      background:#1e293b;
+      padding:30px;
+      border-radius:16px;
+      width:95%;
+      max-width:600px;
+      box-shadow:0 20px 40px rgba(0,0,0,.6);
+    }
+
+    h1{
+      color:#22d3ee;
+      text-align:center;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      background:#334155;
+      color:white;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    button:hover{
+      background:#10b981;
+    }
+
+    #scoreBox{
+      margin-top:20px;
+      text-align:center;
+      font-size:18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🧠 Quiz Sprint</h1>
+  <p id="question"></p>
+  <div id="options"></div>
+  <div id="scoreBox">
+    Score: <span id="score">0</span>
+  </div>
+</div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 🔥 FIREBASE
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+
+// ================= FIREBASE =================
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
@@ -64,67 +140,61 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUid = null;
+let studentName = "Student";
 
 
-// 🔐 UID SYSTEM
-if (!localStorage.getItem("ml_uid")) {
-  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
+// ================= WEEK =================
+function getWeek(){
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear() + "-W" + week;
 }
 
 
-// 📅 WEEK
-function getWeek() {
-  let d = new Date();
-  let onejan = new Date(d.getFullYear(),0,1);
-  let week = Math.ceil((((d - onejan)/86400000)+onejan.getDay()+1)/7);
-  return d.getFullYear()+"-W"+week;
-}
+// ================= LOAD USER =================
+async function loadUser(uid){
+  const snap = await getDoc(doc(db,"users",uid));
 
-
-// 🔥 FIREBASE SYNC
-async function syncToFirebase(points){
-  const uid = localStorage.getItem("ml_uid");
-
-  await setDoc(doc(db, "leaderboard", uid), {
-    name: localStorage.getItem("ml_name") || "Guest",
-    points: points,
-    week: getWeek()
-  });
-}
-
-
-// 💎 POINT SYSTEM
-function addPoints(amount){
-  let current = parseInt(localStorage.getItem("ml_points")) || 0;
-  let newPoints = current + amount;
-
-  localStorage.setItem("ml_points", newPoints);
-  syncToFirebase(newPoints);
-}
-
-
-// 🧠 SUBJECT SYSTEM (NEW)
-const SUBJECT = "math";
-
-function ensureSubject(){
-  let key = "ml_history_" + SUBJECT;
-  if(!localStorage.getItem(key)){
-    localStorage.setItem(key, JSON.stringify([]));
+  if(snap.exists()){
+    studentName = snap.data().name || "Student";
   }
 }
 
-function saveScoreToHistory(){
 
-  let score = parseInt(localStorage.getItem("ml_last_quiz_score")) || 0;
-  if(score <= 0) return;
+// ================= ADD POINTS =================
+async function addPoints(amount){
+  if(!currentUid) return;
 
-  ensureSubject();
+  const ref = doc(db,"leaderboard",currentUid);
+  const snap = await getDoc(ref);
 
-  let key = "ml_history_" + SUBJECT;
-  let history = JSON.parse(localStorage.getItem(key));
+  let currentPoints = 0;
+
+  if(snap.exists()){
+    currentPoints = snap.data().points || 0;
+  }
+
+  const updatedPoints = currentPoints + amount;
+
+  await setDoc(ref,{
+    name: studentName,
+    points: updatedPoints,
+    week: getWeek()
+  },{merge:true});
+}
+
+
+// ================= QUIZ HISTORY =================
+function saveScoreToHistory(percent){
+  const key = "ml_history_math";
+  const history = JSON.parse(localStorage.getItem(key) || "[]");
 
   history.push({
-    score: score,
+    score: percent,
     date: new Date().toLocaleDateString()
   });
 
@@ -133,27 +203,26 @@ function saveScoreToHistory(){
   }
 
   localStorage.setItem(key, JSON.stringify(history));
-
-  console.log("Saved math history:", score);
 }
 
 
-// ---------------- QUIZ LOGIC ----------------
-
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
+// ================= HELPERS =================
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+    [arr[i],arr[j]]=[arr[j],arr[i]];
   }
-  return a;
+  return arr;
 }
 
 function randomInt(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-const questionBank=[];
-const ops=["+","-","*","/"];
+
+// ================= GENERATE QUESTIONS =================
+const questionBank = [];
+const ops = ["+","-","*","/"];
 
 for(let i=0;i<50;i++){
 
@@ -172,87 +241,98 @@ for(let i=0;i<50;i++){
     a=correct*b;
   }
 
-  let options=[correct];
+  let answers=[correct];
 
-  while(options.length<3){
-    let wrong=correct+randomInt(-15,15);
-    if(!options.includes(wrong)) options.push(wrong);
+  while(answers.length<4){
+    const wrong = correct + randomInt(-15,15);
+    if(!answers.includes(wrong)){
+      answers.push(wrong);
+    }
   }
 
-  options=shuffle(options);
+  answers = shuffle(answers);
 
   questionBank.push({
     q:`What is ${a} ${op} ${b}?`,
-    a:options,
-    c:options.indexOf(correct)
+    a:answers,
+    c:answers.indexOf(correct)
   });
 }
 
-let questions=shuffle([...questionBank]).slice(0,10);
-let index=0;
-let score=0;
+
+// ================= QUIZ STATE =================
+let questions = shuffle([...questionBank]).slice(0,10);
+let index = 0;
+let score = 0;
 
 
-// 🚀 LOAD QUESTION
-function loadQuestion(){
+// ================= LOAD QUESTION =================
+async function loadQuestion(){
 
-  if(index>=questions.length){
+  if(index >= questions.length){
 
-    let percent=Math.round((score/questions.length)*100);
+    const percent = Math.round((score / questions.length) * 100);
 
-    // 💎 SAVE SCORE
-    localStorage.setItem("ml_last_quiz_score",percent);
+    localStorage.setItem("ml_last_quiz_score", percent);
+    saveScoreToHistory(percent);
 
-    // 💎 SAVE HISTORY
-    saveScoreToHistory();
-
-    // 🎯 DAILY BONUS
-    const today=new Date().toDateString();
-    const key="ml_quiz_reward";
-
-    if(percent>=80 && localStorage.getItem(key)!==today){
-      addPoints(5);
-      localStorage.setItem(key,today);
+    if(percent >= 80){
+      await addPoints(5);
     }
 
-    document.querySelector(".card").innerHTML=
-      `<h1>🎉 Quiz Complete!</h1>
-       <p>Your score: <strong>${score}/${questions.length}</strong></p>
-       <p>Percentage: <strong>${percent}%</strong></p>
-       <button onclick="location.reload()">Play Again</button>`;
-
+    document.querySelector(".card").innerHTML = `
+      <h1>🎉 Quiz Complete!</h1>
+      <p style="text-align:center;">Your score: <strong>${score}/${questions.length}</strong></p>
+      <p style="text-align:center;">Percentage: <strong>${percent}%</strong></p>
+      <button onclick="location.reload()">Play Again</button>
+    `;
     return;
   }
 
-  const q=questions[index];
-  document.getElementById("question").textContent=q.q;
+  const q = questions[index];
+  document.getElementById("question").textContent = q.q;
 
-  const options=document.getElementById("options");
-  options.innerHTML="";
+  const options = document.getElementById("options");
+  options.innerHTML = "";
 
   q.a.forEach((opt,i)=>{
 
-    const btn=document.createElement("button");
-    btn.textContent=opt;
+    const btn = document.createElement("button");
+    btn.textContent = opt;
 
-    btn.onclick=()=>{
-      if(i===q.c){
+    btn.onclick = async ()=>{
+      if(i === q.c){
         score++;
-        addPoints(2);
+        await addPoints(2);
       }
+
       index++;
+      document.getElementById("score").innerText = score;
       loadQuestion();
     };
 
     options.appendChild(btn);
   });
-
-  document.getElementById("score").textContent=score;
 }
 
-loadQuestion();
 
+// ================= AUTH =================
+onAuthStateChanged(auth, async(user)=>{
+
+  if(!user){
+    window.location.replace("index.html");
+    return;
+  }
+
+  currentUid = user.uid;
+
+  await loadUser(currentUid);
+
+  loadQuestion();
+});
 </script>
 
+</body>
+</html>
 </body>
 </html>
