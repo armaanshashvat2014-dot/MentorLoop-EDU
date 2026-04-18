@@ -24,13 +24,6 @@ width:95%;
 max-width:650px;
 box-shadow:0 0 40px rgba(34,211,238,.2);
 border:1px solid rgba(34,211,238,.3);
-backdrop-filter:blur(10px);
-animation:fadeIn .4s ease-in-out;
-}
-
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
 }
 
 h1{
@@ -59,7 +52,6 @@ transition:.25s;
 button:hover{
 background:#22d3ee;
 color:#020617;
-transform:scale(1.02);
 }
 
 .score-box{
@@ -89,7 +81,6 @@ transition:width .3s ease;
 <body>
 
 <div class="card">
-
 <h1>⚛️ Science Sprint</h1>
 
 <div class="progress">
@@ -102,15 +93,24 @@ transition:width .3s ease;
 <div class="score-box">
 Score: <span id="score">0</span>
 </div>
-
 </div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 🔥 FIREBASE
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+
+// ================= FIREBASE =================
 const firebaseConfig = {
   apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
   authDomain: "mentorloop-55a37.firebaseapp.com",
@@ -119,64 +119,58 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUid = null;
+let studentName = "Student";
 
 
-// 🔐 UID
-if (!localStorage.getItem("ml_uid")) {
-  localStorage.setItem("ml_uid", "user_" + Math.random().toString(36).substring(2, 10));
-}
-
-// 📅 WEEK
+// ================= WEEK =================
 function getWeek(){
-  let d=new Date();
-  let onejan=new Date(d.getFullYear(),0,1);
-  let week=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
   return d.getFullYear()+"-W"+week;
 }
 
-// 🔥 SYNC
-async function syncToFirebase(points){
-  const uid = localStorage.getItem("ml_uid");
 
-  await setDoc(doc(db,"leaderboard",uid),{
-    name: localStorage.getItem("ml_name") || "Guest",
-    points: points,
-    week: getWeek()
-  });
-}
-
-// 💎 POINT SYSTEM
-function addPoints(amount){
-  let current=parseInt(localStorage.getItem("ml_points"))||0;
-  let newPoints=current+amount;
-
-  localStorage.setItem("ml_points",newPoints);
-  syncToFirebase(newPoints);
-}
-
-
-// 🧠 SUBJECT SYSTEM (NEW)
-const SUBJECT = "science";
-
-function ensureSubject(){
-  let key = "ml_history_" + SUBJECT;
-  if(!localStorage.getItem(key)){
-    localStorage.setItem(key, JSON.stringify([]));
+// ================= LOAD USER =================
+async function loadUser(uid){
+  const snap = await getDoc(doc(db,"users",uid));
+  if(snap.exists()){
+    studentName = snap.data().name || "Student";
   }
 }
 
-function saveScoreToHistory(){
 
-  let score = parseInt(localStorage.getItem("ml_last_quiz_score")) || 0;
-  if(score <= 0) return;
+// ================= ADD POINTS =================
+async function addPoints(amount){
+  if(!currentUid) return;
 
-  ensureSubject();
+  const ref = doc(db,"leaderboard",currentUid);
+  const snap = await getDoc(ref);
 
-  let key = "ml_history_" + SUBJECT;
-  let history = JSON.parse(localStorage.getItem(key));
+  let currentPoints = 0;
+
+  if(snap.exists()){
+    currentPoints = snap.data().points || 0;
+  }
+
+  await setDoc(ref,{
+    name: studentName,
+    points: currentPoints + amount,
+    week: getWeek()
+  },{merge:true});
+}
+
+
+// ================= HISTORY =================
+function saveScoreToHistory(percent){
+  const key = "ml_history_science";
+  const history = JSON.parse(localStorage.getItem(key) || "[]");
 
   history.push({
-    score: score,
+    score: percent,
     date: new Date().toLocaleDateString()
   });
 
@@ -188,18 +182,16 @@ function saveScoreToHistory(){
 }
 
 
-// ---------- SHUFFLE ----------
+// ================= QUIZ =================
 function shuffle(a){
-for(let i=a.length-1;i>0;i--){
-const j=Math.floor(Math.random()*(i+1));
-[a[i],a[j]]=[a[j],a[i]];
-}
-return a;
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
 }
 
-// ---------- QUESTIONS ----------
-const scienceQuestions=[
-
+const scienceQuestions = [
 {q:"What planet is known as the Red Planet?",a:["Mars","Venus","Jupiter"],c:0},
 {q:"What gas do plants absorb?",a:["Oxygen","Carbon Dioxide","Nitrogen"],c:1},
 {q:"What is the chemical symbol for Gold?",a:["Au","Ag","Gd"],c:0},
@@ -210,81 +202,82 @@ const scienceQuestions=[
 {q:"Speed of light is?",a:["300,000 km/s","150,000 km/s","1,000 km/s"],c:0},
 {q:"Largest planet?",a:["Earth","Saturn","Jupiter"],c:2},
 {q:"What gas do humans breathe?",a:["Oxygen","Helium","Nitrogen"],c:0}
-
 ];
 
-let questions=shuffle([...scienceQuestions]).slice(0,10);
-let index=0;
-let score=0;
+let questions = shuffle([...scienceQuestions]).slice(0,10);
+let index = 0;
+let score = 0;
 
 
-// ---------- LOAD ----------
-function loadQuestion(){
+// ================= LOAD QUESTION =================
+async function loadQuestion(){
 
-if(index>=questions.length){
+  if(index >= questions.length){
 
-let percent=Math.round((score/questions.length)*100);
+    const percent = Math.round((score/questions.length)*100);
 
-// 💎 SAVE SCORE
-localStorage.setItem("ml_last_quiz_score",percent);
+    localStorage.setItem("ml_last_quiz_score", percent);
+    saveScoreToHistory(percent);
 
-// 💎 SAVE HISTORY
-saveScoreToHistory();
+    const today = new Date().toDateString();
+    const rewardKey = "ml_science_reward";
 
-// 🎯 BONUS
-const today=new Date().toDateString();
-const key="ml_science_reward";
+    if(percent >= 80 && localStorage.getItem(rewardKey)!==today){
+      await addPoints(5);
+      localStorage.setItem(rewardKey,today);
+    }
 
-if(percent>=80 && localStorage.getItem(key)!==today){
-addPoints(5);
-localStorage.setItem(key,today);
+    document.querySelector(".card").innerHTML = `
+      <h1>🎉 Quiz Complete!</h1>
+      <p>Your score: <strong>${score}/${questions.length}</strong></p>
+      <p>Percentage: <strong>${percent}%</strong></p>
+      <button onclick="location.reload()">Play Again</button>
+    `;
+    return;
+  }
+
+  const q = questions[index];
+  document.getElementById("question").textContent = q.q;
+
+  const box = document.getElementById("options");
+  box.innerHTML = "";
+
+  q.a.forEach((opt,i)=>{
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+
+    btn.onclick = async ()=>{
+      if(i === q.c){
+        score++;
+        await addPoints(2);
+      }
+
+      index++;
+      document.getElementById("score").innerText = score;
+      document.getElementById("progress").style.width =
+        ((index/questions.length)*100)+"%";
+
+      loadQuestion();
+    };
+
+    box.appendChild(btn);
+  });
 }
 
-document.querySelector(".card").innerHTML=
-`<h1>🎉 Quiz Complete!</h1>
-<p>Your score: <strong>${score}/${questions.length}</strong></p>
-<p>Percentage: <strong>${percent}%</strong></p>
-<button onclick="location.reload()">Play Again</button>`;
 
-return;
-}
+// ================= AUTH =================
+onAuthStateChanged(auth, async(user)=>{
 
-const q=questions[index];
+  if(!user){
+    window.location.replace("index.html");
+    return;
+  }
 
-document.getElementById("question").textContent=q.q;
+  currentUid = user.uid;
+  await loadUser(currentUid);
 
-const options=document.getElementById("options");
-options.innerHTML="";
-
-q.a.forEach((opt,i)=>{
-
-const btn=document.createElement("button");
-btn.textContent=opt;
-
-btn.onclick=()=>{
-if(i===q.c){
-score++;
-addPoints(2);
-}
-
-index++;
-
-document.getElementById("score").textContent=score;
-
-document.getElementById("progress").style.width=
-((index/questions.length)*100)+"%";
-
-loadQuestion();
-};
-
-options.appendChild(btn);
-
+  loadQuestion();
 });
-
-}
-
-loadQuestion();
-
 </script>
 
 </body>
