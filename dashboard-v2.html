@@ -3,194 +3,2468 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>MentorLoop EDU Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+  rel="stylesheet"
+>
+
 <style>
-*{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;font-family:Poppins,sans-serif;background:#020617;color:#fff;min-height:100vh;overflow-x:hidden}
-.sidebar{position:fixed;top:0;left:0;width:78px;height:100vh;padding:14px 10px;background:#0f172a;border-right:1px solid rgba(255,255,255,.06);transition:width .3s ease,transform .3s ease;overflow-x:hidden;overflow-y:auto;z-index:1000}
-.sidebar.expanded{width:270px}
-.toggle-btn{display:block;width:42px;height:42px;margin:0 0 18px 4px;padding:0;background:transparent;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#fff;font-size:22px;cursor:pointer}
-.toggle-btn:hover{background:rgba(255,255,255,.08)}
-.brand{display:flex;align-items:center;gap:10px;min-height:42px;margin-bottom:16px;white-space:nowrap}
-.brand-icon{font-size:25px;min-width:42px;text-align:center}.sidebar h2{margin:0;color:#22d3ee;font-size:18px;opacity:0;transition:opacity .2s}.sidebar.expanded h2{opacity:1}
-.sidebar h4{margin:18px 5px 7px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;white-space:nowrap;opacity:0;transition:opacity .2s}.sidebar.expanded h4{opacity:1}
-.sidebar a{display:flex;align-items:center;gap:12px;width:100%;min-height:42px;padding:9px 10px;margin:3px 0;color:#94a3b8;text-decoration:none;border-radius:9px;white-space:nowrap;font-size:14px;transition:.2s}
-.sidebar a:hover,.sidebar a.active{background:rgba(34,211,238,.10);color:#fff}.nav-icon{min-width:30px;text-align:center;font-size:17px}.nav-text{opacity:0;transition:opacity .2s}.sidebar.expanded .nav-text{opacity:1}
-.main{min-height:100vh;margin-left:78px;padding:28px;width:calc(100% - 78px);transition:margin-left .3s ease,width .3s ease}.sidebar.expanded~.main{margin-left:270px;width:calc(100% - 270px)}
-.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px}.topbar h1{margin:0 0 5px;font-size:30px}.subtitle{margin:0;color:#94a3b8;font-size:14px}
-.user-chip{display:flex;align-items:center;gap:8px;padding:9px 13px;background:#0f172a;border:1px solid rgba(255,255,255,.07);border-radius:999px;color:#cbd5e1;font-size:13px}
-.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.stat{background:linear-gradient(145deg,#0f172a,#111c31);padding:20px;border:1px solid rgba(255,255,255,.06);border-radius:14px;text-align:left}
-.stat-label{color:#94a3b8;font-size:13px;margin:0 0 6px}.stat h3{margin:0;font-size:30px}.stat small{color:#64748b}
-.card{background:#0f172a;border:1px solid rgba(255,255,255,.06);padding:20px;border-radius:14px;margin-top:16px}.card h3{margin:0 0 8px;font-size:17px}.card p{color:#cbd5e1;font-size:14px}.card-header{display:flex;justify-content:space-between;align-items:center;gap:10px}.muted{color:#64748b}
-.missions{list-style:none;padding:0;margin:10px 0 0}.missions li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#cbd5e1}.missions li:last-child{border-bottom:0}.mission-reward{color:#22d3ee;font-weight:600}
-.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.badge{display:inline-block;padding:7px 11px;background:#334155;border-radius:20px;color:#cbd5e1;font-size:12px}.badge.unlocked{background:#10b981;color:#fff}
-.wheel-wrap{text-align:center}#wheel{display:block;width:200px;height:200px;margin:8px auto 0;border-radius:50%;border:5px solid #fff;box-shadow:0 0 25px rgba(34,211,238,.12);transition:transform 3s cubic-bezier(.15,.75,.2,1)}
-.pointer{width:0;height:0;margin:0 auto -2px;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:20px solid #ef4444;position:relative;z-index:2}
-button{margin-top:12px;padding:10px 16px;border:0;border-radius:10px;background:linear-gradient(90deg,#22d3ee,#10b981);color:#fff;font-family:inherit;font-weight:600;cursor:pointer}button:hover{filter:brightness(1.08)}button:disabled{opacity:.55;cursor:not-allowed}
-.status{margin-top:16px;padding:12px 14px;border-radius:10px;background:#111827;color:#94a3b8;font-size:13px;display:none}.status.show{display:block}.status.error{color:#fca5a5;background:#3f1720}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:900}.overlay.active{display:block}
-@media(max-width:768px){
-.sidebar{width:270px;transform:translateX(-100%);padding:18px 14px;box-shadow:10px 0 30px rgba(0,0,0,.35)}.sidebar.expanded{width:270px;transform:translateX(0)}
-.sidebar h2,.sidebar h4,.nav-text{opacity:1}.main,.sidebar.expanded~.main{margin-left:0;width:100%;padding:18px}.topbar h1{font-size:24px}.stats{grid-template-columns:1fr}
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
+  background: #020617;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 72px;
+  height: 100vh;
+
+  padding: 12px 10px;
+
+  background: #0f172a;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  z-index: 1000;
+
+  transition:
+    width 0.3s ease,
+    transform 0.3s ease;
+}
+
+.sidebar.expanded {
+  width: 270px;
+}
+
+/* scrollbar */
+
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+/* toggle */
+
+.toggle-btn {
+  width: 42px;
+  height: 42px;
+
+  margin: 0 0 18px 4px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+
+  background: transparent;
+  color: white;
+
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+.toggle-btn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* logo */
+
+.logo {
+  display: flex;
+  align-items: center;
+
+  min-height: 42px;
+
+  margin-bottom: 18px;
+
+  white-space: nowrap;
+}
+
+.logo-icon {
+  min-width: 42px;
+
+  text-align: center;
+
+  font-size: 24px;
+}
+
+.logo-text {
+  margin-left: 8px;
+
+  color: #22d3ee;
+
+  font-size: 18px;
+  font-weight: 600;
+
+  opacity: 0;
+
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.expanded .logo-text {
+  opacity: 1;
+}
+
+/* category headings */
+
+.sidebar h4 {
+  margin: 18px 6px 7px;
+
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+
+  opacity: 0;
+
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.expanded h4 {
+  opacity: 1;
+}
+
+/* links */
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 42px;
+
+  padding: 9px 10px;
+  margin: 3px 0;
+
+  color: #94a3b8;
+
+  text-decoration: none;
+
+  border-radius: 9px;
+
+  white-space: nowrap;
+
+  font-size: 14px;
+
+  transition: 0.2s ease;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: rgba(34,211,238,0.10);
+  color: white;
+}
+
+.nav-icon {
+  min-width: 30px;
+
+  text-align: center;
+
+  font-size: 17px;
+}
+
+.nav-text {
+  opacity: 0;
+
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.expanded .nav-text {
+  opacity: 1;
+}
+
+/* =========================================================
+   MOBILE OVERLAY
+========================================================= */
+
+.overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.65);
+
+  backdrop-filter: blur(4px);
+
+  display: none;
+
+  z-index: 900;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+  width: calc(100% - 72px);
+
+  min-height: 100vh;
+
+  margin-left: 72px;
+
+  padding: 28px;
+
+  transition:
+    margin-left 0.3s ease,
+    width 0.3s ease;
+}
+
+.sidebar.expanded ~ .main {
+  width: calc(100% - 270px);
+  margin-left: 270px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.top-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  margin-bottom: 25px;
+}
+
+.title-area h1 {
+  margin: 0;
+
+  font-size: 30px;
+}
+
+.title-area p {
+  margin: 5px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 14px;
+}
+
+.user-id {
+  padding: 9px 14px;
+
+  background: #0f172a;
+
+  border: 1px solid rgba(255,255,255,0.07);
+
+  border-radius: 999px;
+
+  color: #cbd5e1;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.stat {
+  padding: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #0f172a,
+      #111c31
+    );
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  border-radius: 14px;
+}
+
+.stat-label {
+  margin: 0 0 5px;
+
+  color: #94a3b8;
+
+  font-size: 13px;
+}
+
+.stat-number {
+  margin: 0;
+
+  font-size: 31px;
+  font-weight: 600;
+}
+
+.stat-description {
+  margin: 4px 0 0;
+
+  color: #64748b;
+
+  font-size: 12px;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card {
+  margin-top: 16px;
+
+  padding: 20px;
+
+  background: #0f172a;
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  border-radius: 14px;
+}
+
+.card-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.card h3 {
+  margin: 0;
+
+  font-size: 17px;
+}
+
+.card p {
+  color: #cbd5e1;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   MISSIONS
+========================================================= */
+
+.missions {
+  list-style: none;
+
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.mission {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 0;
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.06);
+
+  color: #cbd5e1;
+
+  font-size: 14px;
+}
+
+.mission:last-child {
+  border-bottom: none;
+}
+
+.reward {
+  color: #22d3ee;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badges {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+.badge {
+  padding: 7px 11px;
+
+  background: #334155;
+
+  border-radius: 20px;
+
+  color: #cbd5e1;
+
+  font-size: 12px;
+}
+
+.badge.unlocked {
+  background: #10b981;
+
+  color: white;
+}
+
+/* =========================================================
+   WHEEL
+========================================================= */
+
+.wheel-container {
+  text-align: center;
+}
+
+.pointer {
+  width: 0;
+  height: 0;
+
+  margin: 0 auto -2px;
+
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid #ef4444;
+
+  position: relative;
+
+  z-index: 5;
+}
+
+#wheel {
+  display: block;
+
+  width: 200px;
+  height: 200px;
+
+  margin: 0 auto;
+
+  border: 5px solid white;
+
+  border-radius: 50%;
+
+  transition:
+    transform 3s cubic-bezier(.15,.75,.2,1);
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+button {
+  font-family: "Poppins", sans-serif;
+}
+
+.spin-button {
+  margin-top: 15px;
+
+  padding: 10px 18px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #22d3ee,
+      #10b981
+    );
+
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.spin-button:hover {
+  filter: brightness(1.08);
+}
+
+.spin-button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status {
+  display: none;
+
+  margin-top: 16px;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  background: #111827;
+
+  color: #94a3b8;
+
+  font-size: 13px;
+}
+
+.status.show {
+  display: block;
+}
+
+.status.error {
+  color: #fca5a5;
+
+  background: #3f1720;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .sidebar {
+    width: 270px;
+
+    transform: translateX(-100%);
+
+    padding: 18px 14px;
+
+    box-shadow:
+      10px 0 30px rgba(0,0,0,0.35);
+  }
+
+  .sidebar.expanded {
+    width: 270px;
+
+    transform: translateX(0);
+  }
+
+  .logo-text,
+  .sidebar h4,
+  .nav-text {
+    opacity: 1;
+  }
+
+  .main,
+  .sidebar.expanded ~ .main {
+    width: 100%;
+
+    margin-left: 0;
+
+    padding: 18px;
+  }
+
+  .top-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .title-area h1 {
+    font-size: 25px;
+  }
+
+  .user-id {
+    max-width: 100%;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* very small screens */
+
+@media (max-width: 420px) {
+
+  .main {
+    padding: 14px !important;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  #wheel {
+    width: 180px;
+    height: 180px;
+  }
 }
 </style>
 </head>
+
 <body>
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<!-- =======================================================
+     MOBILE OVERLAY
+======================================================= -->
 
-<nav class="sidebar" id="sidebar" aria-label="Main navigation">
-<button class="toggle-btn" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
-<div class="brand"><span class="brand-icon">🎓</span><h2>MentorLoop EDU</h2></div>
+<div
+  class="overlay"
+  id="overlay"
+  onclick="closeSidebar()">
+</div>
 
-<h4>🏠 Core</h4>
-<a href="#" class="active"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a>
-<a href="profile.html"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
-<a href="notifications.html"><span class="nav-icon">🔔</span><span class="nav-text">Notifications</span></a>
 
-<h4>📚 Learning</h4>
-<a href="table.html"><span class="nav-icon">❓</span><span class="nav-text">Why us</span></a>
-<a href="dashboard-v3.html"><span class="nav-icon">📖</span><span class="nav-text">Learn more</span></a>
-<a href="primary-quiz.html"><span class="nav-icon">🧒</span><span class="nav-text">Primary Test</span></a>
-<a href="lowersecondary-quiz.html"><span class="nav-icon">📘</span><span class="nav-text">Lower Secondary</span></a>
-<a href="higher-college-quiz.html"><span class="nav-icon">🎓</span><span class="nav-text">Higher Level</span></a>
-<a href="hard-challenge.html"><span class="nav-icon">🔥</span><span class="nav-text">Hard Quizzes</span></a>
-<a href="games.html"><span class="nav-icon">🧩</span><span class="nav-text">Quizzes</span></a>
-<a href="create.html"><span class="nav-icon">✏️</span><span class="nav-text">Class Quiz</span></a>
-<a href="report.html"><span class="nav-icon">📋</span><span class="nav-text">Report Card</span></a>
+<!-- =======================================================
+     SIDEBAR
+======================================================= -->
 
-<h4>🎮 Fun & Battle</h4>
-<a href="battle-mode.html"><span class="nav-icon">⚔️</span><span class="nav-text">Battle Mode</span></a>
-<a href="league.html"><span class="nav-icon">🏎️</span><span class="nav-text">Race others</span></a>
+<nav
+  class="sidebar"
+  id="sidebar"
+  aria-label="Main navigation">
 
-<h4>🧠 AI Tools</h4>
-<a href="https://learning-ai-2.streamlit.app/"><span class="nav-icon">🤖</span><span class="nav-text">AI Tutor 1</span></a>
-<a href="https://complex-buddy-ai.lovable.app/"><span class="nav-icon">🧠</span><span class="nav-text">AI Tutor 2</span></a>
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+    aria-label="Toggle navigation">
+    ☰
+  </button>
 
-<h4>📊 Growth</h4>
-<a href="leaderboard.html"><span class="nav-icon">🏆</span><span class="nav-text">Leaderboard</span></a>
-<a href="progress.html"><span class="nav-icon">📈</span><span class="nav-text">Over-time progress</span></a>
+  <div class="logo">
+    <span class="logo-icon">🎓</span>
 
-<h4>🏫 System</h4>
-<a href="teacher.html"><span class="nav-icon">👨‍🏫</span><span class="nav-text">Teacher Zone</span></a>
-<a href="dashboard.html"><span class="nav-icon">🏫</span><span class="nav-text">Classroom</span></a>
-<a href="https://blank-app-6sirql25can.streamlit.app/"><span class="nav-icon">🛡️</span><span class="nav-text">Safe Browser</span></a>
-<a href="https://armaanshashvat2014-dot.github.io/EDU/study.html"><span class="nav-icon">📚</span><span class="nav-text">6th grade+ books</span></a>
+    <span class="logo-text">
+      MentorLoop EDU
+    </span>
+  </div>
 
-<h4>🧩 Extra</h4>
-<a href="blog.html"><span class="nav-icon">ℹ️</span><span class="nav-text">About</span></a>
-<a href="knowledge.html"><span class="nav-icon">🧠</span><span class="nav-text">Knowledge Vault</span></a>
-<a href="fair-play.html"><span class="nav-icon">🚩</span><span class="nav-text">Report Users</span></a>
-<a href="offline.html"><span class="nav-icon">📴</span><span class="nav-text">Offline</span></a>
-<a href="chat.html"><span class="nav-icon">💬</span><span class="nav-text">Talk Live</span></a>
+
+  <!-- CORE -->
+
+  <h4>🏠 Core</h4>
+
+  <a href="#" class="active">
+    <span class="nav-icon">📊</span>
+    <span class="nav-text">Dashboard</span>
+  </a>
+
+  <a href="profile.html">
+    <span class="nav-icon">👤</span>
+    <span class="nav-text">Profile</span>
+  </a>
+
+  <a href="notifications.html">
+    <span class="nav-icon">🔔</span>
+    <span class="nav-text">Notifications</span>
+  </a>
+
+
+  <!-- LEARNING -->
+
+  <h4>📚 Learning</h4>
+
+  <a href="table.html">
+    <span class="nav-icon">❓</span>
+    <span class="nav-text">Why us</span>
+  </a>
+
+  <a href="dashboard-v3.html">
+    <span class="nav-icon">📖</span>
+    <span class="nav-text">Learn more</span>
+  </a>
+
+  <a href="primary-quiz.html">
+    <span class="nav-icon">🧒</span>
+    <span class="nav-text">Primary Test</span>
+  </a>
+
+  <a href="lowersecondary-quiz.html">
+    <span class="nav-icon">📘</span>
+    <span class="nav-text">Lower Secondary</span>
+  </a>
+
+  <a href="higher-college-quiz.html">
+    <span class="nav-icon">🎓</span>
+    <span class="nav-text">Higher Level</span>
+  </a>
+
+  <a href="hard-challenge.html">
+    <span class="nav-icon">🔥</span>
+    <span class="nav-text">Hard Quizzes</span>
+  </a>
+
+  <a href="games.html">
+    <span class="nav-icon">🧩</span>
+    <span class="nav-text">Quizzes</span>
+  </a>
+
+  <a href="create.html">
+    <span class="nav-icon">✏️</span>
+    <span class="nav-text">Class Quiz</span>
+  </a>
+
+  <a href="report.html">
+    <span class="nav-icon">📋</span>
+    <span class="nav-text">Report Card</span>
+  </a>
+
+
+  <!-- BATTLE -->
+
+  <h4>🎮 Fun & Battle</h4>
+
+  <a href="battle-mode.html">
+    <span class="nav-icon">⚔️</span>
+    <span class="nav-text">Battle Mode</span>
+  </a>
+
+  <a href="league.html">
+    <span class="nav-icon">🏎️</span>
+    <span class="nav-text">Race others</span>
+  </a>
+
+
+  <!-- AI -->
+
+  <h4>🧠 AI Tools</h4>
+
+  <a href="https://learning-ai-2.streamlit.app/">
+    <span class="nav-icon">🤖</span>
+    <span class="nav-text">AI Tutor 1</span>
+  </a>
+
+  <a href="https://complex-buddy-ai.lovable.app/">
+    <span class="nav-icon">🧠</span>
+    <span class="nav-text">AI Tutor 2</span>
+  </a>
+
+
+  <!-- GROWTH -->
+
+  <h4>📊 Growth</h4>
+
+  <a href="leaderboard.html">
+    <span class="nav-icon">🏆</span>
+    <span class="nav-text">Leaderboard</span>
+  </a>
+
+  <a href="progress.html">
+    <span class="nav-icon">📈</span>
+    <span class="nav-text">Over-time progress</span>
+  </a>
+
+
+  <!-- SYSTEM -->
+
+  <h4>🏫 System</h4>
+
+  <a href="teacher.html">
+    <span class="nav-icon">👨‍🏫</span>
+    <span class="nav-text">Teacher Zone</span>
+  </a>
+
+  <a href="dashboard.html">
+    <span class="nav-icon">🏫</span>
+    <span class="nav-text">Classroom</span>
+  </a>
+
+  <a href="https://blank-app-6sirql25can.streamlit.app/">
+    <span class="nav-icon">🛡️</span>
+    <span class="nav-text">Safe Browser</span>
+  </a>
+
+  <a href="https://armaanshashvat2014-dot.github.io/EDU/study.html">
+    <span class="nav-icon">📚</span>
+    <span class="nav-text">6th grade+ books</span>
+  </a>
+
+
+  <!-- EXTRA -->
+
+  <h4>🧩 Extra</h4>
+
+  <a href="blog.html">
+    <span class="nav-icon">ℹ️</span>
+    <span class="nav-text">About</span>
+  </a>
+
+  <a href="knowledge.html">
+    <span class="nav-icon">🧠</span>
+    <span class="nav-text">Knowledge Vault</span>
+  </a>
+
+  <a href="fair-play.html">
+    <span class="nav-icon">🚩</span>
+    <span class="nav-text">Report Users</span>
+  </a>
+
+  <a href="offline.html">
+    <span class="nav-icon">📴</span>
+    <span class="nav-text">Offline</span>
+  </a>
+
+  <a href="chat.html">
+    <span class="nav-icon">💬</span>
+    <span class="nav-text">Talk Live</span>
+  </a>
+
 </nav>
 
+
+<!-- =======================================================
+     MAIN
+======================================================= -->
+
 <main class="main">
-<div class="topbar">
-<div><h1>📊 Dashboard</h1><p class="subtitle">Your learning progress, rewards and daily activity.</p></div>
-<div class="user-chip">🆔 <span id="userId">Loading ID...</span></div>
-</div>
 
-<div class="stats">
-<div class="stat"><p class="stat-label">⭐ Points</p><h3 id="points">0</h3><small>Keep learning to earn more.</small></div>
-<div class="stat"><p class="stat-label">🔥 Streak</p><h3 id="streak">0</h3><small>Consecutive active days.</small></div>
-</div>
+  <!-- HEADER -->
 
-<div class="card"><div class="card-header"><h3>🧠 AI Study Helper</h3><span class="muted">Based on your latest quiz</span></div><p id="studyTip">Loading your study tip...</p></div>
+  <header class="top-header">
 
-<div class="card"><div class="card-header"><h3>🎯 Daily Missions</h3><span class="mission-reward">+5</span></div>
-<ul class="missions"><li><span>✅ Log in today</span><span class="mission-reward">+5</span></li></ul></div>
+    <div class="title-area">
 
-<div class="card"><div class="card-header"><h3>🏆 Badges</h3><span class="muted">Points milestones</span></div><div id="badges" class="badges"></div></div>
+      <h1>
+        📊 Dashboard
+      </h1>
 
-<div class="card wheel-wrap"><h3>🎡 Spin Wheel</h3><p class="muted">One spin per day. Good luck!</p><div class="pointer"></div><canvas id="wheel" width="200" height="200"></canvas><button id="spinBtn" onclick="spin()">Spin</button></div>
-<div class="status" id="status"></div>
+      <p>
+        Your learning progress, rewards and daily activity.
+      </p>
+
+    </div>
+
+    <div class="user-id">
+      🆔 <span id="userId">Loading ID...</span>
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       STATS
+  ====================================================== -->
+
+  <section class="stats">
+
+    <div class="stat">
+
+      <p class="stat-label">
+        ⭐ Points
+      </p>
+
+      <h2
+        class="stat-number"
+        id="points">
+        0
+      </h2>
+
+      <p class="stat-description">
+        Keep learning to earn more.
+      </p>
+
+    </div>
+
+
+    <div class="stat">
+
+      <p class="stat-label">
+        🔥 Streak
+      </p>
+
+      <h2
+        class="stat-number"
+        id="streak">
+        0
+      </h2>
+
+      <p class="stat-description">
+        Consecutive active days.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       AI STUDY HELPER
+  ====================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <h3>
+        🧠 AI Study Helper
+      </h3>
+
+      <span
+        style="color:#64748b;font-size:12px">
+        Latest quiz
+      </span>
+
+    </div>
+
+    <p id="studyTip">
+      Loading your study tip...
+    </p>
+
+  </section>
+
+
+  <!-- =====================================================
+       DAILY MISSIONS
+  ====================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <h3>
+        🎯 Daily Missions
+      </h3>
+
+      <span class="reward">
+        +5
+      </span>
+
+    </div>
+
+    <ul class="missions">
+
+      <li class="mission">
+
+        <span>
+          ✅ Login today
+        </span>
+
+        <span class="reward">
+          +5
+        </span>
+
+      </li>
+
+    </ul>
+
+  </section>
+
+
+  <!-- =====================================================
+       BADGES
+  ====================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <h3>
+        🏆 Badges
+      </h3>
+
+      <span
+        style="color:#64748b;font-size:12px">
+        Point milestones
+      </span>
+
+    </div>
+
+    <div
+      id="badges"
+      class="badges">
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       SPIN WHEEL
+  ====================================================== -->
+
+  <section class="card wheel-container">
+
+    <h3>
+      🎡 Spin Wheel
+    </h3>
+
+    <p style="color:#64748b">
+      One spin per day. Good luck!
+    </p>
+
+    <div class="pointer"></div>
+
+    <canvas
+      id="wheel"
+      width="200"
+      height="200">
+    </canvas>
+
+    <button
+      id="spinButton"
+      class="spin-button"
+      onclick="spin()">
+      Spin
+    </button>
+
+  </section>
+
+
+  <!-- STATUS -->
+
+  <div
+    id="status"
+    class="status">
+  </div>
+
 </main>
 
+
+<!-- =======================================================
+     FIREBASE + JAVASCRIPT
+======================================================= -->
+
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,doc,getDoc,setDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const firebaseConfig={apiKey:"AIzaSyBOP356DMNyWQyHDbksw0i_dWXfXsbQvI",authDomain:"mentorloop-55a37.firebaseapp.com",projectId:"mentorloop-55a37"};
-const app=initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app);
+/* =========================================================
+   FIREBASE IMPORTS
+========================================================= */
 
-let currentUser=null,publicId=null,points=0,streak=0,spinning=false,banUnsubscribe=null;
-const rewards=[10,20,30,"streak",15,25,5,"RARE"],wheelLabels=["10","20","30","🔥","15","25","5","RARE"];
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-function status(message,error=false){const e=document.getElementById("status");e.textContent=message;e.className="status show"+(error?" error":"")}
-function hideStatus(){document.getElementById("status").className="status"}
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-window.toggleSidebar=()=>{const s=document.getElementById("sidebar"),o=document.getElementById("overlay");if(innerWidth<=768){const open=s.classList.toggle("expanded");o.classList.toggle("active",open)}else s.classList.toggle("expanded")};
-window.closeSidebar=()=>{document.getElementById("sidebar").classList.remove("expanded");document.getElementById("overlay").classList.remove("active")};
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-function dateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-function yesterdayKey(){const d=new Date();d.setDate(d.getDate()-1);return dateKey(d)}
-function getWeek(){const d=new Date(),onejan=new Date(d.getFullYear(),0,1),week=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);return d.getFullYear()+"-W"+week}
 
-async function getPublicId(user){const s=await getDoc(doc(db,"user_map",user.uid));return s.exists()?s.data().publicId:null}
+/* =========================================================
+   FIREBASE CONFIG
+   SAME PROJECT AS YOUR ORIGINAL WORKING DASHBOARD
+========================================================= */
 
-function showBanScreen(id){document.body.innerHTML=`<div style="min-height:100vh;display:flex;justify-content:center;align-items:center;padding:24px;background:#020617;color:white;text-align:center;font-family:Poppins,sans-serif"><div style="max-width:450px;padding:30px;background:#0f172a;border:1px solid rgba(255,255,255,.08);border-radius:18px"><h1>🚫 Account Restricted</h1><p style="color:#94a3b8">Please contact your school administrator.</p><p>ID: ${String(id).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}</p></div></div>`}
-async function checkBan(){if(!publicId)return false;const s=await getDoc(doc(db,"leaderboard",publicId));if(s.exists()&&s.data().banned===true){showBanScreen(publicId);return true}return false}
-function watchBan(){if(banUnsubscribe)banUnsubscribe();banUnsubscribe=onSnapshot(doc(db,"leaderboard",publicId),s=>{if(s.exists()&&s.data().banned===true)showBanScreen(publicId)},e=>console.error("Ban listener:",e))}
+const firebaseConfig = {
 
-function updateUI(){document.getElementById("points").textContent=points;document.getElementById("streak").textContent=streak}
-function renderTip(){const score=Number(localStorage.getItem("ml_last_quiz_score"))||0;document.getElementById("studyTip").textContent=score<50?"Revise the basics, then try the quiz again.":score<80?"Good attempt! Practice the topics you missed.":"Excellent work! Try a harder challenge next."}
-function renderBadges(){const b=document.getElementById("badges");b.innerHTML="";[100,200,400,800,1600].forEach(n=>{const e=document.createElement("span");e.className="badge"+(points>=n?" unlocked":"");e.textContent=(points>=n?"🏆 ":"🔒 ")+n;b.appendChild(e)})}
+  apiKey:
+    "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
 
-async function savePoints(){if(!publicId)return;await setDoc(doc(db,"leaderboard",publicId),{name:localStorage.getItem("ml_name")||currentUser?.displayName||"Guest",points,streak,week:getWeek(),updatedAt:Date.now()},{merge:true});updateUI();renderBadges()}
-async function loadPoints(){const s=await getDoc(doc(db,"leaderboard",publicId));if(s.exists()){const d=s.data();points=Number(d.points)||0;streak=Number(d.streak)||0}else{points=0;streak=0}updateUI();renderBadges()}
-async function addPoints(n){points+=Number(n)||0;await savePoints()}
+  authDomain:
+    "mentorloop-55a37.firebaseapp.com",
 
-async function giveDailyReward(){
- const today=dateKey(),last=localStorage.getItem("ml_last_login");
- if(last===today)return;
- streak=last===yesterdayKey()?Math.max(1,streak+1):1;
- await addPoints(5);localStorage.setItem("ml_last_login",today);
- status("Daily login reward: +5 points 🎉");setTimeout(hideStatus,3000);
-}
+  projectId:
+    "mentorloop-55a37"
 
-const canvas=document.getElementById("wheel"),ctx=canvas.getContext("2d"),slice=Math.PI*2/8;
-function drawWheel(){
- ctx.clearRect(0,0,200,200);
- for(let i=0;i<8;i++){const a=i*slice-Math.PI/2;
-  ctx.beginPath();ctx.moveTo(100,100);ctx.arc(100,100,96,a,a+slice);ctx.closePath();ctx.fillStyle=i%2?"#22d3ee":"#10b981";ctx.fill();
-  ctx.save();ctx.translate(100,100);ctx.rotate(a+slice/2);ctx.textAlign="right";ctx.textBaseline="middle";ctx.fillStyle="#fff";ctx.font="600 13px Poppins,sans-serif";ctx.fillText(wheelLabels[i],82,0);ctx.restore()
- }
- ctx.beginPath();ctx.arc(100,100,15,0,Math.PI*2);ctx.fillStyle="#020617";ctx.fill()
-}
-drawWheel();
-
-window.spin=async()=>{
- if(spinning||!currentUser||!publicId)return;
- const today=dateKey();if(localStorage.getItem("ml_last_spin")===today){alert("Come back tomorrow! 🎡");return}
- spinning=true;document.getElementById("spinBtn").disabled=true;
- try{
-  let spins=Number(localStorage.getItem("ml_spins"))||0;spins++;
-  const index=spins%10===0?7:Math.floor(Math.random()*7);
-  canvas.style.transform=`rotate(${360*5+index*45}deg)`;
-  await new Promise(r=>setTimeout(r,3000));
-  const reward=rewards[index];
-  if(reward==="RARE"){await addPoints(200);alert("🔥 Rare reward: +200 points!")}
-  else if(reward==="streak"){streak++;await savePoints();alert("🔥 +1 streak!")}
-  else{await addPoints(reward);alert(`+${reward} points! 🎉`)}
-  localStorage.setItem("ml_spins",String(spins));localStorage.setItem("ml_last_spin",today);
- }catch(e){console.error("Spin error:",e);status("The reward could not be saved. Please try again.",true)}
- finally{spinning=false;document.getElementById("spinBtn").disabled=false}
 };
 
-onAuthStateChanged(auth,async user=>{
- if(!user){window.location.replace("index.html");return}
- currentUser=user;
- try{
-  publicId=await getPublicId(user);
-  if(!publicId){alert("User profile is missing. Please sign in again.");window.location.replace("index.html");return}
-  document.getElementById("userId").textContent=publicId;
-  if(await checkBan())return;
-  watchBan();await loadPoints();await giveDailyReward();updateUI();renderTip();renderBadges();
- }catch(e){console.error("Dashboard initialization:",e);status("Could not load your dashboard data. Check Firebase configuration and Firestore rules.",true)}
-});
+
+/* =========================================================
+   INITIALIZE FIREBASE
+========================================================= */
+
+const app =
+  initializeApp(firebaseConfig);
+
+const db =
+  getFirestore(app);
+
+const auth =
+  getAuth(app);
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let currentUser = null;
+
+let publicId = null;
+
+let points = 0;
+
+let streak =
+  Number(localStorage.getItem("ml_streak")) || 0;
+
+let spinning = false;
+
+let unsubscribeBan = null;
+
+
+/* =========================================================
+   WHEEL REWARDS
+========================================================= */
+
+const rewards = [
+  10,
+  20,
+  30,
+  "streak",
+  15,
+  25,
+  5,
+  "RARE"
+];
+
+const wheelLabels = [
+  "10",
+  "20",
+  "30",
+  "🔥",
+  "15",
+  "25",
+  "5",
+  "RARE"
+];
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+window.toggleSidebar = function () {
+
+  const sidebar =
+    document.getElementById("sidebar");
+
+  const overlay =
+    document.getElementById("overlay");
+
+
+  if (window.innerWidth <= 768) {
+
+    const isOpen =
+      sidebar.classList.toggle("expanded");
+
+    overlay.classList.toggle(
+      "active",
+      isOpen
+    );
+
+  } else {
+
+    sidebar.classList.toggle(
+      "expanded"
+    );
+
+  }
+
+};
+
+
+window.closeSidebar = function () {
+
+  document
+    .getElementById("sidebar")
+    .classList.remove("expanded");
+
+  document
+    .getElementById("overlay")
+    .classList.remove("active");
+
+};
+
+
+/* =========================================================
+   DATE HELPERS
+========================================================= */
+
+function getDateKey(date = new Date()) {
+
+  const year =
+    date.getFullYear();
+
+  const month =
+    String(date.getMonth() + 1)
+      .padStart(2, "0");
+
+  const day =
+    String(date.getDate())
+      .padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+
+}
+
+
+function getYesterdayKey() {
+
+  const date =
+    new Date();
+
+  date.setDate(
+    date.getDate() - 1
+  );
+
+  return getDateKey(date);
+
+}
+
+
+/* =========================================================
+   WEEK
+========================================================= */
+
+function getWeek() {
+
+  const date =
+    new Date();
+
+  const firstDay =
+    new Date(
+      date.getFullYear(),
+      0,
+      1
+    );
+
+  const week =
+    Math.ceil(
+      (
+        (
+          (date - firstDay)
+          / 86400000
+        )
+        +
+        firstDay.getDay()
+        +
+        1
+      ) / 7
+    );
+
+  return (
+    date.getFullYear()
+    +
+    "-W"
+    +
+    week
+  );
+
+}
+
+
+/* =========================================================
+   PUBLIC ID
+========================================================= */
+
+async function getPublicId(user) {
+
+  const userRef =
+    doc(
+      db,
+      "user_map",
+      user.uid
+    );
+
+  const snapshot =
+    await getDoc(userRef);
+
+  if (
+    snapshot.exists()
+  ) {
+
+    return snapshot.data().publicId;
+
+  }
+
+  return null;
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+function updatePointsUI() {
+
+  const element =
+    document.getElementById("points");
+
+  if (element) {
+
+    element.textContent =
+      points;
+
+  }
+
+}
+
+
+function updateStreakUI() {
+
+  const element =
+    document.getElementById("streak");
+
+  if (element) {
+
+    element.textContent =
+      streak;
+
+  }
+
+}
+
+
+/* =========================================================
+   STUDY TIP
+========================================================= */
+
+function renderTip() {
+
+  const score =
+    Number(
+      localStorage.getItem(
+        "ml_last_quiz_score"
+      )
+    ) || 0;
+
+  let tip =
+    "Start a quiz to get study insights.";
+
+
+  if (score < 50) {
+
+    tip =
+      "Revise the basics and try the quiz again.";
+
+  }
+
+  else if (score < 80) {
+
+    tip =
+      "Good attempt! Practice the topics you missed.";
+
+  }
+
+  else {
+
+    tip =
+      "Excellent work! Try a harder challenge next.";
+
+  }
+
+
+  const element =
+    document.getElementById(
+      "studyTip"
+    );
+
+  if (element) {
+
+    element.textContent =
+      tip;
+
+  }
+
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+function renderBadges() {
+
+  const box =
+    document.getElementById(
+      "badges"
+    );
+
+  if (!box) return;
+
+
+  box.innerHTML = "";
+
+
+  const levels = [
+    100,
+    200,
+    400,
+    800,
+    1600
+  ];
+
+
+  levels.forEach(level => {
+
+    const badge =
+      document.createElement(
+        "span"
+      );
+
+    badge.className =
+      "badge";
+
+
+    if (points >= level) {
+
+      badge.classList.add(
+        "unlocked"
+      );
+
+      badge.textContent =
+        "🏆 " + level;
+
+    } else {
+
+      badge.textContent =
+        "🔒 " + level;
+
+    }
+
+
+    box.appendChild(
+      badge
+    );
+
+  });
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function showStatus(
+  message,
+  error = false
+) {
+
+  const element =
+    document.getElementById(
+      "status"
+    );
+
+  if (!element) return;
+
+
+  element.textContent =
+    message;
+
+
+  element.className =
+    "status show"
+    +
+    (
+      error
+        ? " error"
+        : ""
+    );
+
+}
+
+
+function hideStatus() {
+
+  const element =
+    document.getElementById(
+      "status"
+    );
+
+  if (element) {
+
+    element.className =
+      "status";
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD POINTS
+========================================================= */
+
+async function loadPoints() {
+
+  if (!publicId) return;
+
+
+  const reference =
+    doc(
+      db,
+      "leaderboard",
+      publicId
+    );
+
+
+  const snapshot =
+    await getDoc(
+      reference
+    );
+
+
+  if (snapshot.exists()) {
+
+    const data =
+      snapshot.data();
+
+
+    points =
+      Number(
+        data.points
+      ) || 0;
+
+
+    /*
+      If a streak exists in Firestore,
+      use it.
+
+      Otherwise keep the local streak.
+    */
+
+    if (
+      data.streak !== undefined
+    ) {
+
+      streak =
+        Number(
+          data.streak
+        ) || 0;
+
+    }
+
+  }
+
+  else {
+
+    points = 0;
+
+  }
+
+
+  updatePointsUI();
+
+  updateStreakUI();
+
+  renderBadges();
+
+}
+
+
+/* =========================================================
+   SAVE POINTS
+========================================================= */
+
+async function savePoints() {
+
+  if (!publicId) return;
+
+
+  const reference =
+    doc(
+      db,
+      "leaderboard",
+      publicId
+    );
+
+
+  await setDoc(
+    reference,
+    {
+
+      name:
+        localStorage.getItem(
+          "ml_name"
+        )
+        ||
+        currentUser?.displayName
+        ||
+        "Guest",
+
+      points:
+        points,
+
+      streak:
+        streak,
+
+      week:
+        getWeek()
+
+    },
+
+    {
+      merge: true
+    }
+
+  );
+
+
+  updatePointsUI();
+
+  updateStreakUI();
+
+  renderBadges();
+
+}
+
+
+/* =========================================================
+   ADD POINTS
+========================================================= */
+
+async function addPoints(amount) {
+
+  points +=
+    Number(amount) || 0;
+
+  await savePoints();
+
+}
+
+
+/* =========================================================
+   DAILY LOGIN
+========================================================= */
+
+async function giveDailyReward() {
+
+  const today =
+    getDateKey();
+
+  const lastLogin =
+    localStorage.getItem(
+      "ml_last_login"
+    );
+
+
+  /*
+    Already claimed today.
+  */
+
+  if (
+    lastLogin === today
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+    Consecutive day.
+  */
+
+  if (
+    lastLogin ===
+    getYesterdayKey()
+  ) {
+
+    streak =
+      Math.max(
+        1,
+        streak + 1
+      );
+
+  }
+
+  /*
+    Missed a day.
+  */
+
+  else {
+
+    streak = 1;
+
+  }
+
+
+  /*
+    +5 login reward.
+  */
+
+  await addPoints(5);
+
+
+  localStorage.setItem(
+    "ml_last_login",
+    today
+  );
+
+
+  localStorage.setItem(
+    "ml_streak",
+    String(streak)
+  );
+
+
+  updateStreakUI();
+
+
+  showStatus(
+    "🎉 Daily login reward: +5 points!"
+  );
+
+
+  setTimeout(
+    hideStatus,
+    3000
+  );
+
+}
+
+
+/* =========================================================
+   BAN SCREEN
+========================================================= */
+
+function showBanScreen(id) {
+
+  document.body.innerHTML = `
+
+    <div style="
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:25px;
+      background:#020617;
+      color:white;
+      text-align:center;
+      font-family:Poppins,sans-serif;
+    ">
+
+      <div style="
+        width:100%;
+        max-width:450px;
+        padding:35px;
+        background:#0f172a;
+        border-radius:18px;
+        border:1px solid rgba(255,255,255,.08);
+      ">
+
+        <h1>
+          🚫 Account Restricted
+        </h1>
+
+        <p style="
+          color:#94a3b8;
+        ">
+          Please contact your school administrator.
+        </p>
+
+        <p>
+          ID:
+          ${escapeHTML(id)}
+        </p>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   BAN CHECK
+========================================================= */
+
+async function checkBan() {
+
+  if (!publicId) {
+
+    return false;
+
+  }
+
+
+  const reference =
+    doc(
+      db,
+      "leaderboard",
+      publicId
+    );
+
+
+  const snapshot =
+    await getDoc(
+      reference
+    );
+
+
+  if (
+    snapshot.exists()
+    &&
+    snapshot.data().banned === true
+  ) {
+
+    showBanScreen(
+      publicId
+    );
+
+    return true;
+
+  }
+
+
+  return false;
+
+}
+
+
+/* =========================================================
+   LIVE BAN LISTENER
+========================================================= */
+
+function watchBan() {
+
+  if (!publicId) return;
+
+
+  if (unsubscribeBan) {
+
+    unsubscribeBan();
+
+  }
+
+
+  unsubscribeBan =
+    onSnapshot(
+
+      doc(
+        db,
+        "leaderboard",
+        publicId
+      ),
+
+      snapshot => {
+
+        if (
+          snapshot.exists()
+          &&
+          snapshot.data().banned === true
+        ) {
+
+          showBanScreen(
+            publicId
+          );
+
+        }
+
+      },
+
+      error => {
+
+        console.error(
+          "Ban listener error:",
+          error
+        );
+
+      }
+
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(
+      /[&<>"']/g,
+      character => {
+
+        const entities = {
+
+          "&":
+            "&amp;",
+
+          "<":
+            "&lt;",
+
+          ">":
+            "&gt;",
+
+          '"':
+            "&quot;",
+
+          "'":
+            "&#039;"
+
+        };
+
+        return entities[
+          character
+        ];
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   SPIN WHEEL
+========================================================= */
+
+const canvas =
+  document.getElementById(
+    "wheel"
+  );
+
+const ctx =
+  canvas.getContext(
+    "2d"
+  );
+
+
+function drawWheel() {
+
+  ctx.clearRect(
+    0,
+    0,
+    200,
+    200
+  );
+
+
+  const slice =
+    (Math.PI * 2)
+    / 8;
+
+
+  for (
+    let i = 0;
+    i < 8;
+    i++
+  ) {
+
+    const start =
+      i * slice
+      -
+      Math.PI / 2;
+
+    const end =
+      start + slice;
+
+
+    /*
+      Slice
+    */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      100,
+      100
+    );
+
+    ctx.arc(
+      100,
+      100,
+      96,
+      start,
+      end
+    );
+
+    ctx.closePath();
+
+
+    ctx.fillStyle =
+      i % 2
+        ? "#22d3ee"
+        : "#10b981";
+
+    ctx.fill();
+
+
+    /*
+      Text
+    */
+
+    ctx.save();
+
+    ctx.translate(
+      100,
+      100
+    );
+
+    ctx.rotate(
+      start
+      +
+      slice / 2
+    );
+
+    ctx.textAlign =
+      "right";
+
+    ctx.textBaseline =
+      "middle";
+
+    ctx.fillStyle =
+      "#ffffff";
+
+    ctx.font =
+      "600 12px Poppins, sans-serif";
+
+
+    ctx.fillText(
+      wheelLabels[i],
+      82,
+      0
+    );
+
+
+    ctx.restore();
+
+  }
+
+
+  /*
+    Center circle
+  */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    100,
+    100,
+    15,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle =
+    "#020617";
+
+  ctx.fill();
+
+}
+
+
+drawWheel();
+
+
+/* =========================================================
+   SPIN
+========================================================= */
+
+window.spin =
+  async function () {
+
+    if (
+      spinning
+      ||
+      !currentUser
+      ||
+      !publicId
+    ) {
+
+      return;
+
+    }
+
+
+    const today =
+      getDateKey();
+
+
+    const lastSpin =
+      localStorage.getItem(
+        "ml_last_spin"
+      );
+
+
+    /*
+      One spin per day.
+    */
+
+    if (
+      lastSpin === today
+    ) {
+
+      alert(
+        "Come back tomorrow! 🎡"
+      );
+
+      return;
+
+    }
+
+
+    spinning = true;
+
+
+    const button =
+      document.getElementById(
+        "spinButton"
+      );
+
+
+    button.disabled =
+      true;
+
+
+    try {
+
+      let spins =
+        Number(
+          localStorage.getItem(
+            "ml_spins"
+          )
+        ) || 0;
+
+
+      spins++;
+
+
+      /*
+        Every 10th spin gets
+        the rare reward.
+      */
+
+      const index =
+        spins % 10 === 0
+          ? 7
+          : Math.floor(
+              Math.random() * 7
+            );
+
+
+      const degrees =
+        360 * 5
+        +
+        index * 45;
+
+
+      canvas.style.transform =
+        `rotate(${degrees}deg)`;
+
+
+      /*
+        Wait for animation.
+      */
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            3000
+          )
+      );
+
+
+      const reward =
+        rewards[index];
+
+
+      if (
+        reward === "RARE"
+      ) {
+
+        await addPoints(
+          200
+        );
+
+
+        alert(
+          "🔥 RARE REWARD: +200 points!"
+        );
+
+      }
+
+
+      else if (
+        reward === "streak"
+      ) {
+
+        streak++;
+
+
+        localStorage.setItem(
+          "ml_streak",
+          String(streak)
+        );
+
+
+        await savePoints();
+
+
+        alert(
+          "🔥 +1 streak!"
+        );
+
+      }
+
+
+      else {
+
+        await addPoints(
+          reward
+        );
+
+
+        alert(
+          "+" +
+          reward +
+          " points! 🎉"
+        );
+
+      }
+
+
+      localStorage.setItem(
+        "ml_spins",
+        String(spins)
+      );
+
+
+      localStorage.setItem(
+        "ml_last_spin",
+        today
+      );
+
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Spin error:",
+        error
+      );
+
+
+      showStatus(
+        "The reward could not be saved. Please try again.",
+        true
+      );
+
+    }
+
+
+    finally {
+
+      spinning =
+        false;
+
+      button.disabled =
+        false;
+
+    }
+
+  };
+
+
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
+
+/*
+  IMPORTANT:
+  This is intentionally kept compatible
+  with your original working dashboard.
+
+  We do NOT change your login page.
+*/
+
+onAuthStateChanged(
+  auth,
+  async user => {
+
+    /*
+      User is not authenticated.
+    */
+
+    if (!user) {
+
+      window.location.replace(
+        "index.html"
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Save authenticated user.
+    */
+
+    currentUser =
+      user;
+
+
+    try {
+
+      /*
+        Get public ID from
+        user_map/{uid}
+      */
+
+      publicId =
+        await getPublicId(
+          user
+        );
+
+
+      /*
+        Missing profile.
+      */
+
+      if (!publicId) {
+
+        alert(
+          "User profile missing."
+        );
+
+
+        window.location.replace(
+          "index.html"
+        );
+
+
+        return;
+
+      }
+
+
+      /*
+        Display public ID.
+      */
+
+      document.getElementById(
+        "userId"
+      ).textContent =
+        publicId;
+
+
+      /*
+        Check ban before
+        loading dashboard.
+      */
+
+      if (
+        await checkBan()
+      ) {
+
+        return;
+
+      }
+
+
+      /*
+        Watch account live.
+      */
+
+      watchBan();
+
+
+      /*
+        Load Firebase data.
+      */
+
+      await loadPoints();
+
+
+      /*
+        Give daily reward.
+      */
+
+      await giveDailyReward();
+
+
+      /*
+        Update UI.
+      */
+
+      updatePointsUI();
+
+      updateStreakUI();
+
+      renderTip();
+
+      renderBadges();
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Dashboard error:",
+        error
+      );
+
+
+      /*
+        IMPORTANT:
+        We do NOT redirect to index
+        on a Firestore error.
+
+        This prevents Firebase/Firestore
+        errors from looking like an
+        authentication failure.
+      */
+
+      showStatus(
+        "Dashboard data could not be loaded. Please retry",
+        true
+      );
+
+    }
+
+  }
+
+);
+
 </script>
+
 </body>
 </html>
