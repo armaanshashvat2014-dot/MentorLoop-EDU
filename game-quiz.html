@@ -1,11 +1,17 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Quiz Sprint | MentorLoop EDU</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz Sprint | MentorLoop EDU</title>
 
   <style>
+    * { box-sizing: border-box; }
+
     body {
+      margin: 0;
+      padding: 20px;
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #0f172a, #1e293b);
       display: flex;
@@ -19,253 +25,552 @@
       background: #1e293b;
       padding: 30px;
       border-radius: 16px;
-      width: 95%;
+      width: 100%;
       max-width: 600px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
 
-    h1 { color:#22d3ee; }
+    h1 { color: #22d3ee; text-align: center; }
+
+    #question {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 28px 0;
+    }
 
     button {
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      background:#334155;
-      color:white;
-      border:none;
-      border-radius:8px;
-      cursor:pointer;
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      background: #334155;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background .2s, transform .2s;
     }
 
-    button:hover { background:#10b981; }
+    button:hover:not(:disabled) {
+      background: #0d9488;
+      transform: translateY(-1px);
+    }
+
+    button:disabled { cursor: not-allowed; opacity: .7; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .stat {
+      background: #0f172a;
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      color: #22d3ee;
+      font-size: 25px;
+      margin-top: 6px;
+    }
+
+    #status {
+      color: #fbbf24;
+      font-size: 13px;
+      min-height: 18px;
+      overflow-wrap: anywhere;
+    }
+
+    .progress-track {
+      background: #334155;
+      height: 8px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    #progress {
+      height: 100%;
+      width: 0%;
+      background: #22d3ee;
+      transition: width .25s;
+    }
+
+    .correct { background: #047857 !important; }
+    .wrong { background: #b91c1c !important; }
+
+    @media (max-width: 450px) {
+      .card { padding: 20px; }
+    }
   </style>
 </head>
 
 <body>
+  <main class="card" id="quizCard">
+    <h1>🧠 Quiz Sprint</h1>
 
-<div class="card">
-  <h1>🧠 Quiz Sprint</h1>
-  <p id="question"></p>
-  <div id="options"></div>
-  <p><strong>Score:</strong> <span id="score">0</span></p>
-</div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    <p id="question">Loading your quiz...</p>
+    <p id="questionCount">Question 0 of 10</p>
 
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    <div class="progress-track">
+      <div id="progress"></div>
+    </div>
 
+    <div id="options"></div>
 
-// ================= FIREBASE =================
-const firebaseConfig = {
-  apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
-  authDomain: "mentorloop-55a37.firebaseapp.com",
-  projectId: "mentorloop-55a37"
-};
+    <div class="stats">
+      <div class="stat">
+        Quiz Score
+        <strong id="score">0</strong>
+      </div>
+      <div class="stat">
+        Your Points
+        <strong id="points">0</strong>
+      </div>
+    </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+    <p id="status" role="status" aria-live="polite">
+      Connecting to your account...
+    </p>
+  </main>
 
-let currentUid = null;
-let studentName = "Student";
+  <script type="module">
+    import {
+      initializeApp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ================= WEEK =================
-function getWeek(){
-  const d = new Date();
-  const onejan = new Date(d.getFullYear(),0,1);
-  const week = Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
-  return d.getFullYear() + "-W" + week;
-}
-
-
-// ================= LOAD USER =================
-async function loadUser(uid){
-  const snap = await getDoc(doc(db,"users",uid));
-
-  if(snap.exists()){
-    studentName = snap.data().name || "Student";
-  }
-}
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 
-// ================= ADD POINTS =================
-async function addPoints(amount){
-  if(!currentUid) return;
+    // ================ FIREBASE ================
 
-  const ref = doc(db,"leaderboard",currentUid);
-  const snap = await getDoc(ref);
-
-  let currentPoints = 0;
-
-  if(snap.exists()){
-    currentPoints = snap.data().points || 0;
-  }
-
-  const updatedPoints = currentPoints + amount;
-
-  await setDoc(ref,{
-    name: studentName,
-    points: updatedPoints,
-    week: getWeek()
-  },{merge:true});
-}
-
-
-// ================= QUIZ HISTORY =================
-function saveScoreToHistory(percent){
-  const key = "ml_history_math";
-  const history = JSON.parse(localStorage.getItem(key) || "[]");
-
-  history.push({
-    score: percent,
-    date: new Date().toLocaleDateString()
-  });
-
-  if(history.length > 10){
-    history.shift();
-  }
-
-  localStorage.setItem(key, JSON.stringify(history));
-}
-
-
-// ================= HELPERS =================
-function shuffle(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
-}
-
-function randomInt(min,max){
-  return Math.floor(Math.random()*(max-min+1))+min;
-}
-
-
-// ================= GENERATE QUESTIONS =================
-const questionBank = [];
-const ops = ["+","-","*","/"];
-
-for(let i=0;i<50;i++){
-
-  let a=randomInt(5,50);
-  let b=randomInt(2,20);
-  let op=ops[randomInt(0,3)];
-  let correct;
-
-  if(op==="+") correct=a+b;
-  if(op==="-") correct=a-b;
-  if(op==="*") correct=a*b;
-
-  if(op==="/"){
-    correct=randomInt(2,20);
-    b=randomInt(2,10);
-    a=correct*b;
-  }
-
-  let answers=[correct];
-
-  while(answers.length<4){
-    const wrong = correct + randomInt(-15,15);
-    if(!answers.includes(wrong)){
-      answers.push(wrong);
-    }
-  }
-
-  answers = shuffle(answers);
-
-  questionBank.push({
-    q:`What is ${a} ${op} ${b}?`,
-    a:answers,
-    c:answers.indexOf(correct)
-  });
-}
-
-
-// ================= QUIZ STATE =================
-let questions = shuffle([...questionBank]).slice(0,10);
-let index = 0;
-let score = 0;
-
-
-// ================= LOAD QUESTION =================
-async function loadQuestion(){
-
-  if(index >= questions.length){
-
-    const percent = Math.round((score / questions.length) * 100);
-
-    localStorage.setItem("ml_last_quiz_score", percent);
-    saveScoreToHistory(percent);
-
-    if(percent >= 80){
-      await addPoints(5);
-    }
-
-    document.querySelector(".card").innerHTML = `
-      <h1>🎉 Quiz Complete!</h1>
-      <p style="text-align:center;">Your score: <strong>${score}/${questions.length}</strong></p>
-      <p style="text-align:center;">Percentage: <strong>${percent}%</strong></p>
-      <button onclick="location.reload()">Play Again</button>
-    `;
-    return;
-  }
-
-  const q = questions[index];
-  document.getElementById("question").textContent = q.q;
-
-  const options = document.getElementById("options");
-  options.innerHTML = "";
-
-  q.a.forEach((opt,i)=>{
-
-    const btn = document.createElement("button");
-    btn.textContent = opt;
-
-    btn.onclick = async ()=>{
-      if(i === q.c){
-        score++;
-        await addPoints(2);
-      }
-
-      index++;
-      document.getElementById("score").innerText = score;
-      loadQuestion();
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOP356DMuNyWQyHDbksw0i_dWXfXsbQvI",
+      authDomain: "mentorloop-55a37.firebaseapp.com",
+      projectId: "mentorloop-55a37"
     };
 
-    options.appendChild(btn);
-  });
-}
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
 
-// ================= AUTH =================
-onAuthStateChanged(auth, async(user)=>{
+    // ================ STATE ================
 
-  if(!user){
-    window.location.replace("index.html");
-    return;
-  }
+    let currentUid = null;
+    let studentName = "Student";
 
-  currentUid = user.uid;
+    let score = 0;
+    let points = 0;
+    let index = 0;
 
-  await loadUser(currentUid);
+    let questions = [];
+    let acceptingAnswer = false;
+    let quizFinished = false;
+    let pointsSyncFailed = false;
 
-  loadQuestion();
-});
-</script>
+    const TOTAL_QUESTIONS = 10;
 
-</body>
-</html>
+    const $ = id => document.getElementById(id);
+
+
+    // ================ WEEK KEY ================
+
+    // ISO week: Monday to Sunday, including year boundaries.
+    function getWeek() {
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+
+      // Convert to the Thursday of this ISO week.
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+
+      const weekYear = date.getFullYear();
+      const firstThursday = new Date(weekYear, 0, 4);
+
+      firstThursday.setDate(
+        firstThursday.getDate() +
+        3 - (firstThursday.getDay() + 6) % 7
+      );
+
+      const week = 1 + Math.round(
+        (date - firstThursday) / (7 * 24 * 60 * 60 * 1000)
+      );
+
+      return `${weekYear}-W${String(week).padStart(2, "0")}`;
+    }
+
+
+    // ================ LOAD USER ================
+
+    async function loadUser(uid) {
+      const userSnap = await getDoc(doc(db, "users", uid));
+
+      if (userSnap.exists()) {
+        studentName = userSnap.data().name || "Student";
+      }
+
+      // Load this user's current weekly points.
+      const leaderboardRef = doc(db, "leaderboard", uid);
+      const leaderboardSnap = await getDoc(leaderboardRef);
+
+      if (leaderboardSnap.exists()) {
+        const data = leaderboardSnap.data();
+
+        // Do not display last week's points as this week's points.
+        points = data.week === getWeek()
+          ? Number(data.points) || 0
+          : 0;
+      } else {
+        points = 0;
+      }
+
+      updateStats();
+    }
+
+
+    // ================ UPDATE DISPLAY ================
+
+    function updateStats() {
+      $("score").textContent = score;
+      $("points").textContent = points;
+    }
+
+
+    // ================ ADD POINTS ================
+
+    async function addPoints(amount) {
+      if (!currentUid || amount <= 0) return;
+
+      const leaderboardRef = doc(db, "leaderboard", currentUid);
+      const thisWeek = getWeek();
+
+      // A transaction prevents concurrent writes from overwriting each other.
+      const updatedPoints = await runTransaction(db, async transaction => {
+        const snap = await transaction.get(leaderboardRef);
+
+        const data = snap.exists() ? snap.data() : {};
+
+        const previousPoints = data.week === thisWeek
+          ? Number(data.points) || 0
+          : 0;
+
+        const newPoints = previousPoints + amount;
+
+        transaction.set(leaderboardRef, {
+          name: studentName,
+          points: newPoints,
+          week: thisWeek
+        }, { merge: true });
+
+        return newPoints;
+      });
+
+      // Keep the JavaScript variable and the visible number synchronized.
+      points = updatedPoints;
+      updateStats();
+    }
+
+
+    // ================ QUIZ HISTORY ================
+
+    function saveScoreToHistory(percent) {
+      const key = "ml_history_math";
+      let history = [];
+
+      try {
+        const stored = JSON.parse(localStorage.getItem(key) || "[]");
+        history = Array.isArray(stored) ? stored : [];
+      } catch {
+        history = [];
+      }
+
+      history.push({
+        score: percent,
+        date: new Date().toLocaleDateString()
+      });
+
+      if (history.length > 10) {
+        history = history.slice(-10);
+      }
+
+      localStorage.setItem(key, JSON.stringify(history));
+      localStorage.setItem("ml_last_quiz_score", String(percent));
+    }
+
+
+    // ================ HELPERS ================
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+
+    // ================ GENERATE QUESTIONS ================
+
+    function generateQuestions() {
+      const bank = [];
+      const ops = ["+", "-", "*", "/"];
+
+      for (let i = 0; i < 50; i++) {
+        let a = randomInt(5, 50);
+        let b = randomInt(2, 20);
+        const op = ops[randomInt(0, ops.length - 1)];
+        let correct;
+
+        if (op === "+") correct = a + b;
+        if (op === "-") correct = a - b;
+        if (op === "*") correct = a * b;
+
+        if (op === "/") {
+          // Generate exact integer division.
+          correct = randomInt(2, 20);
+          b = randomInt(2, 10);
+          a = correct * b;
+        }
+
+        const answers = [correct];
+
+        while (answers.length < 4) {
+          const wrong = correct + randomInt(-15, 15);
+
+          if (!answers.includes(wrong)) {
+            answers.push(wrong);
+          }
+        }
+
+        shuffle(answers);
+
+        bank.push({
+          q: `What is ${a} ${op} ${b}?`,
+          a: answers,
+          c: answers.indexOf(correct)
+        });
+      }
+
+      return shuffle(bank).slice(0, TOTAL_QUESTIONS);
+    }
+
+
+    // ================ LOAD QUESTION ================
+
+    function loadQuestion() {
+      if (index >= questions.length) {
+        finishQuiz();
+        return;
+      }
+
+      acceptingAnswer = true;
+
+      const q = questions[index];
+
+      $("question").textContent = q.q;
+      $("questionCount").textContent =
+        `Question ${index + 1} of ${questions.length}`;
+
+      $("progress").style.width =
+        `${(index / questions.length) * 100}%`;
+
+      const options = $("options");
+      options.replaceChildren();
+
+      q.a.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.type = "button";
+
+        btn.addEventListener("click", () => answerQuestion(i, q));
+
+        options.appendChild(btn);
+      });
+    }
+
+
+    // ================ HANDLE ANSWER ================
+
+    async function answerQuestion(selectedIndex, q) {
+      if (!acceptingAnswer || quizFinished) return;
+
+      acceptingAnswer = false;
+
+      const buttons = [...$("options").querySelectorAll("button")];
+
+      // Stop double-clicks from adding extra points.
+      buttons.forEach(btn => btn.disabled = true);
+
+      const isCorrect = selectedIndex === q.c;
+
+      if (isCorrect) {
+        score++;
+        $("status").textContent = "✅ Correct! +2 points";
+        buttons[selectedIndex].classList.add("correct");
+      } else {
+        $("status").textContent =
+          `❌ Not quite! Correct answer: ${q.a[q.c]}`;
+        buttons[selectedIndex].classList.add("wrong");
+        buttons[q.c].classList.add("correct");
+      }
+
+      // Update the score immediately, without waiting for Firebase.
+      updateStats();
+
+      index++;
+
+      $("progress").style.width =
+        `${(index / questions.length) * 100}%`;
+
+      // Persist points separately from the quiz's correct-answer count.
+      try {
+        if (isCorrect) {
+          await addPoints(2);
+        }
+      } catch (error) {
+        console.error("Could not save leaderboard points:", error);
+        pointsSyncFailed = true;
+        $("status").textContent =
+          "Your answer was recorded, but points could not sync. Check your connection.";
+      }
+
+      // Allow a short pause so the answer feedback is visible.
+      setTimeout(() => {
+        if (!quizFinished) loadQuestion();
+      }, 450);
+    }
+
+
+    // ================ FINISH QUIZ ================
+
+    async function finishQuiz() {
+      if (quizFinished) return;
+
+      quizFinished = true;
+      acceptingAnswer = false;
+
+      const percent = Math.round((score / questions.length) * 100);
+
+      try {
+        saveScoreToHistory(percent);
+      } catch (error) {
+        console.error("Could not save local quiz history:", error);
+      }
+
+      let bonusMessage = "";
+
+      if (percent >= 80) {
+        try {
+          await addPoints(5);
+          bonusMessage = "<p>🏆 You earned a 5-point bonus!</p>";
+        } catch (error) {
+          console.error("Could not save bonus points:", error);
+          pointsSyncFailed = true;
+          bonusMessage =
+            "<p>Your bonus could not sync. Please check your connection.</p>";
+        }
+      }
+
+      $("progress").style.width = "100%";
+      $("quizCard").innerHTML = `
+        <h1>🎉 Quiz Complete!</h1>
+        <p style="text-align:center">
+          Your score: <strong>${score}/${questions.length}</strong>
+        </p>
+        <p style="text-align:center">
+          Percentage: <strong>${percent}%</strong>
+        </p>
+        ${bonusMessage}
+        <div class="stats">
+          <div class="stat">
+            Quiz Score
+            <strong>${score}</strong>
+          </div>
+          <div class="stat">
+            Weekly Points
+            <strong id="finalPoints">${points}</strong>
+          </div>
+        </div>
+        <p style="text-align:center">
+          ${pointsSyncFailed
+            ? "⚠️ Some points could not be saved. Check your connection and try again later."
+            : "✅ Your points are synced with the leaderboard."}
+        </p>
+        <button id="playAgain" type="button">🔄 Play Again</button>
+      `;
+
+      $("playAgain").addEventListener("click", () => {
+        score = 0;
+        index = 0;
+        quizFinished = false;
+        pointsSyncFailed = false;
+        questions = generateQuestions();
+
+        // Keep the accumulated weekly points when replaying.
+        $("quizCard").innerHTML = `
+          <h1>🧠 Quiz Sprint</h1>
+          <p id="question"></p>
+          <p id="questionCount">Question 0 of 10</p>
+          <div class="progress-track">
+            <div id="progress"></div>
+          </div>
+          <div id="options"></div>
+          <div class="stats">
+            <div class="stat">Quiz Score<strong id="score">0</strong></div>
+            <div class="stat">Your Points<strong id="points">${points}</strong></div>
+          </div>
+          <p id="status" role="status" aria-live="polite">Good luck! 🚀</p>
+        `;
+
+        loadQuestion();
+      });
+    }
+
+
+    // ================ AUTHENTICATION ================
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      try {
+        currentUid = user.uid;
+
+        await loadUser(currentUid);
+
+        questions = generateQuestions();
+        $("status").textContent = `Good luck, ${studentName}! 🚀`;
+
+        loadQuestion();
+      } catch (error) {
+        console.error("Quiz initialization failed:", error);
+        $("question").textContent =
+          "Could not load your account. Please refresh and try again.";
+        $("status").textContent =
+          "Check your internet connection and Firebase permissions.";
+      }
+    });
+  </script>
 </body>
 </html>
